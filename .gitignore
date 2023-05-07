@@ -163,4 +163,4 @@ cython_debug/
 *.sqlite*
 
 # Logs
-*.logs*
+*logs.*

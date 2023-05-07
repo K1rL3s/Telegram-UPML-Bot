@@ -1,9 +1,12 @@
 from pathlib import Path
 
+# import aioschedule
 from aiogram import Dispatcher, Bot, executor
 from loguru import logger
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
+from src.database.db_session import global_init
+# from src.schedule import add_schedule_jobs
 from src.utils.consts import Config
 from src.view import register_view
 from src.middlewares import setup_middlewares
@@ -12,6 +15,8 @@ from src.middlewares import setup_middlewares
 async def on_startup(dp: Dispatcher) -> None:
     setup_middlewares(dp)
     register_view(dp)
+    # add_schedule_jobs()
+    # dp.loop.create_task(aioschedule.run_pending())
 
 
 async def on_shutdown(_) -> None:
@@ -19,7 +24,7 @@ async def on_shutdown(_) -> None:
 
 
 def main():
-    abs_path = Path().absolute().parent
+    abs_path = Path().absolute()
 
     logger.add(
         abs_path / 'logs' / 'logs.log',
@@ -30,7 +35,9 @@ def main():
         # serialize=True
     )
 
-    bot = Bot(token=Config.BOT_TOKEN)
+    global_init(Config.DATABASE_PATH)
+
+    bot = Bot(token=Config.BOT_TOKEN, parse_mode='markdown')
     dp = Dispatcher(bot=bot, storage=MemoryStorage())
 
     executor.start_polling(

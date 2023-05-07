@@ -3,6 +3,9 @@ alembic==1.10.4
 aiogram==2.25.1
 httpx==0.24.0
 aiocache==0.12.1
+aioschedule==0.5.2
+cachetools==5.3.0
+pypdf==3.8.1
 loguru==0.7.0
 pathlib==1.0.1
 python-dotenv==1.0.0
