@@ -4,7 +4,7 @@ from datetime import date, timedelta
 from loguru import logger
 from pypdf import PdfReader
 
-from src.database.db_funcs import save_menu_in_db
+from src.database.db_funcs import save_or_update_menu_in_db
 from src.utils.consts import Config
 from src.utils.dateformat import format_date
 
@@ -151,7 +151,7 @@ def _process_pdf_menu(
             meals.append(_normalize_meal(meal))
             text_menu = text_menu[end:]
 
-        save_menu_in_db(
+        save_or_update_menu_in_db(
             menu_date,
             *meals
         )

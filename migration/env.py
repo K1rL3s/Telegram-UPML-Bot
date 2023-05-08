@@ -20,6 +20,7 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 from src.database.db_session import SqlAlchemyBase
 import src.database.__all_models
+from src.database.__all_models import *
 target_metadata = SqlAlchemyBase.metadata
 
 # other values from the config, defined by the needs of env.py,

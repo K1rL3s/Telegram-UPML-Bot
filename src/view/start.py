@@ -1,10 +1,14 @@
 from aiogram import Dispatcher, types
+from aiogram.dispatcher import FSMContext
 
-from src.keyboards import start_menu_keyboard
+from src.database.db_funcs import save_user_or_update_status
+from src.keyboards import start_menu_keyboard, main_menu_keyboard
 from src.utils.consts import CallbackData
 
 
 async def start_view(message: types.Message) -> None:
+    save_user_or_update_status(message.from_user.id)
+
     text = 'Привет! Я - стартовое меню.'
 
     await message.reply(
@@ -17,15 +21,37 @@ async def main_menu_view(message: types.Message | types.CallbackQuery) -> None:
     text = 'Привет! Я - главное меню.'
 
     if isinstance(message, types.CallbackQuery):
-        message = message.message
+        method = 'reply' if message.message.photo else 'edit_text'
+        await getattr(message.message, method)(
+            text=text,
+            reply_markup=main_menu_keyboard
+        )
+    else:
+        await message.reply(
+            text=text,
+            reply_markup=main_menu_keyboard
+        )
 
-    await message.reply(
-        text=text,
-        reply_markup=start_menu_keyboard
+
+async def cancel_state(
+        message: types.Message | types.CallbackQuery,
+        state: FSMContext
+) -> None:
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+
+    await state.finish()
+
+    await main_menu_view(message)
+
+
+def register_start_view(dp: Dispatcher):
+    dp.register_message_handler(
+        cancel_state,
+        commands=['cancel', 'stop'],
+        state='*'
     )
-
-
-def register_base_view(dp: Dispatcher):
     dp.register_message_handler(
         start_view,
         commands=['start'],

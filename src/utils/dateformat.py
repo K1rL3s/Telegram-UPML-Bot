@@ -20,6 +20,9 @@ def date_by_format(_date: str) -> date:
     :return: Объект даты.
     """
 
+    if _date.lower() == 'today':
+        return date.today()
+
     dd, mm, yyyy = map(int, _date.split('.'))
     return date(day=dd, month=mm, year=yyyy)
 

@@ -4,6 +4,7 @@ from pathlib import Path
 from aiogram import Dispatcher, Bot, executor
 from loguru import logger
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from sqlalchemy.orm import close_all_sessions
 
 from src.database.db_session import global_init
 # from src.schedule import add_schedule_jobs
@@ -20,7 +21,7 @@ async def on_startup(dp: Dispatcher) -> None:
 
 
 async def on_shutdown(_) -> None:
-    pass
+    close_all_sessions()
 
 
 def main():

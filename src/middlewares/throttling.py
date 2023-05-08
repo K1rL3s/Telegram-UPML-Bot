@@ -11,7 +11,7 @@ class ThrottlingMiddleware(MyBaseMiddleware):
     Простой мидлварь анти-флуд-спам из документации aiogram'а.
     """
 
-    def __init__(self, limit=.75, key_prefix='antiflood'):
+    def __init__(self, limit=.5, key_prefix='antiflood'):
         self.rate_limit = limit
         self.prefix = key_prefix
         super(ThrottlingMiddleware, self).__init__()

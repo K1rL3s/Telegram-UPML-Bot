@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Date, Integer, String
 
-from src.database.base_model import BaseModel
+from src.database.models.base_model import BaseModel
 
 
 class Menu(BaseModel):

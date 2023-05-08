@@ -2,5 +2,5 @@
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 
-class CafeMenuStates(StatesGroup):
-    watching = State()
+class LoadingLessons(StatesGroup):
+    image = State()
