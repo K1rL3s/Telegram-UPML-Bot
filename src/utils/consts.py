@@ -28,6 +28,8 @@ class CallbackData:
     SWITCH_LESSONS_NOTIFY = PREFIX_SWITCH + 'lessons_notify'
     SWITCH_NEWS_NOTIFY = PREFIX_SWITCH + 'news_notify'
 
+    CANCEL_STATE = 'cancel_state'
+
 
 GRADES = tuple(
     f'{grade}{letter}' for grade in (range(10, 11 + 1)) for letter in 'АБВ'

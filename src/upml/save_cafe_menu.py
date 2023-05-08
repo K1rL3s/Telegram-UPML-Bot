@@ -9,7 +9,7 @@ from src.utils.consts import Config
 from src.utils.dateformat import format_date
 
 
-async def save_cafe_menu() -> bool:
+async def save_cafe_menu() -> str:
     """
     Основная функция в файле, выполняет всю работу, вызывая другие функции.
 
@@ -17,8 +17,8 @@ async def save_cafe_menu() -> bool:
     """
 
     if (pdf_reader := await _get_pdf_menu()) is None:
-        logger.warning('Не удалось найти PDF с меню')
-        return False
+        logger.warning(text := 'Не удалось найти PDF с меню')
+        return text
 
     menu_date = _get_this_week_monday()
     add_counter = 0
@@ -26,13 +26,14 @@ async def save_cafe_menu() -> bool:
     menu = ' '.join(pdf_reader.pages[0].extract_text().split())
     while add_counter < 7 and format_date(menu_date) not in menu:
         menu_date += timedelta(days=1)
+        add_counter += 1
 
     if add_counter >= 7:
-        logger.warning('Не удалось сравнять дату PDF и текущей недели')
-        return False
+        logger.warning(text := 'Не удалось сравнять дату PDF и текущей недели')
+        return text
 
     _process_pdf_menu(pdf_reader, menu_date)
-    return True
+    return 'OK'
 
 
 def _get_this_week_monday() -> date:

@@ -21,8 +21,7 @@ async def main_menu_view(message: types.Message | types.CallbackQuery) -> None:
     text = 'Привет! Я - главное меню.'
 
     if isinstance(message, types.CallbackQuery):
-        method = 'reply' if message.message.photo else 'edit_text'
-        await getattr(message.message, method)(
+        await message.message.edit_text(
             text=text,
             reply_markup=main_menu_keyboard
         )
@@ -50,6 +49,11 @@ def register_start_view(dp: Dispatcher):
     dp.register_message_handler(
         cancel_state,
         commands=['cancel', 'stop'],
+        state='*'
+    )
+    dp.register_callback_query_handler(
+        cancel_state,
+        text=CallbackData.CANCEL_STATE,
         state='*'
     )
     dp.register_message_handler(

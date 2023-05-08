@@ -3,15 +3,15 @@ from io import BytesIO
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 
-from src.handlers.admin import first_load_lessons_handler
-from src.keyboards import start_menu_keyboard
+from src.handlers.admin import load_lessons_handler
+from src.keyboards import cancel_state_keyboard, start_menu_keyboard
 from src.upml.save_cafe_menu import save_cafe_menu
 from src.utils.states import LoadingLessons
 from src.utils.throttling import rate_limit
 
 
 async def update_cafe_menu_view(message: types.Message) -> None:
-    text = str(await save_cafe_menu())
+    text = await save_cafe_menu()
 
     await message.reply(
         text=text,
@@ -24,7 +24,7 @@ async def start_load_lessons_view(message: types.Message) -> None:
 
     await message.reply(
         text='Отправьте изображение(-я) расписаний уроков',
-        reply_markup=start_menu_keyboard
+        reply_markup=cancel_state_keyboard
     )
 
 
@@ -32,11 +32,14 @@ async def start_load_lessons_view(message: types.Message) -> None:
 async def load_lessons_view(message: types.Message, state: FSMContext) -> None:
     await message.photo[-1].download(destination_file=(image := BytesIO()))
 
-    text = await first_load_lessons_handler(message.chat.id, image)
+    text = await load_lessons_handler(message.chat.id, image)
 
     await message.reply(
-        text=text
+        text=text,
+        reply_markup=start_menu_keyboard
     )
+
+    await state.finish()
 
 
 def register_admin_view(dp: Dispatcher):
@@ -53,4 +56,3 @@ def register_admin_view(dp: Dispatcher):
         content_types=['photo'],
         state=LoadingLessons.image
     )
-

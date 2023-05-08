@@ -16,21 +16,24 @@ async def open_date_lessons_view(callback: types.CallbackQuery) -> None:
         callback.from_user.id, lessons_date
     )
 
-    if images[0]:
-        await callback.message.answer_photo(
-            caption=text,
-            photo=images[0],
-            reply_markup=lessons_keyboard(lessons_date)
+    if images:
+        temp = await callback.bot.send_media_group(
+            chat_id=callback.message.chat.id,
+            media=[
+                types.InputMediaPhoto(media_id)
+                for media_id in images
+                if media_id
+            ]
         )
-    else:
-        method = 'reply' if callback.message.photo else 'edit_text'
-        await getattr(callback.message, method)(
+        await temp[0].reply(
             text=text,
             reply_markup=lessons_keyboard(lessons_date)
         )
-
-    # if callback.message.photo:
-    #     await callback.message.delete()
+    else:
+        await callback.message.edit_text(
+            text=text,
+            reply_markup=lessons_keyboard(lessons_date)
+        )
 
 
 def register_lessons_view(dp: Dispatcher) -> None:

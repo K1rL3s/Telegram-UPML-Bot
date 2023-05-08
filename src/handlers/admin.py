@@ -10,14 +10,16 @@ from src.upml.process_lessons import save_lessons
 from src.utils.funcs import bytes_io_to_image_id
 
 
-async def first_load_lessons_handler(
+# изменить возвращаемые значения на (int, date)
+async def load_lessons_handler(
         chat_id: int,
         image: BytesIO
 ) -> str:
     try:
         lessons_date, grade, full_lessons, class_lessons = save_lessons(image)
-    except Exception as e:
+    except ValueError as e:
         logger.warning(text := f'Ошибка при загрузке расписания: {repr(e)}')
+        # raise e
         return text
 
     lessons_id = await bytes_io_to_image_id(chat_id, full_lessons)

@@ -55,12 +55,12 @@ def save_lessons(
 
 
 def _is_pixel_black(pixel: tuple[int, int, int]) -> bool:
-    return all(color <= 40 for color in pixel)
-    # return sum(pixel) <= 10 * 3
+    return all(color <= 80 for color in pixel)
+    # return sum(pixel) <= 80 * 3
 
 
 def _is_pixel_white(pixel: tuple[int, int, int]) -> bool:
-    return all(color >= 220 for color in pixel)
+    return all(color >= 200 for color in pixel)
     # return sum(pixel) >= 220 * 3
 
 
@@ -176,10 +176,10 @@ def _get_date_image(
                 break
 
     if (
-            abs(left_x - right_x) <= 1
-            or abs(right_x - down_y) <= 1
-            or left_x is None
+            left_x is None
             or right_x is None
+            or abs(left_x - right_x) <= 1
+            or abs(right_x - down_y) <= 1
             or abs(up_y - down_y) <= 1
     ):
         raise ValueError("Не удалось получить дату с расписания")
@@ -278,8 +278,8 @@ def _combine_prefix_classes_date(
         date_x = (new_image.width - date_im.width) // 2
         color = new_image.getpixel((date_x, up_y))
         new_image.paste(
-            Image.new("RGB", (new_image.width // 3, down_y - up_y), color),
-            (new_image.width // 3, up_y)
+            Image.new("RGB", (new_image.width // 2, down_y - up_y), color),
+            (new_image.width // 4, up_y)
         )
         new_image.paste(
             date_im,
