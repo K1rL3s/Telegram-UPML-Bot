@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 
 from dotenv import load_dotenv
 from httpx import AsyncClient
@@ -29,6 +30,11 @@ class CallbackData:
     SWITCH_NEWS_NOTIFY = PREFIX_SWITCH + 'news_notify'
 
     CANCEL_STATE = 'cancel_state'
+
+
+class Roles(Enum):
+    SUPERADMIN = 'superadmin'
+    ADMIN = 'admin'
 
 
 GRADES = tuple(

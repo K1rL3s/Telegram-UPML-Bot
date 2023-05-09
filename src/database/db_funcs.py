@@ -1,12 +1,15 @@
 from datetime import date
+from enum import Enum
 
 import sqlalchemy as sa
 
 from src.database.models.class_lessons import ClassLessons
 from src.database.models.full_lessons import FullLessons
 from src.database.models.menus import Menu
+from src.database.models.roles import Role
 from src.database.models.users import User
 from src.database.db_session import create_session
+from src.utils.consts import Roles
 
 
 def save_user_or_update_status(user_id: int) -> None:
@@ -221,3 +224,27 @@ def update_user(user_id: int, **params) -> None:
             **params
         )
         session.execute(query)
+
+
+def is_has_role(user_id: int, role: Roles | str) -> bool:
+    """
+    Имеет ли юзер роль.
+
+    :param user_id: Айди юзера.
+    :param role: Роль.
+    :return: Тру или фэлс.
+    """
+
+    if isinstance(role, Enum):
+        role = role.value
+
+    with create_session() as session:
+        query = sa.select(User).where(
+            User.user_id == user_id,
+            User.roles.any(
+                sa.select(Role.id).where(
+                    Role.role.ilike(role)  # заменить на == ?
+                ).scalar_subquery()
+            )
+        )
+        return bool(session.scalar(query))

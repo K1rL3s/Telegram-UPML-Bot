@@ -1,8 +1,12 @@
 import datetime
+from typing import List
 
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
+from sqlalchemy.orm import Mapped, relationship
 
 from src.database.models.base_model import BaseModel
+from src.database.models.roles import Role
+from src.database.models.users_to_roles import users_to_roles
 
 
 class User(BaseModel):
@@ -25,8 +29,7 @@ class User(BaseModel):
     news_notify = Column(Boolean, default=False, nullable=False)
 
     is_active = Column(Boolean, default=True, nullable=False)
-    is_superadmin = Column(Boolean, default=False, nullable=False)
-    is_admin = Column(Boolean, default=False, nullable=False)
+    roles: Mapped[List[Role]] = relationship(secondary=users_to_roles)
 
     createad_time = Column(
         DateTime,
@@ -47,8 +50,7 @@ class User(BaseModel):
             lessons_notify=self.lessons_notify,
             news_notify=self.news_notify,
             is_active=self.is_active,
-            is_superadmin=self.is_superadmin,
-            is_admin=self.is_admin,
+            roles=self.roles,
             createad_time=self.createad_time,
             modified_time=self.modified_time,
         )
