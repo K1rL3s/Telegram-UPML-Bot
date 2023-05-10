@@ -25,7 +25,7 @@ def save_user_or_update_status(user_id: int, username: str) -> None:
         query = sa.Select(User).where(User.user_id == user_id)
         user: User = session.scalar(query)
 
-        if user and not user.is_active:
+        if user and (not user.is_active or not user.username):
             user.is_active = True
             user.username = username
         elif not user:
