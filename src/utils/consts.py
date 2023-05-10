@@ -12,7 +12,8 @@ class Config:
     BOT_TOKEN = os.environ["BOT_TOKEN"]
     DATABASE_PATH = 'src/database/db_files/database.sqlite?check_same_thread=False'  # noqa
     TESSERACT_PATH = os.environ["TESSERACT_PATH"]
-    TIMEOUT = 30
+    TIMEOUT = 60
+    RELAX = 0.5
     async_session = AsyncClient(timeout=TIMEOUT)
 
 

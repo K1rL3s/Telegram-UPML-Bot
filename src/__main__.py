@@ -46,7 +46,8 @@ def main():
         skip_updates=True,
         on_startup=on_startup,
         on_shutdown=on_shutdown,
-        timeout=Config.TIMEOUT
+        timeout=Config.TIMEOUT,
+        relax=Config.RELAX
     )
 
 
