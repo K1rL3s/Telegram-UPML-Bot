@@ -6,19 +6,21 @@ from src.utils.consts import CallbackData
 
 
 def open_settings_handler(
-        user_id: int
+        user_id: int,
+        username: str
 ) -> tuple[int | None, str | None, bool, bool]:
     """
     Обработчик открытия настроек.
 
     :param user_id: Айди юзера.
+    :param username: Имя юзера.
     :return: Параметры для клавиатуры.
     """
 
     user = get_user(user_id)
 
     if user is None:
-        save_user_or_update_status(user_id)
+        save_user_or_update_status(user_id, username)
         user = get_user(user_id)
 
     return user.grade, user.letter, user.lessons_notify, user.news_notify

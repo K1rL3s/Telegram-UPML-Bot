@@ -20,6 +20,7 @@ class Config:
 class CallbackData:
     OPEN_MAIN_MENU = 'open_main_menu'
     OPEN_SETTINGS = 'open_settings'
+    OPEN_ADMIN_MENU = 'open_admin_menu'
     OPEN_CAFE_MENU_ON_ = 'open_cafe_menu_on_'
     OPEN_CAFE_MENU_TODAY = OPEN_CAFE_MENU_ON_ + 'today'
     OPEN_LESSONS_ON_ = 'open_lessons_on_'
@@ -31,6 +32,18 @@ class CallbackData:
     SWITCH_NEWS_NOTIFY = PREFIX_SWITCH + 'news_notify'
 
     CANCEL_STATE = 'cancel_state'
+
+    AUTO_UPDATE_CAFE_MENU = 'auto_update_cafe_menu'
+    MANUAL_UPDATE_CAFE_MENU = 'manual_update_cafe_menu'
+    UPLOAD_LESSONS = 'upload_lessons'
+    DO_A_NOTIFY_FOR_ = 'do_a_notify_for_'
+
+    OPEN_ADMINS_LIST_PAGE_ = 'open_admins_list_page_'
+    CHECK_ADMIN_ = 'check_admin_'
+    REMOVE_ADMIN_ = 'remove_admin_'
+    REMOVE_ADMIN_SURE_ = 'remove_admin_sure_'
+    ADD_NEW_ADMIN = 'add_new_admin'
+    ADD_NEW_ADMIN_SURE = 'add_new_admin_sure'
 
 
 class Roles(Enum):

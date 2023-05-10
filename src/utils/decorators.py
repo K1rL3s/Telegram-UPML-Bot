@@ -1,7 +1,23 @@
 from aiogram import types
 
-from src.database.db_funcs import is_has_role
+from src.database.db_funcs import is_has_role, save_user_or_update_status
 from src.utils.consts import Roles
+from src.utils.funcs import extract_username
+
+
+def save_new_user_decor(func):
+    """
+    Костыльный декоратор, который сохраняет или обновляет пользователей
+    при их взаимодействии с ботом.
+    """
+
+    async def wrapper(update: types.Message | types.CallbackQuery):
+        save_user_or_update_status(
+            update.from_user.id, extract_username(update)
+        )
+        await func(update)
+
+    return wrapper
 
 
 # Подумать над костылём в функциях (*_, *__)
@@ -26,4 +42,5 @@ def is_has_role_decor(role: Roles | str):
     return decorator
 
 
+superadmin_required = is_has_role_decor(Roles.SUPERADMIN)
 admin_required = is_has_role_decor(Roles.ADMIN)

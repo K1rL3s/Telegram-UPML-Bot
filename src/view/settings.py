@@ -6,8 +6,11 @@ from src.handlers.settings import (
 )
 from src.keyboards import settings_keyboard, choose_grade_keyboard
 from src.utils.consts import CallbackData
+from src.utils.decorators import save_new_user_decor
+from src.utils.funcs import extract_username
 
 
+@save_new_user_decor
 async def open_settings_view(callback: types.CallbackQuery) -> None:
     text = """
 Привет! Я - настройки!
@@ -18,7 +21,7 @@ async def open_settings_view(callback: types.CallbackQuery) -> None:
     """.strip()
 
     grade, letter, lessons_notify, news_notify = open_settings_handler(
-        callback.from_user.id
+        callback.from_user.id, extract_username(callback)
     )
 
     keyboard = settings_keyboard(

@@ -4,8 +4,10 @@ from src.handlers.lessons import get_lessons_text_and_image_id
 from src.keyboards import lessons_keyboard
 from src.utils.consts import CallbackData
 from src.utils.dateformat import date_by_format
+from src.utils.decorators import save_new_user_decor
 
 
+@save_new_user_decor
 async def open_date_lessons_view(callback: types.CallbackQuery) -> None:
     lessons_date = date_by_format(
         callback.data.replace(

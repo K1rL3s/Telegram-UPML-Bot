@@ -11,6 +11,11 @@ go_to_main_menu_button = InlineKeyboardButton(
     callback_data=CallbackData.OPEN_MAIN_MENU
 )
 
+go_to_admin_menu_button = InlineKeyboardButton(
+    '❗Админ меню',
+    callback_data=CallbackData.OPEN_ADMIN_MENU
+)
+
 
 def _get_keyboard_for_left_right_menu(
         open_smt_on_callback: str,

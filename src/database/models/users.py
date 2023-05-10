@@ -22,6 +22,7 @@ class User(BaseModel):
         unique=True, nullable=False, index=True
     )
 
+    username = Column(String(32), nullable=False)
     grade = Column(Integer, default=None)  # 10 или 11
     letter = Column(String(1), default=None)  # Буква класса, русская
 

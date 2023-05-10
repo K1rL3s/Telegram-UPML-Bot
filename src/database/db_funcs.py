@@ -12,12 +12,13 @@ from src.database.db_session import create_session
 from src.utils.consts import Roles
 
 
-def save_user_or_update_status(user_id: int) -> None:
+def save_user_or_update_status(user_id: int, username: str) -> None:
     """
     Сохраняет пользователя в базе данных
     или обновляет его статус ``is_active``.
 
     :param user_id: Айди юзера.
+    :param username: Имя пользователя.
     """
 
     with create_session(do_commit=True) as session:
@@ -26,8 +27,9 @@ def save_user_or_update_status(user_id: int) -> None:
 
         if user and not user.is_active:
             user.is_active = True
+            user.username = username
         elif not user:
-            user = User(user_id=user_id)
+            user = User(user_id=user_id, username=username)
             session.add(user)
 
 
@@ -164,6 +166,57 @@ def get_user(user_id: int) -> User:
         return session.scalar(query)
 
 
+def get_role(role: Roles | str) -> Role:
+    """
+    Возвращает модель Role по названию роли.
+
+    :param role: Название роли.
+    :return: Модель Role.
+    """
+
+    if isinstance(role, Enum):
+        role = role.value
+
+    with create_session() as session:
+        role_query = sa.select(Role).where(Role.role == role)
+        return session.scalar(role_query)
+
+
+def get_users_with_role(role: Roles | str) -> list[User]:
+    """
+    Возвращает всех пользователей, у которых есть роль.
+
+    :param role: Роль.
+    :return: Список юзеров.
+    """
+
+    if isinstance(role, Enum):
+        role = role.value
+
+    with create_session() as session:
+        query = sa.select(User).where(
+            User.roles.any(
+                sa.select(Role.id).where(
+                    Role.role == role
+                ).scalar_subquery()
+            )
+        )
+        return list(session.scalars(query).all())
+
+
+def get_user_id_by_username(username: str) -> int | None:
+    """
+    Возвращает айди пользователя по его имени в базе.
+
+    :param username: Имя юзера.
+    :return: Айди юзера.
+    """
+
+    with create_session() as session:
+        query = sa.Select(User.user_id).where(User.username == username)
+        return session.scalar(query)
+
+
 def get_full_lessons(
         lessons_date: date,
         grade: int
@@ -239,12 +292,56 @@ def is_has_role(user_id: int, role: Roles | str) -> bool:
         role = role.value
 
     with create_session() as session:
-        query = sa.select(User).where(
+        role = get_role(role)
+        user_query = sa.select(User).where(
             User.user_id == user_id,
-            User.roles.any(
-                sa.select(Role.id).where(
-                    Role.role.ilike(role)  # заменить на == ?
-                ).scalar_subquery()
-            )
         )
-        return bool(session.scalar(query))
+        user = session.scalar(user_query)
+        return role in user.roles or any(
+            user_role.id <= role.id for user_role in user.roles
+        )
+
+
+def remove_role_from_user(user_id: int, role: Roles | str) -> None:
+    """
+    Удаляет роль у юзера.
+
+    :param user_id: Айди юзера.
+    :param role: Его роль.
+    """
+
+    if isinstance(role, Roles):
+        role = role.value
+
+    with create_session(do_commit=True) as session:
+        user_query = sa.Select(User).where(User.user_id == user_id)
+        user = session.scalar(user_query)
+        role_query = sa.select(Role).where(
+            Role.role == role
+        )
+        role = session.scalar(role_query)
+        try:
+            user.roles.remove(role)
+        except ValueError:
+            pass
+
+
+def add_role_to_user(user_id: int, role: Roles | str) -> None:
+    """
+    Добавляет роль юзеру.
+
+    :param user_id: Айди юзера.
+    :param role: Роль.
+    """
+
+    if isinstance(role, Roles):
+        role = role.value
+
+    with create_session(do_commit=True) as session:
+        user_query = sa.Select(User).where(User.user_id == user_id)
+        user = session.scalar(user_query)
+        role_query = sa.select(Role).where(
+            Role.role == role
+        )
+        role = session.scalar(role_query)
+        user.roles.append(role)

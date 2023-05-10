@@ -32,8 +32,8 @@ def upgrade() -> None:
         op.execute(f'INSERT INTO roles (role) VALUES ("{role.value}")')
 
     op.create_table('users_to_roles',
-    sa.Column('user_id', sa.Integer(), nullable=True),
-    sa.Column('role_id', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False, primary_key=True),
+    sa.Column('role_id', sa.Integer(), nullable=False, primary_key=True),
     sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], )
     )

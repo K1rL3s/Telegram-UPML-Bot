@@ -41,6 +41,7 @@ def upgrade() -> None:
         'users',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
         sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('username', sa.String(32), nullable=False),
         sa.Column('grade', sa.Integer(), nullable=True),
         sa.Column('letter', sa.String(length=1), nullable=True),
         sa.Column('lessons_notify', sa.Boolean(), nullable=False),
