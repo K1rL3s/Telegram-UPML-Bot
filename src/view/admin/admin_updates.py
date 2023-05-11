@@ -8,7 +8,7 @@ from src.keyboards import cancel_state_keyboard, start_menu_keyboard
 from src.keyboards.admin import admin_menu_keyboard
 from src.upml.save_cafe_menu import save_cafe_menu
 from src.utils.consts import CallbackData
-from src.utils.dateformat import format_date
+from src.utils.datehelp import format_date
 from src.utils.decorators import admin_required
 from src.utils.states import LoadingLessons
 from src.utils.throttling import rate_limit
@@ -22,7 +22,7 @@ async def update_cafe_menu_view(
     Обработчик кнопки "Загрузить меню",
     загружает и обрабатывает PDF расписание еды с сайта лицея.
     """
-    text = await save_cafe_menu()
+    status, text = await save_cafe_menu()
 
     await callback.message.edit_text(
         text=text,

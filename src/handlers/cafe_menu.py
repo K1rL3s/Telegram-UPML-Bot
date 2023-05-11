@@ -4,7 +4,7 @@ from functools import lru_cache
 from cachetools.func import ttl_cache
 
 from src.database.db_funcs import get_menu_by_date
-from src.utils.dateformat import format_date, weekday_by_date
+from src.utils.datehelp import format_date, date_today, weekday_by_date
 
 
 @lru_cache(maxsize=128)
@@ -33,7 +33,7 @@ def get_formatted_menu_by_date(menu_date: date = None) -> str:
     """
 
     if menu_date is None:
-        menu_date = date.today()
+        menu_date = date_today()
 
     menu = get_menu_by_date(menu_date)
 

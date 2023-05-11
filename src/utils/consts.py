@@ -1,5 +1,6 @@
 import os
 from enum import Enum
+from datetime import timezone, timedelta
 
 from dotenv import load_dotenv
 from httpx import AsyncClient
@@ -14,6 +15,7 @@ class Config:
     TESSERACT_PATH = os.environ["TESSERACT_PATH"]
     TIMEOUT = 60
     RELAX = 0.5
+    TIMEZONE = timezone(timedelta(hours=int(os.getenv("TIMEZONE") or 0)))
     async_session = AsyncClient(timeout=TIMEOUT)
 
 

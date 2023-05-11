@@ -1,7 +1,7 @@
 from datetime import date
 
 from src.database.db_funcs import get_user, get_full_lessons, get_class_lessons
-from src.utils.dateformat import format_date
+from src.utils.datehelp import format_date
 
 
 def get_lessons_text_and_image_id(

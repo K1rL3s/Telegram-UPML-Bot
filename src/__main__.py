@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 
 # import aioschedule
@@ -7,7 +8,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from sqlalchemy.orm import close_all_sessions
 
 from src.database.db_session import global_init
-# from src.schedule import add_schedule_jobs
+from src.schedule import run_schedule_jobs
 from src.utils.consts import Config
 from src.view import register_view
 from src.middlewares import setup_middlewares
@@ -16,8 +17,8 @@ from src.middlewares import setup_middlewares
 async def on_startup(dp: Dispatcher) -> None:
     setup_middlewares(dp)
     register_view(dp)
-    # add_schedule_jobs()
-    # dp.loop.create_task(aioschedule.run_pending())
+    asyncio.create_task(run_schedule_jobs())
+    print(3)
 
 
 async def on_shutdown(_) -> None:
@@ -47,7 +48,7 @@ def main():
         on_startup=on_startup,
         on_shutdown=on_shutdown,
         timeout=Config.TIMEOUT,
-        relax=Config.RELAX
+        relax=Config.RELAX,
     )
 
 

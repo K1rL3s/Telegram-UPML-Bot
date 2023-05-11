@@ -3,7 +3,7 @@ from datetime import date, timedelta
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from src.utils.consts import CallbackData
-from src.utils.dateformat import format_date
+from src.utils.datehelp import format_date, date_today
 
 
 go_to_main_menu_button = InlineKeyboardButton(
@@ -24,10 +24,10 @@ def _get_keyboard_for_left_right_menu(
         curr_date: date = None,
 ) -> InlineKeyboardMarkup:
 
-    today = date.today()
+    today = date_today()
 
     if curr_date is None:
-        curr_date = date.today()
+        curr_date = today
 
     tomorrow = curr_date + timedelta(days=1)
     yesterday = curr_date - timedelta(days=1)

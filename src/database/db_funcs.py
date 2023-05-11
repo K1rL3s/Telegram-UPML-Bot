@@ -140,7 +140,7 @@ def save_or_update_class_lessons(
         session.add(lessons)
 
 
-def get_menu_by_date(menu_date: date) -> Menu:
+def get_menu_by_date(menu_date: date) -> Menu | None:
     """
     Возвращает меню на день по дате.
 
@@ -153,7 +153,7 @@ def get_menu_by_date(menu_date: date) -> Menu:
         return session.scalar(query)
 
 
-def get_user(user_id: int) -> User:
+def get_user(user_id: int) -> User | None:
     """
     Возвращает модель User по айди пользователя.
 
@@ -166,7 +166,7 @@ def get_user(user_id: int) -> User:
         return session.scalar(query)
 
 
-def get_role(role: Roles | str) -> Role:
+def get_role(role: Roles | str) -> Role | None:
     """
     Возвращает модель Role по названию роли.
 
@@ -217,10 +217,7 @@ def get_user_id_by_username(username: str) -> int | None:
         return session.scalar(query)
 
 
-def get_full_lessons(
-        lessons_date: date,
-        grade: int
-) -> str | None:
+def get_full_lessons(lessons_date: date, grade: int) -> str | None:
     """
     Возвращает айди картинки расписания уроков для параллели.
 

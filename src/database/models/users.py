@@ -1,4 +1,3 @@
-import datetime
 from typing import List
 
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
@@ -7,6 +6,7 @@ from sqlalchemy.orm import Mapped, relationship
 from src.database.models.base_model import BaseModel
 from src.database.models.roles import Role
 from src.database.models.users_to_roles import users_to_roles
+from src.utils.datehelp import datetime_now
 
 
 class User(BaseModel):
@@ -34,12 +34,12 @@ class User(BaseModel):
 
     createad_time = Column(
         DateTime,
-        default=datetime.datetime.utcnow, nullable=False
+        default=datetime_now, nullable=False
     )
     modified_time = Column(
         DateTime,
-        default=datetime.datetime.utcnow,
-        onupdate=datetime.datetime.utcnow, nullable=False,
+        default=datetime_now,
+        onupdate=datetime_now, nullable=False,
     )
 
     def __repr__(self):

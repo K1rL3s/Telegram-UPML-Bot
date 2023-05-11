@@ -7,8 +7,8 @@ from src.utils.consts import Config
 
 async def main():
     global_init(Config.DATABASE_PATH)
-    result = await save_cafe_menu()
-    print(result)
+    status, message = await save_cafe_menu()
+    print(status, message)
 
 
 if __name__ == '__main__':

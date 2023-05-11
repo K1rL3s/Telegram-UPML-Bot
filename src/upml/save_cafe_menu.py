@@ -6,10 +6,10 @@ from pypdf import PdfReader
 
 from src.database.db_funcs import save_or_update_menu_in_db
 from src.utils.consts import Config
-from src.utils.dateformat import format_date
+from src.utils.datehelp import format_date, get_this_week_monday
 
 
-async def save_cafe_menu() -> str:
+async def save_cafe_menu() -> tuple[bool, str]:
     """
     Основная функция в файле, выполняет всю работу, вызывая другие функции.
 
@@ -18,9 +18,9 @@ async def save_cafe_menu() -> str:
 
     if (pdf_reader := await _get_pdf_menu()) is None:
         logger.warning(text := 'Не удалось найти PDF с меню')
-        return text
+        return False, text
 
-    menu_date = _get_this_week_monday()
+    menu_date = get_this_week_monday()
     add_counter = 0
 
     menu = ' '.join(pdf_reader.pages[0].extract_text().split())
@@ -30,21 +30,10 @@ async def save_cafe_menu() -> str:
 
     if add_counter >= 7:
         logger.warning(text := 'Не удалось сравнять дату PDF и текущей недели')
-        return text
+        return False, text
 
     _process_pdf_menu(pdf_reader, menu_date)
-    return 'Расписание еды обновлено!'
-
-
-def _get_this_week_monday() -> date:
-    """
-    Возвращает объект date с понедельником текущей недели.
-
-    :return: date.
-    """
-
-    today = date.today()
-    return today - timedelta(days=today.weekday())
+    return True, 'Расписание еды обновлено!'
 
 
 def _get_meal(menu: str, start_sub: str, end_sub: str) -> tuple[str, int, int]:
@@ -109,7 +98,7 @@ async def _get_pdf_menu() -> None | PdfReader:
     pdf_url = 'https://ugrafmsh.ru/wp-content/uploads/' \
               '{2}/{1:0>2}/menyu-{0:0>2}-{1:0>2}-{2}-krugl.pdf'.format
 
-    menu_date = _get_this_week_monday() - timedelta(days=1)
+    menu_date = get_this_week_monday() - timedelta(days=1)
 
     # Ищем в воскресенье, понедельник, вторник и среду.
     # Число и месяц изменяются сами, поэтому ссылка будет корректной.

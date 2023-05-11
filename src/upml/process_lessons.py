@@ -6,6 +6,7 @@ from PIL.PyAccess import PyAccess
 import pytesseract
 
 from src.utils.consts import Config
+from src.utils.datehelp import date_today
 
 
 pytesseract.pytesseract.tesseract_cmd = Config.TESSERACT_PATH
@@ -203,7 +204,7 @@ def _get_date_from_image(image: Image.Image) -> tuple[str, date]:
 
     dd, mm = map(int, dd_mm.split('.'))
 
-    return weekday, date(day=dd, month=mm, year=date.today().year)
+    return weekday, date(day=dd, month=mm, year=date_today().year)
 
 
 def _crop_lessons_by_class(

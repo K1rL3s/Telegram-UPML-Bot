@@ -3,7 +3,7 @@ from aiogram import Dispatcher, types
 from src.handlers.lessons import get_lessons_text_and_image_id
 from src.keyboards import lessons_keyboard
 from src.utils.consts import CallbackData
-from src.utils.dateformat import date_by_format
+from src.utils.datehelp import date_by_format
 from src.utils.decorators import save_new_user_decor
 
 

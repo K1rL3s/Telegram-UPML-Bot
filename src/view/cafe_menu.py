@@ -3,7 +3,7 @@ from aiogram import Dispatcher, types
 from src.handlers.cafe_menu import get_formatted_menu_by_date
 from src.keyboards import cafe_menu_keyboard
 from src.utils.consts import CallbackData
-from src.utils.dateformat import date_by_format
+from src.utils.datehelp import date_by_format
 
 
 async def open_date_cafe_menu(callback: types.CallbackQuery) -> None:

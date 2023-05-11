@@ -31,12 +31,10 @@ def global_init(db_file: str | Path) -> None:
         raise RuntimeError("Необходимо указать файл (путь до) базы данных.")
 
     conn_str = f'sqlite:///{db_file}'
-
     engine = sqlalchemy.create_engine(conn_str, echo=False)
+    __factory = sessionmaker(bind=engine)
 
     logger.info(f'Подключение к базе данных успешно')
-
-    __factory = sessionmaker(bind=engine)
 
     from src.database import __all_models  # noqa
 
