@@ -17,11 +17,11 @@ cancel_state_keyboard = InlineKeyboardMarkup().add(
     cancel_state_button
 )
 open_admins_list_button = InlineKeyboardButton(
-    '👨‍✈️Список админов',
+    '👮‍♀️Список админов',
     callback_data=CallbackData.OPEN_ADMINS_LIST_PAGE_
 )
 add_new_admin_button = InlineKeyboardButton(
-    '✅Добавить админа',
+    '🔎Добавить админа',
     callback_data=CallbackData.ADD_NEW_ADMIN
 )
 
@@ -67,10 +67,10 @@ def admins_list_keyboard(
         users: list[tuple[str, int]],
         page: int
 ) -> InlineKeyboardMarkup:
+    upp = 6  # 6 пользователей на страницу (users per page)
     keyboard = InlineKeyboardMarkup(row_width=2)
 
-    # 6 пользователей на страницу
-    for name, user_id in users[page * 6:page * 6 + 6]:
+    for name, user_id in users[page * upp:page * upp + upp]:
         keyboard.insert(
             InlineKeyboardButton(
                 name,
@@ -78,7 +78,7 @@ def admins_list_keyboard(
             )
         )
 
-    if page > 1:
+    if page > 0:
         keyboard.add(
             InlineKeyboardButton(
                 f'⬅️Назад',
@@ -87,7 +87,7 @@ def admins_list_keyboard(
             )
         )
 
-    if page * 6 + 6 < len(users):
+    if page * upp + upp < len(users):
         keyboard.insert(
             InlineKeyboardButton(
                 f'➡️Вперёд',
