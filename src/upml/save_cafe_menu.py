@@ -33,7 +33,7 @@ async def save_cafe_menu() -> str:
         return text
 
     _process_pdf_menu(pdf_reader, menu_date)
-    return 'OK'
+    return 'Расписание еды обновлено!'
 
 
 def _get_this_week_monday() -> date:
@@ -109,11 +109,11 @@ async def _get_pdf_menu() -> None | PdfReader:
     pdf_url = 'https://ugrafmsh.ru/wp-content/uploads/' \
               '{2}/{1:0>2}/menyu-{0:0>2}-{1:0>2}-{2}-krugl.pdf'.format
 
-    menu_date = _get_this_week_monday()
+    menu_date = _get_this_week_monday() - timedelta(days=1)
 
-    # Ищем в понедельник, вторник и среду.
+    # Ищем в воскресенье, понедельник, вторник и среду.
     # Число и месяц изменяются сами, поэтому ссылка будет корректной.
-    for i in range(3):
+    for i in range(4):
         response = await Config.async_session.get(
             pdf_url(menu_date.day, menu_date.month, menu_date.year)
         )

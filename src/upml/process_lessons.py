@@ -310,9 +310,7 @@ def _get_grade(image: Image.Image, x: int, y: int) -> int:
         x += 1
 
     if x == width:
-        raise ValueError(
-            "Не удалось найти чёрную полосу после префикса"
-        )
+        raise ValueError("Не удалось найти чёрную полосу после префикса")
 
     x -= 2
 
@@ -324,4 +322,4 @@ def _get_grade(image: Image.Image, x: int, y: int) -> int:
         temp, lang='rus',
         config='--psm 10 --oem 3 -c tessedit_char_whitelist=01'
     )
-    return 10 if int(text) == 10 else 11
+    return 10 if int(text) == 10 else 11  # XD

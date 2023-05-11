@@ -9,6 +9,9 @@ from src.utils.decorators import admin_required, save_new_user_decor
 
 @save_new_user_decor
 async def start_view(message: types.Message) -> None:
+    """
+    Обработчик команды "/start".
+    """
     text = 'Привет! Я - стартовое меню.'
 
     await message.reply(
@@ -19,6 +22,9 @@ async def start_view(message: types.Message) -> None:
 
 @save_new_user_decor
 async def main_menu_view(message: types.Message | types.CallbackQuery) -> None:
+    """
+    Обработчик команды "/menu" и кнопки "Главное меню".
+    """
     text = 'Привет! Я - главное меню.'
     keyboard = main_menu_keyboard(message.from_user.id)
 
@@ -36,7 +42,17 @@ async def main_menu_view(message: types.Message | types.CallbackQuery) -> None:
 
 @admin_required
 async def admin_menu_view(callback: types.CallbackQuery, *_, **__) -> None:
-    text = 'Привет! Я - админ меню.'
+    """
+    Обработчик кнопки "Админ меню".
+    """
+    text = """
+Привет! Я - админ меню.
+
+*Загрузить меню* - автоматическое обновление еды информацией с сайта лицея.
+*Изменить меню* - ручное изменение еды.
+*Загрузить уроки* - ручная загрузка изображений с расписанием уроков.
+*Уведомление* - сделать оповещение, опрос.
+""".strip()
     keyboard = admin_menu_keyboard(callback.from_user.id)
 
     await callback.message.edit_text(
@@ -49,6 +65,9 @@ async def cancel_state(
         message: types.Message | types.CallbackQuery,
         state: FSMContext
 ) -> None:
+    """
+    Обработчик кнопок с отменой состояний и команд "/cancel", "/stop".
+    """
     current_state = await state.get_state()
     if current_state is None:
         return

@@ -7,6 +7,9 @@ from src.utils.dateformat import date_by_format
 
 
 async def open_date_cafe_menu(callback: types.CallbackQuery) -> None:
+    """
+    Обработчик кнопки "Меню", открывает расписание еды на текущий день.
+    """
     menu_date = date_by_format(
         callback.data.replace(
             CallbackData.OPEN_CAFE_MENU_ON_, ''

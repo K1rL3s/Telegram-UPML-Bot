@@ -21,6 +21,9 @@ from src.utils.states import AddingNewAdmin
 
 @superadmin_required
 async def admins_list_view(callback: types.CallbackQuery, *_, **__) -> None:
+    """
+    Обработчик кнопки "Список админов".
+    """
     page = int(
         callback.data.replace(
             CallbackData.OPEN_ADMINS_LIST_PAGE_, ''
@@ -43,6 +46,9 @@ async def admins_list_view(callback: types.CallbackQuery, *_, **__) -> None:
 
 @superadmin_required
 async def admin_add_view(callback: types.CallbackQuery, *_, **__) -> None:
+    """
+    Обработчик кнопки "Добавить админа".
+    """
     await AddingNewAdmin.username.set()
     text = 'Введите имя пользователя, которого хотите сделать админом.'
     await callback.message.edit_text(
@@ -56,6 +62,9 @@ async def admin_add_check_username_view(
         message: types.Message | types.CallbackQuery,
         state: FSMContext, *_, **__
 ) -> None:
+    """
+    Обработчик сообщения с юзернеймом админа, которого хотят добавить.
+    """
     username = message.text
     user_id = get_user_id_by_username(username)
 
@@ -82,6 +91,9 @@ async def admin_add_check_username_view(
 async def admin_add_confirm_view(
         callback: types.CallbackQuery, state: FSMContext, *_, **__
 ) -> None:
+    """
+    Обработчик кнопки "Подтвердить" при добавлении админа.
+    """
     async with state.proxy() as data:
         user_id = data['user_id']
         add_role_to_user(user_id, Roles.ADMIN)
@@ -95,6 +107,9 @@ async def admin_add_confirm_view(
 
 @superadmin_required
 async def admin_check_view(callback: types.CallbackQuery, *_, **__) -> None:
+    """
+    Обработчик кнопки с юзернеймом админа в списке админов.
+    """
     user_id, page = map(
         int,
         callback.data.replace(
@@ -113,6 +128,10 @@ async def admin_check_view(callback: types.CallbackQuery, *_, **__) -> None:
 
 @superadmin_required
 async def admin_remove_view(callback: types.CallbackQuery, *_, **__) -> None:
+    """
+    Обработчик кнопкок "Снять роль админа" и "Точно снять роль"
+    при удалении админа.
+    """
     if callback.data.startswith(CallbackData.REMOVE_ADMIN_SURE_):
         user_id = int(
             callback.data.replace(

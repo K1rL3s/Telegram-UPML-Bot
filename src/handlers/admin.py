@@ -1,3 +1,4 @@
+from datetime import date
 from io import BytesIO
 
 from loguru import logger
@@ -10,11 +11,18 @@ from src.upml.process_lessons import save_lessons
 from src.utils.funcs import bytes_io_to_image_id
 
 
-# изменить возвращаемые значения на (int, date)
 async def load_lessons_handler(
         chat_id: int,
         image: BytesIO
-) -> str:
+) -> tuple[int, date] | str:
+    """
+    Передача расписания в обработчик и сохранение результата в базу данных.
+
+    :param chat_id: Айди чата, откуда пришло изображение с расписанием.
+    :param image: Изображение с расписанием.
+    :return: Паралелль и дата, если окей, иначе текст ошибки.
+    """
+
     try:
         lessons_date, grade, full_lessons, class_lessons = save_lessons(image)
     except ValueError as e:

@@ -8,6 +8,7 @@ from src.keyboards import cancel_state_keyboard, start_menu_keyboard
 from src.keyboards.admin import admin_menu_keyboard
 from src.upml.save_cafe_menu import save_cafe_menu
 from src.utils.consts import CallbackData
+from src.utils.dateformat import format_date
 from src.utils.decorators import admin_required
 from src.utils.states import LoadingLessons
 from src.utils.throttling import rate_limit
@@ -17,6 +18,10 @@ from src.utils.throttling import rate_limit
 async def update_cafe_menu_view(
         callback: types.CallbackQuery, *_, **__
 ) -> None:
+    """
+    Обработчик кнопки "Загрузить меню",
+    загружает и обрабатывает PDF расписание еды с сайта лицея.
+    """
     text = await save_cafe_menu()
 
     await callback.message.edit_text(
@@ -29,6 +34,9 @@ async def update_cafe_menu_view(
 async def start_load_lessons_view(
         callback: types.CallbackQuery, *_, **__
 ) -> None:
+    """
+    Обработчик кнопки "Загрузить уроки".
+    """
     await LoadingLessons.image.set()
     text = 'Отправьте изображение(-я) расписания уроков'
 
@@ -43,9 +51,24 @@ async def start_load_lessons_view(
 async def load_lessons_view(
         message: types.Message, state: FSMContext, *_, **__
 ) -> None:
+    """
+    Обработчик сообщений с изображениями
+    после нажатия кнопки "Загрузить уроки".
+    """
     await message.photo[-1].download(destination_file=(image := BytesIO()))
 
     text = await load_lessons_handler(message.chat.id, image)
+
+    if isinstance(text, str):
+        await message.reply(
+            text=text,
+            reply_markup=start_menu_keyboard
+        )
+        return
+
+    grade, lessons_date = text
+    text = f'Расписание для {grade}-х классов на ' \
+           f'{format_date(lessons_date)} сохранено!'
 
     await message.reply(
         text=text,

@@ -10,9 +10,7 @@ from src.utils.decorators import save_new_user_decor
 from src.utils.funcs import extract_username
 
 
-@save_new_user_decor
-async def open_settings_view(callback: types.CallbackQuery) -> None:
-    text = """
+settings_welcome_text = """
 Привет! Я - настройки!
 
 *Класс* - твой класс.
@@ -20,6 +18,12 @@ async def open_settings_view(callback: types.CallbackQuery) -> None:
 *Новости* - уведомления о мероприятиях, новостях.
     """.strip()
 
+
+@save_new_user_decor
+async def open_settings_view(callback: types.CallbackQuery) -> None:
+    """
+    Обработчик кнопки "Настройки".
+    """
     grade, letter, lessons_notify, news_notify = open_settings_handler(
         callback.from_user.id, extract_username(callback)
     )
@@ -32,7 +36,7 @@ async def open_settings_view(callback: types.CallbackQuery) -> None:
     )
 
     await callback.message.edit_text(
-        text=text,
+        text=settings_welcome_text,
         reply_markup=keyboard
     )
 
@@ -50,7 +54,7 @@ async def edit_bool_settings_view(callback: types.CallbackQuery):
     )
 
     await callback.message.edit_text(
-        text=callback.message.text,
+        text=settings_welcome_text,
         reply_markup=keyboard
     )
 
@@ -60,7 +64,7 @@ async def edit_grade_settings_view(callback: types.CallbackQuery):
 
     if values is None:
         await callback.message.edit_text(
-            text=callback.message.text,
+            text=settings_welcome_text,
             reply_markup=choose_grade_keyboard
         )
         return
@@ -75,7 +79,7 @@ async def edit_grade_settings_view(callback: types.CallbackQuery):
     )
 
     await callback.message.edit_text(
-        text=callback.message.text,
+        text=settings_welcome_text,
         reply_markup=keyboard
     )
 

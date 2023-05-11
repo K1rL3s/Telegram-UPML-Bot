@@ -9,6 +9,11 @@ from src.utils.decorators import save_new_user_decor
 
 @save_new_user_decor
 async def open_date_lessons_view(callback: types.CallbackQuery) -> None:
+    """
+    Обработчик кнопки "Уроки".
+    Отправляет расписание уроков паралелли и класса, если выбран класс.
+    Отправляет расписание двух паралеллей, если не выбран класс.
+    """
     lessons_date = date_by_format(
         callback.data.replace(
             CallbackData.OPEN_LESSONS_ON_, ''

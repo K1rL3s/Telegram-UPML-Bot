@@ -52,7 +52,7 @@ def edit_grade_setting_handler(
         callback_data: str,
 ) -> tuple[int | None, str | None, bool, bool] | None:
     """
-    Обработчик нажатия кнопки смены класса.
+    Обработчик нажатия кнопки смены класса (выбор класса).
 
     :param user_id: Айди юзера.
     :param callback_data: Строка из callback'а (нажатая кнопка).
