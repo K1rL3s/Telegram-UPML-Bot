@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Date, Integer, String
+from sqlalchemy import Column, Date, ForeignKey, Integer, String
 
 from src.database.models.base_model import BaseModel
 
@@ -16,6 +16,8 @@ class Menu(BaseModel):
         Date,
         unique=True, nullable=False, index=True
     )
+
+    edit_by = Column(Integer, ForeignKey('users.id'), default=0)
 
     breakfast = Column(String)
     lunch = Column(String)

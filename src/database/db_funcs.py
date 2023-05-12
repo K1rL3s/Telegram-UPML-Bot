@@ -9,7 +9,7 @@ from src.database.models.menus import Menu
 from src.database.models.roles import Role
 from src.database.models.users import User
 from src.database.db_session import create_session
-from src.utils.consts import Roles
+from src.utils.consts import Roles, menu_eng_to_ru
 
 
 def save_user_or_update_status(user_id: int, username: str) -> None:
@@ -35,11 +35,12 @@ def save_user_or_update_status(user_id: int, username: str) -> None:
 
 def save_or_update_menu_in_db(
         menu_date: date,
-        breakfast: str,
-        lunch: str,
-        dinner: str,
-        snack: str,
-        supper: str,
+        breakfast: str | None,
+        lunch: str | None,
+        dinner: str | None,
+        snack: str | None,
+        supper: str | None,
+        edit_by: int = 0
 ) -> None:
     """
     Сохраняет или обновляет меню для определённой даты.
@@ -50,23 +51,33 @@ def save_or_update_menu_in_db(
     :param dinner: Обед.
     :param snack: Полдник.
     :param supper: Ужин.
+    :param edit_by: Кем редактируется, айди в бд, 0 - автоматически.
     """
 
     with create_session(do_commit=True) as session:
         find_query = sa.Select(Menu).where(Menu.date == menu_date)
-        if session.scalar(find_query):
-            delete_query = sa.Delete(Menu).where(Menu.date == menu_date)
-            session.execute(delete_query)
-
-        menu = Menu(
-            date=menu_date,
-            breakfast=breakfast,
-            lunch=lunch,
-            dinner=dinner,
-            snack=snack,
-            supper=supper
-        )
-        session.add(menu)
+        if menu := session.scalar(find_query):
+            # Если меню кем-то редактировалось
+            # и сейчас обновляется автоматически
+            if menu.edit_by and not edit_by:
+                return
+            menu.breakfast = breakfast
+            menu.lunch = lunch
+            menu.dinner = dinner
+            menu.snack = snack
+            menu.supper = supper
+            menu.edit_by = edit_by
+        else:
+            menu = Menu(
+                date=menu_date,
+                breakfast=breakfast,
+                lunch=lunch,
+                dinner=dinner,
+                snack=snack,
+                supper=supper,
+                edit_by=edit_by
+            )
+            session.add(menu)
 
 
 def save_or_update_full_lessons(
@@ -274,6 +285,35 @@ def update_user(user_id: int, **params) -> None:
             **params
         )
         session.execute(query)
+
+
+def edit_meal_by_date(
+        meal: str,
+        new_menu: str,
+        menu_date: date,
+        edit_by: int
+) -> None:
+    """
+    Обновляет приём пищи по названию и дате
+
+    :param meal: Название приёма пищи на английском.
+    :param new_menu: Новая версия.
+    :param menu_date: Дата.
+    :param edit_by: ТГ Айди того, кто меняет.
+    """
+    menu = get_menu_by_date(menu_date)
+    user_id = get_user(edit_by).id
+
+    meals = {
+        meal: getattr(menu, meal, None) for meal in menu_eng_to_ru.keys()
+    }
+    meals[meal] = new_menu
+
+    save_or_update_menu_in_db(
+        menu_date=menu_date,
+        edit_by=user_id,
+        **meals
+    )
 
 
 def is_has_role(user_id: int, role: Roles | str) -> bool:

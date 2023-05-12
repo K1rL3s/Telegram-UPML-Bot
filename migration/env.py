@@ -1,9 +1,11 @@
 from logging.config import fileConfig
 
+from alembic.script import ScriptDirectory
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -21,12 +23,29 @@ if config.config_file_name is not None:
 from src.database.db_session import SqlAlchemyBase
 import src.database.__all_models
 from src.database.__all_models import *
+
+
 target_metadata = SqlAlchemyBase.metadata
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+
+
+def process_revision_directives(context, revision, directives):
+    migration_script = directives[0]
+    head_revision = ScriptDirectory.from_config(
+        context.config
+    ).get_current_head()
+
+    if head_revision is None:
+        new_rev_id = 1
+    else:
+        last_rev_id = int(head_revision.lstrip('0'))
+        new_rev_id = last_rev_id + 1
+    migration_script.rev_id = '{0:04}'.format(new_rev_id)
 
 
 def run_migrations_offline() -> None:
@@ -47,6 +66,8 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        render_as_batch=True,
+        process_revision_directives=process_revision_directives,
     )
 
     with context.begin_transaction():
@@ -68,7 +89,10 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            render_as_batch=True,
+            process_revision_directives=process_revision_directives,
         )
 
         with context.begin_transaction():

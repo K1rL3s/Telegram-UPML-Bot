@@ -4,7 +4,7 @@ from io import BytesIO
 from loguru import logger
 
 from src.database.db_funcs import (
-    save_or_update_class_lessons,
+    get_menu_by_date, save_or_update_class_lessons,
     save_or_update_full_lessons,
 )
 from src.upml.process_lessons import save_lessons
@@ -41,3 +41,15 @@ async def load_lessons_handler(
         save_or_update_class_lessons(image_id, lessons_date, grade, letter)
 
     return f'{grade} {lessons_date}'
+
+
+def get_meal_by_date(meal: str, menu_date: date) -> str | None:
+    """
+    Возвращает приём пищи по названию и дате.
+
+    :param meal: Название приёма пищи на английском.
+    :param menu_date: Дата.
+    :return: Приём пищи из бд.
+    """
+    menu = get_menu_by_date(menu_date)
+    return getattr(menu, meal, None)

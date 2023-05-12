@@ -9,6 +9,16 @@ from httpx import AsyncClient
 load_dotenv()
 
 
+# Переводы всякого
+menu_eng_to_ru = {
+    'breakfast': 'завтрак',
+    'lunch': 'второй завтрак',
+    'dinner': 'обед',
+    'snack': 'полдник',
+    'supper': 'ужин'
+}
+
+
 class Config:
     BOT_TOKEN = os.environ["BOT_TOKEN"]
     DATABASE_PATH = 'src/database/db_files/database.sqlite?check_same_thread=False'  # noqa
@@ -36,7 +46,14 @@ class CallbackData:
     CANCEL_STATE = 'cancel_state'
 
     AUTO_UPDATE_CAFE_MENU = 'auto_update_cafe_menu'
-    MANUAL_UPDATE_CAFE_MENU = 'manual_update_cafe_menu'
+    MANUAL_EDIT_CAFE_MENU = 'manual_edit_cafe_menu'
+    EDIT_BREAKFAST = 'edit_breakfast'
+    EDIT_LUNCH = 'edit_lunch'
+    EDIT_DINNER = 'edit_dinner'
+    EDIT_SNACK = 'edit_snack'
+    EDIT_SUPPER = 'edit_supper'
+    EDIT_CONFIRM = 'edit_cafe_menu_confirm'
+
     UPLOAD_LESSONS = 'upload_lessons'
     DO_A_NOTIFY_FOR_ = 'do_a_notify_for_'
 

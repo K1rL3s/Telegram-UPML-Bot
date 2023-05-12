@@ -33,6 +33,28 @@ add_new_admin_sure_keyboard = InlineKeyboardMarkup().add(
     cancel_state_button
 )
 
+choose_meal_keyboard = InlineKeyboardMarkup(row_width=3)
+for dish, callback_data in zip(
+    ('Завтрак', 'Второй завтрак', 'Обед', 'Полдник', 'Ужин'),
+    (
+            CallbackData.EDIT_BREAKFAST, CallbackData.EDIT_SNACK,
+            CallbackData.EDIT_DINNER, CallbackData.EDIT_SNACK,
+            CallbackData.EDIT_SUPPER
+    )
+):
+    choose_meal_keyboard.insert(
+        InlineKeyboardButton(dish, callback_data=callback_data)
+    )
+choose_meal_keyboard.add(cancel_state_button)
+
+confirm_edit_menu_keyboard = InlineKeyboardMarkup().add(
+    InlineKeyboardButton(
+        '✅Подтвердить',
+        callback_data=CallbackData.EDIT_CONFIRM
+    ),
+    cancel_state_button
+)
+
 
 def admin_menu_keyboard(user_id: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup().add(
@@ -42,7 +64,7 @@ def admin_menu_keyboard(user_id: int) -> InlineKeyboardMarkup:
         ),
         InlineKeyboardButton(
             '🍴Изменить меню',
-            callback_data=CallbackData.MANUAL_UPDATE_CAFE_MENU
+            callback_data=CallbackData.MANUAL_EDIT_CAFE_MENU
         ),
     ).add(
         InlineKeyboardButton(
