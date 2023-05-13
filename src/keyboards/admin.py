@@ -37,7 +37,7 @@ choose_meal_keyboard = InlineKeyboardMarkup(row_width=3)
 for dish, callback_data in zip(
     ('Завтрак', 'Второй завтрак', 'Обед', 'Полдник', 'Ужин'),
     (
-            CallbackData.EDIT_BREAKFAST, CallbackData.EDIT_SNACK,
+            CallbackData.EDIT_BREAKFAST, CallbackData.EDIT_LUNCH,
             CallbackData.EDIT_DINNER, CallbackData.EDIT_SNACK,
             CallbackData.EDIT_SUPPER
     )
