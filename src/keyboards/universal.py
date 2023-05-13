@@ -11,9 +11,18 @@ go_to_main_menu_button = InlineKeyboardButton(
     callback_data=CallbackData.OPEN_MAIN_MENU
 )
 
-go_to_admin_menu_button = InlineKeyboardButton(
-    '❗Админ меню',
-    callback_data=CallbackData.OPEN_ADMIN_MENU
+go_to_admin_panel_button = InlineKeyboardButton(
+    '❗Админ панель',
+    callback_data=CallbackData.OPEN_ADMIN_PANEL
+)
+
+cancel_state_button = InlineKeyboardButton(
+    '❌Отмена',
+    callback_data=CallbackData.CANCEL_STATE
+)
+
+cancel_state_keyboard = InlineKeyboardMarkup().add(
+    cancel_state_button
 )
 
 

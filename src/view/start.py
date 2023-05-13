@@ -1,8 +1,9 @@
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 
-from src.keyboards import start_menu_keyboard, main_menu_keyboard
-from src.keyboards.admin import admin_menu_keyboard
+from src.keyboards import (
+    start_menu_keyboard, main_menu_keyboard, admin_panel_keyboard,
+)
 from src.utils.consts import CallbackData
 from src.utils.decorators import admin_required, save_new_user_decor
 
@@ -41,19 +42,19 @@ async def main_menu_view(message: types.Message | types.CallbackQuery) -> None:
 
 
 @admin_required
-async def admin_menu_view(callback: types.CallbackQuery, *_, **__) -> None:
+async def admin_panel_view(callback: types.CallbackQuery, *_, **__) -> None:
     """
-    Обработчик кнопки "Админ меню".
+    Обработчик кнопки "Админ панель".
     """
     text = """
-Привет! Я - админ меню.
+Привет! Я - админ панель.
 
 *Загрузить меню* - автоматическое обновление еды информацией с сайта лицея.
 *Изменить меню* - ручное изменение еды.
 *Загрузить уроки* - ручная загрузка изображений с расписанием уроков.
-*Уведомление* - сделать оповещение, опрос.
+*Уведомление* - сделать оповещение.
 """.strip()
-    keyboard = admin_menu_keyboard(callback.from_user.id)
+    keyboard = admin_panel_keyboard(callback.from_user.id)
 
     await callback.message.edit_text(
         text=text,
@@ -101,6 +102,6 @@ def register_start_view(dp: Dispatcher):
         text=CallbackData.OPEN_MAIN_MENU
     )
     dp.register_callback_query_handler(
-        admin_menu_view,
-        text=CallbackData.OPEN_ADMIN_MENU
+        admin_panel_view,
+        text=CallbackData.OPEN_ADMIN_PANEL
     )

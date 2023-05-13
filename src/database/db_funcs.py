@@ -1,5 +1,6 @@
 from datetime import date
 from enum import Enum
+from typing import Any
 
 import sqlalchemy as sa
 
@@ -15,7 +16,7 @@ from src.utils.consts import Roles, menu_eng_to_ru
 def save_user_or_update_status(user_id: int, username: str) -> None:
     """
     Сохраняет пользователя в базе данных
-    или обновляет его статус ``is_active``.
+    или обновляет его статус ``is_active`` и никнейм.
 
     :param user_id: Айди юзера.
     :param username: Имя пользователя.
@@ -25,7 +26,7 @@ def save_user_or_update_status(user_id: int, username: str) -> None:
         query = sa.Select(User).where(User.user_id == user_id)
         user: User = session.scalar(query)
 
-        if user and (not user.is_active or not user.username):
+        if user and (not user.is_active or user.username != username):
             user.is_active = True
             user.username = username
         elif not user:
@@ -80,10 +81,11 @@ def save_or_update_menu_in_db(
             session.add(menu)
 
 
-def save_or_update_full_lessons(
+def save_or_update_lessons(
         image: str,
         lessons_date: date,
-        grade: int,
+        grade: str,
+        letter: str = None
 ) -> None:
     """
     Сохраняет или обновляет уроки для паралелли.
@@ -91,64 +93,32 @@ def save_or_update_full_lessons(
     :param image: Айди изображения.
     :param lessons_date: Дата.
     :param grade: 10 или 11.
+    :param letter: А, Б, В
     """
+
+    model = ClassLessons if letter else FullLessons
 
     with create_session(do_commit=True) as session:
-        find_query = sa.Select(FullLessons).where(
-            FullLessons.date == lessons_date,
-            FullLessons.grade == grade
+        find_query = sa.Select(model).where(
+            model.date == lessons_date,
+            model.grade == grade,
         )
-        if session.scalar(find_query):
-            delete_query = sa.Delete(FullLessons).where(
-                FullLessons.date == lessons_date,
-                FullLessons.grade == grade
-            )
-            session.execute(delete_query)
 
-        lessons = FullLessons(
-            date=lessons_date,
-            grade=grade,
-            image=image
-        )
-        session.add(lessons)
+        if letter:
+            find_query = find_query.where(model.letter == letter)
 
-
-def save_or_update_class_lessons(
-        image: str,
-        lessons_date: date,
-        grade: int,
-        letter: str
-) -> None:
-    """
-    Сохраняет или обновляет уроки для класса.
-
-    :param image: Айди изображения.
-    :param lessons_date: Дата.
-    :param grade: 10 или 11.
-    :param letter: А, Б, В.
-    """
-
-    with create_session(do_commit=True) as session:
-        find_query = sa.Select(ClassLessons).where(
-            ClassLessons.date == lessons_date,
-            ClassLessons.letter == letter,
-            ClassLessons.grade == grade
-        )
-        if session.scalar(find_query):
-            delete_query = sa.Delete(ClassLessons).where(
-                ClassLessons.date == lessons_date,
-                ClassLessons.letter == letter,
-                ClassLessons.grade == grade
-            )
-            session.execute(delete_query)
-
-        lessons = ClassLessons(
-            date=lessons_date,
-            grade=grade,
-            letter=letter,
-            image=image,
-        )
-        session.add(lessons)
+        if lessons := session.scalar(find_query):
+            lessons.image = image
+        else:
+            data = {
+                'date': lessons_date,
+                'grade': grade,
+                'image': image,
+            }
+            if letter:
+                data['letter'] = letter
+            lessons = model(**data)
+            session.add(lessons)
 
 
 def get_menu_by_date(menu_date: date) -> Menu | None:
@@ -175,6 +145,34 @@ def get_user(user_id: int) -> User | None:
     with create_session() as session:
         query = sa.Select(User).where(User.user_id == user_id)
         return session.scalar(query)
+
+
+def get_users_by_conditions(
+        values: list[tuple[str, Any]],
+        or_mode: bool = False
+) -> list[User]:
+    """
+    Возвращает список моделей User,
+    у которых значение в колонке совпадает с переданным.
+
+    :param values: Список из кортежей,
+                   где первый элемент - колонка, второй - значение.
+                   Пустой список - все юзеры.
+    :param or_mode: Если True, то совпадение хотя бы по одному условию.
+    :return: Список юзеров.
+    """
+
+    with create_session() as session:
+        conditions = []
+        for attr, value in values:
+            conditions.append(getattr(User, attr) == value)
+
+        if or_mode:
+            find_query = sa.select(User).where(sa.or_(*conditions))
+        else:
+            find_query = sa.select(User).where(sa.and_(*conditions))
+
+        return list(session.scalars(find_query).all())
 
 
 def get_role(role: Roles | str) -> Role | None:
@@ -228,7 +226,7 @@ def get_user_id_by_username(username: str) -> int | None:
         return session.scalar(query)
 
 
-def get_full_lessons(lessons_date: date, grade: int) -> str | None:
+def get_full_lessons(lessons_date: date, grade: str) -> str | None:
     """
     Возвращает айди картинки расписания уроков для параллели.
 
@@ -248,23 +246,20 @@ def get_full_lessons(lessons_date: date, grade: int) -> str | None:
 
 def get_class_lessons(
         lessons_date: date,
-        grade: int,
-        letter: str
+        class_: str
 ) -> str | None:
     """
     Возвращает айди картинки расписания уроков для класса.
 
     :param lessons_date: Дата.
-    :param grade: 10 или 11.
-    :param letter: А, Б, В.
+    :param class_: (10 или 11) + (А, Б, В) .
     :return: Айди картинки или None.
     """
 
     with create_session() as session:
         query = sa.Select(ClassLessons).where(
             ClassLessons.date == lessons_date,
-            ClassLessons.grade == grade,
-            ClassLessons.letter == letter
+            ClassLessons.class_ == class_
         )
         lessons: ClassLessons = session.scalar(query)
         return lessons.image if lessons else None
@@ -274,7 +269,7 @@ def update_user(user_id: int, **params) -> None:
     """
     Обновление пользователя по айди.
 
-    :param user_id: Айди юзера.
+    :param user_id: ТГ Айди юзера.
     :param params: Поле таблицы=значение, ...
     """
 
@@ -302,7 +297,7 @@ def edit_meal_by_date(
     :param edit_by: ТГ Айди того, кто меняет.
     """
     menu = get_menu_by_date(menu_date)
-    user_id = get_user(edit_by).id
+    db_id = get_user(edit_by).id
 
     meals = {
         meal: getattr(menu, meal, None) for meal in menu_eng_to_ru.keys()
@@ -311,7 +306,7 @@ def edit_meal_by_date(
 
     save_or_update_menu_in_db(
         menu_date=menu_date,
-        edit_by=user_id,
+        edit_by=db_id,
         **meals
     )
 
@@ -320,7 +315,7 @@ def is_has_role(user_id: int, role: Roles | str) -> bool:
     """
     Имеет ли юзер роль.
 
-    :param user_id: Айди юзера.
+    :param user_id: ТГ Айди юзера.
     :param role: Роль.
     :return: Тру или фэлс.
     """
@@ -343,7 +338,7 @@ def remove_role_from_user(user_id: int, role: Roles | str) -> None:
     """
     Удаляет роль у юзера.
 
-    :param user_id: Айди юзера.
+    :param user_id: ТГ Айди юзера.
     :param role: Его роль.
     """
 
@@ -367,7 +362,7 @@ def add_role_to_user(user_id: int, role: Roles | str) -> None:
     """
     Добавляет роль юзеру.
 
-    :param user_id: Айди юзера.
+    :param user_id: ТГ Айди юзера.
     :param role: Роль.
     """
 

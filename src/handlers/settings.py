@@ -8,7 +8,7 @@ from src.utils.consts import CallbackData
 def open_settings_handler(
         user_id: int,
         username: str
-) -> tuple[int | None, str | None, bool, bool]:
+) -> tuple[str | None, str | None, bool, bool]:
     """
     Обработчик открытия настроек.
 
@@ -29,7 +29,7 @@ def open_settings_handler(
 def edit_bool_settings_handler(
         user_id: int,
         callback_data: str,
-) -> tuple[int | None, str | None, bool, bool]:
+) -> tuple[str | None, str | None, bool, bool]:
     """
     Обработчик нажатия кнопки булевского типа.
 
@@ -50,7 +50,7 @@ def edit_bool_settings_handler(
 def edit_grade_setting_handler(
         user_id: int,
         callback_data: str,
-) -> tuple[int | None, str | None, bool, bool] | None:
+) -> tuple[str | None, str | None, bool, bool] | None:
     """
     Обработчик нажатия кнопки смены класса (выбор класса).
 

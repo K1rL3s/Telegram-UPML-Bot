@@ -1,20 +1,28 @@
+import asyncio
 from datetime import date
 from io import BytesIO
 
+import aiogram.utils.exceptions
+import aiojobs
+from aiogram import Bot
 from loguru import logger
 
 from src.database.db_funcs import (
-    get_menu_by_date, save_or_update_class_lessons,
-    save_or_update_full_lessons,
+    get_menu_by_date, get_users_by_conditions, save_or_update_lessons,
+    update_user,
 )
+from src.database.models.users import User
 from src.upml.process_lessons import save_lessons
-from src.utils.funcs import bytes_io_to_image_id
+from src.utils.funcs import (
+    bytes_io_to_image_id, tg_click_name,
+    username_by_user_id,
+)
 
 
 async def load_lessons_handler(
         chat_id: int,
         image: BytesIO
-) -> tuple[int, date] | str:
+) -> tuple[str, date] | str:
     """
     Передача расписания в обработчик и сохранение результата в базу данных.
 
@@ -36,11 +44,11 @@ async def load_lessons_handler(
         for image in class_lessons
     ]
 
-    save_or_update_full_lessons(lessons_id, lessons_date, grade)
+    save_or_update_lessons(lessons_id, lessons_date, grade)
     for image_id, letter in zip(class_ids, 'АБВ'):
-        save_or_update_class_lessons(image_id, lessons_date, grade, letter)
+        save_or_update_lessons(image_id, lessons_date, grade, letter)
 
-    return f'{grade} {lessons_date}'
+    return grade, lessons_date
 
 
 def get_meal_by_date(meal: str, menu_date: date) -> str | None:
@@ -53,3 +61,77 @@ def get_meal_by_date(meal: str, menu_date: date) -> str | None:
     """
     menu = get_menu_by_date(menu_date)
     return getattr(menu, meal, None)
+
+
+async def _one_notify(text: str, user: User) -> None:
+    try:
+        await Bot.get_current().send_message(
+            text=text,
+            chat_id=user.user_id
+        )
+        logger.debug(f'Рассылка успешна для {user.short_info()}')
+    except aiogram.utils.exceptions.Unauthorized:
+        update_user(user.user_id, is_active=0)
+    except Exception as e:
+        logger.warning(f'Ошибка при рассылке: {e}')
+
+
+async def do_a_notify(
+        text: str,
+        users: list[User],
+        from_who: int = 0,
+        for_who: str = ''
+) -> None:
+    """
+    Делатель рассылки.
+
+    :param text: Сообщение.
+    :param users: Кому отправить сообщение.
+    :param from_who: ТГ Айди отправителя (админа)
+    :param for_who: Для кого рассылка.
+    """
+
+    username = await username_by_user_id(from_who)
+    text = '🔔*Уведомление от администратора* ' \
+           f'{tg_click_name(username, from_who)} *{for_who}*\n\n' + text
+
+    scheduler = aiojobs.Scheduler(limit=5)
+    for user in users:
+        await scheduler.spawn(_one_notify(text, user))
+
+    while scheduler.active_count:
+        await asyncio.sleep(0.2)
+    await scheduler.close()
+
+
+# all, grade_10, grade_11, 10А, 10Б, 10В, 11А, 11Б, 11В
+def get_users_for_notify(
+        notify_type: str = '',
+        is_lessons: bool = False,
+        is_news: bool = False,
+) -> list[User]:
+    """
+    Преобразование notify_type
+    из src/view/admin/admin_notifies.py ``def notify_for_who_view``
+    в условия для фильтра.
+
+    :param notify_type: Тип уведомления из функции.
+    :param is_lessons: Уведомление об изменении расписания.
+    :param is_news: Уведомление о новостях (ручная рассылка).
+    """
+
+    conditions = [('is_active', 1)]
+
+    if is_lessons:
+        conditions.append(('lessons_notify', 1))
+    if is_news:
+        conditions.append(('news_notify', 1))
+
+    if notify_type.startswith('grade'):
+        conditions.append(('grade', notify_type.split('_')[-1]))
+    elif len(notify_type) == 3 \
+            and any(notify_type.startswith(grade) for grade in ('10', '11')) \
+            and any(notify_type.endswith(letter) for letter in 'АБВ'):  # XD
+        conditions.append(('class_', notify_type))
+
+    return get_users_by_conditions(conditions)

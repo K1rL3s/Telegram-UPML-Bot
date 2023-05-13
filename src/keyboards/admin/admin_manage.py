@@ -1,21 +1,12 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from src.database.db_funcs import is_has_role
 from src.keyboards.universal import (
-    go_to_admin_menu_button,
-    go_to_main_menu_button,
+    cancel_state_button,
+    go_to_admin_panel_button,
 )
-from src.utils.consts import CallbackData, Roles
+from src.utils.consts import CallbackData
 
 
-cancel_state_button = InlineKeyboardButton(
-    '❌Отмена',
-    callback_data=CallbackData.CANCEL_STATE
-)
-
-cancel_state_keyboard = InlineKeyboardMarkup().add(
-    cancel_state_button
-)
 open_admins_list_button = InlineKeyboardButton(
     '👮‍♀️Список админов',
     callback_data=CallbackData.OPEN_ADMINS_LIST_PAGE_
@@ -24,7 +15,6 @@ add_new_admin_button = InlineKeyboardButton(
     '🔎Добавить админа',
     callback_data=CallbackData.ADD_NEW_ADMIN
 )
-
 add_new_admin_sure_keyboard = InlineKeyboardMarkup().add(
     InlineKeyboardButton(
         '✅Подтвердить',
@@ -32,57 +22,6 @@ add_new_admin_sure_keyboard = InlineKeyboardMarkup().add(
     ),
     cancel_state_button
 )
-
-choose_meal_keyboard = InlineKeyboardMarkup(row_width=3)
-for dish, callback_data in zip(
-    ('Завтрак', 'Второй завтрак', 'Обед', 'Полдник', 'Ужин'),
-    (
-            CallbackData.EDIT_BREAKFAST, CallbackData.EDIT_LUNCH,
-            CallbackData.EDIT_DINNER, CallbackData.EDIT_SNACK,
-            CallbackData.EDIT_SUPPER
-    )
-):
-    choose_meal_keyboard.insert(
-        InlineKeyboardButton(dish, callback_data=callback_data)
-    )
-choose_meal_keyboard.add(cancel_state_button)
-
-confirm_edit_menu_keyboard = InlineKeyboardMarkup().add(
-    InlineKeyboardButton(
-        '✅Подтвердить',
-        callback_data=CallbackData.EDIT_CONFIRM
-    ),
-    cancel_state_button
-)
-
-
-def admin_menu_keyboard(user_id: int) -> InlineKeyboardMarkup:
-    keyboard = InlineKeyboardMarkup().add(
-        InlineKeyboardButton(
-            '🍴Загрузить меню',
-            callback_data=CallbackData.AUTO_UPDATE_CAFE_MENU
-        ),
-        InlineKeyboardButton(
-            '🍴Изменить меню',
-            callback_data=CallbackData.MANUAL_EDIT_CAFE_MENU
-        ),
-    ).add(
-        InlineKeyboardButton(
-            '📓Загрузить уроки',
-            callback_data=CallbackData.UPLOAD_LESSONS
-        ),
-        InlineKeyboardButton(
-            '🔔Уведомление',
-            callback_data=CallbackData.DO_A_NOTIFY_FOR_
-        ),
-    )
-
-    if is_has_role(user_id, Roles.SUPERADMIN):
-        keyboard.add(open_admins_list_button)
-
-    keyboard.add(go_to_main_menu_button)
-
-    return keyboard
 
 
 def admins_list_keyboard(
@@ -119,7 +58,7 @@ def admins_list_keyboard(
         )
 
     keyboard.add(
-        go_to_admin_menu_button,
+        go_to_admin_panel_button,
         add_new_admin_button
     )
 
@@ -142,7 +81,7 @@ def check_admin_keyboard(
     return InlineKeyboardMarkup().add(
         remove_button
     ).add(
-        go_to_admin_menu_button,
+        go_to_admin_panel_button,
         InlineKeyboardButton(
             f'👨‍✈️Список админов',
             callback_data=CallbackData.OPEN_ADMINS_LIST_PAGE_ + f'{page}'

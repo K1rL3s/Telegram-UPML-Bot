@@ -14,7 +14,7 @@ pytesseract.pytesseract.tesseract_cmd = Config.TESSERACT_PATH
 
 def save_lessons(
         image: BytesIO
-) -> tuple[date, int, BytesIO, list[BytesIO]]:
+) -> tuple[date, str, BytesIO, list[BytesIO]]:
     """
     Основная функция в файле, выполняет всю работу, вызывая другие функции.
 
@@ -291,7 +291,7 @@ def _combine_prefix_classes_date(
     return new_classes
 
 
-def _get_grade(image: Image.Image, x: int, y: int) -> int:
+def _get_grade(image: Image.Image, x: int, y: int) -> str:
     """
     Ищет, расписание для 10 или 11 классов.
 
@@ -323,4 +323,4 @@ def _get_grade(image: Image.Image, x: int, y: int) -> int:
         temp, lang='rus',
         config='--psm 10 --oem 3 -c tessedit_char_whitelist=01'
     )
-    return 10 if int(text) == 10 else 11  # XD
+    return "10" if int(text) == 10 else "11"  # XD

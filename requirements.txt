@@ -4,6 +4,7 @@ aiogram==2.25.1
 httpx==0.24.0
 aiocache==0.12.1
 aioschedule==0.5.2
+aiojobs==1.1.0
 cachetools==5.3.0
 loguru==0.6.0
 pathlib==1.0.1

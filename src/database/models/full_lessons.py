@@ -14,13 +14,5 @@ class FullLessons(BaseModel):
 
     date = Column(Date, nullable=False)
 
-    grade = Column(Integer, nullable=False)  # 10 или 11
+    grade = Column(String(2), nullable=False)  # 10 или 11
     image = Column(String, nullable=False)
-
-    def __repr__(self):
-        return self._repr(
-            id=self.id,
-            date=self.date,
-            grade=self.grade,
-            image=self.image
-        )

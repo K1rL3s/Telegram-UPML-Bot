@@ -24,14 +24,3 @@ class Menu(BaseModel):
     dinner = Column(String)
     snack = Column(String)
     supper = Column(String)
-
-    def __repr__(self):
-        return self._repr(
-            id=self.id,
-            date=self.date,
-            breakfast=self.breakfast,
-            lunch=self.lunch,
-            dinner=self.dinner,
-            snack=self.snack,
-            supper=self.supper
-        )

@@ -4,7 +4,7 @@ from aiogram.types.inline_keyboard import (
 
 from src.database.db_funcs import is_has_role
 from src.keyboards.universal import (
-    go_to_admin_menu_button,
+    go_to_admin_panel_button,
     go_to_main_menu_button,
 )
 from src.utils.consts import CallbackData, Roles
@@ -32,6 +32,6 @@ def main_menu_keyboard(user_id: int) -> InlineKeyboardMarkup:
     )
 
     if is_has_role(user_id, Roles.ADMIN):
-        keyboard.add(go_to_admin_menu_button)
+        keyboard.add(go_to_admin_panel_button)
 
     return keyboard

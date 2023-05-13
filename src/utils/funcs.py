@@ -57,3 +57,13 @@ def extract_username(
             message.from_user.first_name or
             message.from_user.last_name
     )  # XD
+
+
+def tg_click_name(username: str, user_id: int) -> str:
+    """
+    Возвращает markdown строку с упоминанием пользователя.
+
+    :param username: Отображаемое имя.
+    :param user_id: ТГ Айди.
+    """
+    return f'[{username}](tg://user?id={user_id})'

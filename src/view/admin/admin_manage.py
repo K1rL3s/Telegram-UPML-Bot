@@ -7,15 +7,12 @@ from src.database.db_funcs import (
 )
 from src.keyboards import (
     admins_list_keyboard, cancel_state_keyboard,
-    check_admin_keyboard,
-)
-from src.keyboards.admin import (
-    add_new_admin_sure_keyboard,
-    admin_menu_keyboard,
+    check_admin_keyboard, add_new_admin_sure_keyboard,
+    admin_panel_keyboard,
 )
 from src.utils.consts import CallbackData, Roles
 from src.utils.decorators import superadmin_required
-from src.utils.funcs import username_by_user_id
+from src.utils.funcs import tg_click_name, username_by_user_id
 from src.utils.states import AddingNewAdmin
 
 
@@ -80,7 +77,7 @@ async def admin_add_check_username_view(
         data['user_id'] = user_id
 
     await AddingNewAdmin.confirm.set()
-    text = f'Добавить в админы [{username}](tg://user?id={user_id})?'
+    text = f'Добавить в админы {tg_click_name(username, user_id)}?'
     await message.reply(
         text=text,
         reply_markup=add_new_admin_sure_keyboard
@@ -100,7 +97,7 @@ async def admin_add_confirm_view(
         text = 'Успешно!'
         await callback.message.edit_text(
             text=text,
-            reply_markup=admin_menu_keyboard(callback.from_user.id)
+            reply_markup=admin_panel_keyboard(callback.from_user.id)
         )
         await state.finish()
 
@@ -116,8 +113,9 @@ async def admin_check_view(callback: types.CallbackQuery, *_, **__) -> None:
             CallbackData.CHECK_ADMIN_, ''
         ).split('_')
     )
-    text = f"Админ " \
-           f"[{await username_by_user_id(user_id)}](tg://user?id={user_id})"
+
+    text = "Телеграм - " \
+           f"{tg_click_name(await username_by_user_id(user_id), user_id)}"
     keyboard = check_admin_keyboard(user_id, page, sure=False)
 
     await callback.message.edit_text(
@@ -149,8 +147,8 @@ async def admin_remove_view(callback: types.CallbackQuery, *_, **__) -> None:
         ).split('_')
     )
 
-    text = f"Вы точно хотите удалить из админов" \
-           f" [{await username_by_user_id(user_id)}](tg://user?id={user_id})?"
+    text = f"Вы точно хотите удалить из админов " \
+           f"{tg_click_name(await username_by_user_id(user_id), user_id)}?"
     keyboard = check_admin_keyboard(user_id, page, sure=True)
 
     await callback.message.edit_text(

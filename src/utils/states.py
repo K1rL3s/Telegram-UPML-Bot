@@ -15,3 +15,7 @@ class LoadingLessons(StatesGroup):
 class AddingNewAdmin(StatesGroup):
     username = State()
     confirm = State()
+
+
+class DoNotify(StatesGroup):
+    writing = State()

@@ -14,9 +14,3 @@ class Role(BaseModel):
     )
 
     role = Column(String, unique=True, nullable=False)
-
-    def __repr__(self):
-        return self._repr(
-            id=self.id,
-            role=self.role
-        )

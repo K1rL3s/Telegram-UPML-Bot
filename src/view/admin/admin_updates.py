@@ -9,7 +9,7 @@ from src.keyboards import (
     cancel_state_keyboard,
     confirm_edit_menu_keyboard, start_menu_keyboard,
     choose_meal_keyboard,
-    admin_menu_keyboard,
+    admin_panel_keyboard,
 )
 from src.upml.save_cafe_menu import save_cafe_menu
 from src.utils.consts import CallbackData, menu_eng_to_ru
@@ -31,7 +31,7 @@ async def auto_update_cafe_menu_view(
 
     await callback.message.edit_text(
         text=text,
-        reply_markup=admin_menu_keyboard(callback.from_user.id)
+        reply_markup=admin_panel_keyboard(callback.from_user.id)
     )
 
 
@@ -107,7 +107,7 @@ async def edit_cafe_menu_meal_view(
 
     text = f'*Дата*: `{format_date(edit_menu_date)}`\n' \
            f'*Приём пищи*: `{menu_eng_to_ru[edit_meal].capitalize()}`\n' \
-           f'*Меню*:' \
+           f'*Меню*:\n' \
            f'```\n{get_meal_by_date(edit_meal, edit_menu_date)}```\n\n' \
            'Чтобы изменить, отправьте *одним сообщением* изменённую версию.'
 
@@ -140,7 +140,7 @@ async def edit_cafe_menu_text_view(
 
     text = f'*Дата*: `{format_date(edit_menu_date)}`\n' \
            f'*Приём пищи*: `{menu_eng_to_ru[edit_meal].capitalize()}`\n' \
-           f'*Новое меню*:```\n{new_menu}```\n\n' \
+           f'*Новое меню*:\n```\n{new_menu}```\n\n' \
            'Для сохранения нажмите кнопку. Если хотите изменить, ' \
            'отправьте сообщение повторно.'
 
@@ -175,7 +175,7 @@ async def edit_cafe_menu_confirm_view(
 
     await callback.message.edit_text(
         text=text,
-        reply_markup=admin_menu_keyboard(callback.from_user.id)
+        reply_markup=admin_panel_keyboard(callback.from_user.id)
     )
 
     for new_menu_id in new_menu_ids:
@@ -214,6 +214,9 @@ async def load_lessons_view(
 
     text = await load_lessons_handler(message.chat.id, image)
 
+    if state:
+        await state.finish()
+
     if isinstance(text, str):
         await message.reply(
             text=text,
@@ -222,15 +225,13 @@ async def load_lessons_view(
         return
 
     grade, lessons_date = text
-    text = f'Расписание для {grade}-х классов на ' \
-           f'{format_date(lessons_date)} сохранено!'
+    text = f'Расписание для *{grade}-х классов* на ' \
+           f'*{format_date(lessons_date)}* сохранено!'
 
     await message.reply(
         text=text,
         reply_markup=start_menu_keyboard
     )
-
-    await state.finish()
 
 
 def register_admin_updates_view(dp: Dispatcher):
@@ -250,7 +251,7 @@ def register_admin_updates_view(dp: Dispatcher):
 
     dp.register_callback_query_handler(
         edit_cafe_menu_start_view,
-        text=CallbackData.MANUAL_EDIT_CAFE_MENU
+        text=CallbackData.EDIT_CAFE_MENU
     )
     dp.register_message_handler(
         edit_cafe_menu_date_view,

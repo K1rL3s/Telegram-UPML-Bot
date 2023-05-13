@@ -16,7 +16,8 @@ def format_menu(meals: tuple[str, ...]) -> str:
     return '\n\n'.join(
         f'*{meal_type}:*\n{meal or "Н/д"}'.strip()
         for meal_type, meal in zip(
-            ('Завтрак', 'Второй завтрак', 'Обед', 'Полдник', 'Ужин'),
+            ('🕗Завтрак', '🕙Второй завтрак',
+             '🕐Обед', '🕖Полдник', '🕖Ужин'),
             meals
         )
     ).strip()

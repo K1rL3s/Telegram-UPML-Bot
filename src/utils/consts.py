@@ -17,6 +17,11 @@ menu_eng_to_ru = {
     'snack': 'полдник',
     'supper': 'ужин'
 }
+notifies_eng_to_ru = {
+    'all': 'всем',
+    'grade_10': 'десятикам',
+    'grade_11': 'одиннадцатым',
+}
 
 
 class Config:
@@ -32,7 +37,7 @@ class Config:
 class CallbackData:
     OPEN_MAIN_MENU = 'open_main_menu'
     OPEN_SETTINGS = 'open_settings'
-    OPEN_ADMIN_MENU = 'open_admin_menu'
+    OPEN_ADMIN_PANEL = 'open_admin_panel'
     OPEN_CAFE_MENU_ON_ = 'open_cafe_menu_on_'
     OPEN_CAFE_MENU_TODAY = OPEN_CAFE_MENU_ON_ + 'today'
     OPEN_LESSONS_ON_ = 'open_lessons_on_'
@@ -46,7 +51,7 @@ class CallbackData:
     CANCEL_STATE = 'cancel_state'
 
     AUTO_UPDATE_CAFE_MENU = 'auto_update_cafe_menu'
-    MANUAL_EDIT_CAFE_MENU = 'manual_edit_cafe_menu'
+    EDIT_CAFE_MENU = 'edit_cafe_menu'
     EDIT_BREAKFAST = 'edit_breakfast'
     EDIT_LUNCH = 'edit_lunch'
     EDIT_DINNER = 'edit_dinner'
@@ -55,7 +60,12 @@ class CallbackData:
     EDIT_CONFIRM = 'edit_cafe_menu_confirm'
 
     UPLOAD_LESSONS = 'upload_lessons'
+
     DO_A_NOTIFY_FOR_ = 'do_a_notify_for_'
+    FOR_ALL = DO_A_NOTIFY_FOR_ + 'all'
+    FOR_GRADE = DO_A_NOTIFY_FOR_ + 'grade'
+    FOR_CLASS = DO_A_NOTIFY_FOR_ + 'class'
+    NOTIFY_СONFIRM = 'notify_confirm'
 
     OPEN_ADMINS_LIST_PAGE_ = 'open_admins_list_page_'
     CHECK_ADMIN_ = 'check_admin_'

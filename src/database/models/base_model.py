@@ -7,7 +7,11 @@ class BaseModel(SqlAlchemyBase):
     __abstract__ = True
 
     def __repr__(self):
-        return self._repr()
+        return self._repr(
+            **{
+                c.name: getattr(self, c.name) for c in self.__table__.columns
+            }
+        )
 
     def _repr(self, **fields) -> str:
         """

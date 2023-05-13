@@ -25,23 +25,21 @@ def get_lessons_text_and_image_id(
 
     images = []
 
-    if user.grade and user.letter:
+    if user.class_:
         images.append(get_full_lessons(lesson_date, user.grade))
-        images.append(get_class_lessons(lesson_date, user.grade, user.letter))
+        images.append(get_class_lessons(lesson_date, user.class_))
     else:
-        images.append(get_full_lessons(lesson_date, 10))
-        images.append(get_full_lessons(lesson_date, 11))
+        images.append(get_full_lessons(lesson_date, "10"))
+        images.append(get_full_lessons(lesson_date, "11"))
 
-    for_grade = (f"{user.grade}{user.letter}"
-                 if user.grade and user.letter
-                 else "❓")
+    for_class = user.class_ if user.class_ else "❓"
 
     if images[0] or images[1]:
         text = f'🛏 Расписание на *{format_date(lesson_date)}* для ' \
-               f'*{for_grade}* класса.'
+               f'*{for_class}* класса.'
     else:
         images = None
         text = f'🛏 Расписание на *{format_date(lesson_date)}* для ' \
-               f'*{for_grade}* класса *не найдено* :('
+               f'*{for_class}* класса *не найдено* :('
 
     return text, images
