@@ -320,7 +320,6 @@ def _get_grade(image: Image.Image, x: int, y: int) -> str:
 
     temp = image.crop((left_x, up_y, x, y))
     text = pytesseract.image_to_string(
-        temp, lang='rus',
-        config='--psm 10 --oem 3 -c tessedit_char_whitelist=01'
+        temp, config='--psm 10 --oem 3 -c tessedit_char_whitelist=01'
     )
-    return "10" if int(text) == 10 else "11"  # XD
+    return "10" if "10" in text else "11"  # XD

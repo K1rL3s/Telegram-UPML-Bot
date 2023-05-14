@@ -1,7 +1,7 @@
 from datetime import date
 
 from src.database.db_funcs import get_user, get_full_lessons, get_class_lessons
-from src.utils.datehelp import format_date
+from src.utils.datehelp import format_date, weekday_by_date
 
 
 def get_lessons_text_and_image_id(
@@ -35,11 +35,12 @@ def get_lessons_text_and_image_id(
     for_class = user.class_ if user.class_ else "❓"
 
     if images[0] or images[1]:
-        text = f'🛏 Расписание на *{format_date(lesson_date)}* для ' \
-               f'*{for_class}* класса.'
+        text = f'✏ Расписание на *{format_date(lesson_date)}* ' \
+               f'({weekday_by_date(lesson_date)}) для *{for_class}* класса.'
     else:
         images = None
-        text = f'🛏 Расписание на *{format_date(lesson_date)}* для ' \
-               f'*{for_class}* класса *не найдено* :('
+        text = f'🛏 Расписание на *{format_date(lesson_date)}* ' \
+               f'({weekday_by_date(lesson_date)}) ' \
+               f'для *{for_class}* класса *не найдено* :(.'
 
     return text, images
