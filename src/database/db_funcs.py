@@ -207,7 +207,7 @@ def get_users_by_conditions(
 ) -> list[User]:
     """
     Возвращает список моделей User,
-    у которых значение в колонке совпадает с переданным.
+    у которых значение в настройках или пользователе совпадает с переданным.
 
     :param values: Список из кортежей,
                    где первый элемент - колонка, второй - значение.
@@ -219,12 +219,19 @@ def get_users_by_conditions(
     with create_session() as session:
         conditions = []
         for attr, value in values:
-            conditions.append(getattr(User, attr) == value)
+            try:
+                conditions.append(getattr(Settings, attr) == value)
+            except AttributeError:
+                conditions.append(getattr(User, attr) == value)
 
         if or_mode:
-            find_query = sa.select(User).where(sa.or_(*conditions))
+            find_query = sa.select(User).join(Settings).where(
+                sa.or_(*conditions)
+            )
         else:
-            find_query = sa.select(User).where(sa.and_(*conditions))
+            find_query = sa.select(User).join(Settings).where(
+                sa.and_(*conditions)
+            )
 
         return list(session.scalars(find_query).all())
 

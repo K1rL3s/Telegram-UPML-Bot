@@ -106,7 +106,10 @@ async def one_notify(
             chat_id=user.user_id,
             reply_markup=keyboard
         )
-        logger.debug(f'Уведомление "{text}" успешно для {user.short_info()}')
+        logger.debug(
+            f'Уведомление "{" ".join(text.split())}" '
+            f'успешно для {user.short_info()}'
+        )
         return True
     except Unauthorized:
         update_user(user.user_id, is_active=0)
