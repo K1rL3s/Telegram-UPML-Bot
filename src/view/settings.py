@@ -39,6 +39,9 @@ async def open_settings_view(callback: types.CallbackQuery) -> None:
 
 
 async def edit_bool_settings_view(callback: types.CallbackQuery):
+    """
+    Обработчик кнопок уведомлений "Уроки" и "Новости".
+    """
     edit_bool_settings_handler(callback.from_user.id, callback.data)
 
     keyboard = settings_keyboard(callback.from_user.id)
@@ -50,6 +53,9 @@ async def edit_bool_settings_view(callback: types.CallbackQuery):
 
 
 async def edit_grade_settings_view(callback: types.CallbackQuery):
+    """
+    Обработчик кнопок изменения класса.
+    """
     settings = edit_grade_setting_handler(callback.from_user.id, callback.data)
 
     if settings is None:
@@ -68,6 +74,9 @@ async def edit_grade_settings_view(callback: types.CallbackQuery):
 
 
 async def edit_laundry_start_view(callback: types.CallbackQuery) -> None:
+    """
+    Обработчик кнопок изменения времени таймера прачки.
+    """
     attr = callback.data.replace(CallbackData.EDIT_SETTINGS_PREFIX, '')
 
     await EditingSettings.writing.set()
@@ -78,7 +87,7 @@ async def edit_laundry_start_view(callback: types.CallbackQuery) -> None:
         }
     )
 
-    text = f'🕛Введите `{times_eng_to_ru[attr]}` в минутах'
+    text = f'🕛Введите `{times_eng_to_ru[attr]}` в минутах (целых)'
     await callback.message.edit_text(
         text=text,
         reply_markup=cancel_state_keyboard
@@ -88,6 +97,9 @@ async def edit_laundry_start_view(callback: types.CallbackQuery) -> None:
 async def edit_laundry_time_view(
         message: types.Message, state: FSMContext
 ) -> None:
+    """
+    Обработчик сообщения с минутами для изменения таймера прачки.
+    """
     async with state.proxy() as data:
         start_id = data['start_id']
         attr = data['attr']

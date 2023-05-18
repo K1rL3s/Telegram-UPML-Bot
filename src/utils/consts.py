@@ -24,7 +24,7 @@ notifies_eng_to_ru = {
 }
 times_eng_to_ru = {
     'washing_time': 'время стирки',
-    'drying_time': 'время_сушки'
+    'drying_time': 'время сушки'
 }
 
 

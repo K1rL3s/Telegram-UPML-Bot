@@ -52,7 +52,7 @@ def edit_grade_setting_handler(
 
 def edit_laundry_time_handler(user_id: int, attr: str, text: str) -> int:
     try:
-        minutes = limit_min_max(int(text), 1, 2 * 24 * 60)  # двое суток
+        minutes = limit_min_max(int(float(text)), 1, 2 * 24 * 60)  # двое суток
         save_or_update_settings(user_id, **{attr: minutes})
         return minutes
     except ValueError:

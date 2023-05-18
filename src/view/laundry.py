@@ -46,6 +46,9 @@ async def laundry_start_timer_view(callback: types.CallbackQuery) -> None:
 
 
 async def laundry_cancel_timer_view(callback: types.CallbackQuery) -> None:
+    """
+    Обработчик кнопки "Отменить таймер".
+    """
     laundry_cancel_timer_handler(callback.from_user.id)
     text = 'Таймер отменён.'
     keyboard = go_to_main_menu_keyboard
