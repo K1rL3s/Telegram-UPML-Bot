@@ -76,7 +76,7 @@ def save_or_update_menu_in_db(
             menu.dinner = menu.dinner or dinner
             menu.snack = menu.snack or snack
             menu.supper = menu.supper or supper
-            menu.edit_by = menu.edit_by or user.id
+            menu.edit_by = menu.edit_by or (user.id if edit_by else 0)
         else:
             menu = Menu(
                 date=menu_date,

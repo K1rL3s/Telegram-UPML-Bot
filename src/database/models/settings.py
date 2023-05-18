@@ -25,9 +25,9 @@ class Settings(BaseModel):
     class_ = column_property(grade + letter)
 
     # Включены ли уведомления об обновлении расписания
-    lessons_notify = Column(Boolean, default=False, nullable=False)
+    lessons_notify = Column(Boolean, default=None, nullable=False)
     # Включены ли уведомления новостных сообщений
-    news_notify = Column(Boolean, default=False, nullable=False)
+    news_notify = Column(Boolean, default=None, nullable=False)
 
     # Сколько времени стирается бельё
     washing_time = Column(Integer, default=60, nullable=False)

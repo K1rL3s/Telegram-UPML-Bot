@@ -18,7 +18,7 @@ settings_welcome_text = """
 Привет! Я - настройки!
 
 *Класс* - твой класс.
-*Расписание* - уведомления при изменении расписания.
+*Уроки* - уведомления при изменении расписания.
 *Новости* - уведомления о мероприятиях, новостях.
 *Стирка* - время таймера для стирки.
 *Сушка* - время таймера для сушки.
@@ -108,7 +108,8 @@ async def edit_laundry_time_view(
     await Bot.get_current().edit_message_text(
         text=text,
         reply_markup=keyboard,
-        message_id=start_id
+        message_id=start_id,
+        chat_id=message.chat.id
     )
     await message.delete()
 
@@ -127,4 +128,14 @@ def register_setings_view(dp: Dispatcher) -> None:
         lambda callback: callback.data.startswith(
             CallbackData.CHANGE_GRADE_TO_
         )
+    )
+    dp.register_callback_query_handler(
+        edit_laundry_start_view,
+        lambda callback: callback.data.startswith(
+            CallbackData.EDIT_SETTINGS_PREFIX
+        )
+    )
+    dp.register_message_handler(
+        edit_laundry_time_view,
+        state=EditingSettings.writing
     )
