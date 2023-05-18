@@ -1,6 +1,9 @@
 from datetime import date
 
-from src.database.db_funcs import get_user, get_full_lessons, get_class_lessons
+from src.database.db_funcs import (
+    get_settings, get_full_lessons,
+    get_class_lessons,
+)
 from src.utils.datehelp import format_date, weekday_by_date
 
 
@@ -21,26 +24,26 @@ def get_lessons_text_and_image_id(
     :return: Сообщение и список с двумя айди изображений.
     """
 
-    user = get_user(user_id)
+    settings = get_settings(user_id)
 
     images = []
 
-    if user.class_:
-        images.append(get_full_lessons(lesson_date, user.grade))
-        images.append(get_class_lessons(lesson_date, user.class_))
+    if settings.class_:
+        images.append(get_full_lessons(lesson_date, settings.grade))
+        images.append(get_class_lessons(lesson_date, settings.class_))
     else:
         images.append(get_full_lessons(lesson_date, "10"))
         images.append(get_full_lessons(lesson_date, "11"))
 
-    for_class = user.class_ if user.class_ else "❓"
+    for_class = settings.class_ if settings.class_ else "❓"
 
-    if images[0] or images[1]:
+    if any(images):
         text = f'✏ Расписание на *{format_date(lesson_date)}* ' \
                f'({weekday_by_date(lesson_date)}) для *{for_class}* класса.'
     else:
         images = None
         text = f'🛏 Расписание на *{format_date(lesson_date)}* ' \
                f'({weekday_by_date(lesson_date)}) ' \
-               f'для *{for_class}* класса *не найдено* :(.'
+               f'для *{for_class}* класса не найдено :(.'
 
     return text, images

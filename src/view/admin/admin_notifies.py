@@ -135,5 +135,5 @@ def register_admin_notifies_view(dp: Dispatcher) -> None:
     dp.register_callback_query_handler(
         notify_confirm_view,
         state=DoNotify.writing,
-        text=CallbackData.NOTIFY_СONFIRM
+        text=CallbackData.NOTIFY_CONFIRM
     )

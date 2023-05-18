@@ -3,31 +3,39 @@ from aiogram.types.inline_keyboard import (
     InlineKeyboardButton,
 )
 
+from src.database.db_funcs import get_settings
 from src.keyboards.universal import go_to_main_menu_button
 from src.utils.consts import CallbackData, GRADES
 
 
 def settings_keyboard(
-        grade: str = None,
-        letter: str = None,
-        lessons_notify: bool = False,
-        news_notify: bool = False
+        user_id: int
 ) -> InlineKeyboardMarkup:
+    settings = get_settings(user_id)
 
-    return InlineKeyboardMarkup().row(
+    return InlineKeyboardMarkup().add(
         InlineKeyboardButton(
-            'Класс ' + (f'{grade}{letter}' if (grade and letter) else '❓'),
+            'Класс ' + (settings.class_ if settings.class_ else '❓'),
             callback_data=CallbackData.CHANGE_GRADE_TO_
         ),
         InlineKeyboardButton(
-            'Расписание ' + ('✅' if lessons_notify else '❌'),
+            'Уроки ' + ('✅' if settings.lessons_notify else '❌'),
             callback_data=CallbackData.SWITCH_LESSONS_NOTIFY
         ),
         InlineKeyboardButton(
-            'Новости ' + ('✅' if news_notify else '❌'),
+            'Новости ' + ('✅' if settings.news_notify else '❌'),
             callback_data=CallbackData.SWITCH_NEWS_NOTIFY
         )
-    ).row(
+    ).add(
+        InlineKeyboardButton(
+            f'⏳Стирка {settings.washing_time} мин.',
+            callback_data=CallbackData.EDIT_WASHING_TIME
+        ),
+        InlineKeyboardButton(
+            f'💨Сушка {settings.drying_time} мин.',
+            callback_data=CallbackData.EDIT_DRYING_TIME
+        )
+    ).add(
         go_to_main_menu_button
     )
 

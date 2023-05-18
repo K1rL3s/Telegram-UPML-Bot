@@ -4,6 +4,11 @@ from uuid import uuid1
 from aiocache import cached
 from aiogram import Bot, types
 from aiogram.types import InputFile
+from aiogram.utils.exceptions import Unauthorized
+from loguru import logger
+
+from src.database.db_funcs import update_user
+from src.database.models.users import User
 
 
 async def bytes_io_to_image_id(
@@ -67,3 +72,33 @@ def tg_click_name(username: str, user_id: int) -> str:
     :param user_id: ТГ Айди.
     """
     return f'[{username}](tg://user?id={user_id})'
+
+
+def limit_min_max(
+        value: int | float,
+        minimum: int | float,
+        maximum: int | float
+) -> int | float:
+    """
+    Лимит числового значения по минмуму и максимум.
+    """
+    return max(
+        min(value, maximum),
+        minimum
+    )
+
+
+async def one_notify(text: str, user: User) -> bool:
+    try:
+        await Bot.get_current().send_message(
+            text=text,
+            chat_id=user.user_id
+        )
+        logger.debug(f'Уведомление "{text}" успешно для {user.short_info()}')
+        return True
+    except Unauthorized:
+        update_user(user.user_id, is_active=0)
+        return True
+    except Exception as e:
+        logger.warning(f'Ошибка при уведомлении: {e}')
+        return False

@@ -15,8 +15,7 @@ class BaseModel(SqlAlchemyBase):
 
     def _repr(self, **fields) -> str:
         """
-        Помощник __repr__, взят с
-        https://stackoverflow.com/questions/55713664/sqlalchemy-best-way-to-define-repr-for-large-tables  
+        Помощник __repr__, взят с https://stackoverflow.com/questions/55713664/sqlalchemy-best-way-to-define-repr-for-large-tables  
         """  # noqa
 
         field_strings = []

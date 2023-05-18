@@ -47,7 +47,7 @@ notify_for_class_keyboard.add(
 notify_confirm_keyboard = InlineKeyboardMarkup().add(
     InlineKeyboardButton(
         '✅Подтвердить',
-        callback_data=CallbackData.NOTIFY_СONFIRM
+        callback_data=CallbackData.NOTIFY_CONFIRM
     ),
     cancel_state_button
 )

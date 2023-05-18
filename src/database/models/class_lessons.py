@@ -18,4 +18,4 @@ class ClassLessons(BaseModel):
     grade = Column(String(2), nullable=False)  # 10 или 11
     letter = Column(String(1), nullable=False)  # А, Б, В
     class_ = column_property(grade + letter)
-    image = Column(String, nullable=False)
+    image = Column(String, nullable=False)  # Айди изображения из тг

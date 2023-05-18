@@ -3,7 +3,7 @@
 """
 
 from src.keyboards.universal import cancel_state_keyboard
-from src.keyboards.start import start_menu_keyboard, main_menu_keyboard
+from src.keyboards.start import go_to_main_menu_keyboard, main_menu_keyboard
 from src.keyboards.cafe_menu import cafe_menu_keyboard
 from src.keyboards.lessons import lessons_keyboard
 from src.keyboards.settings import settings_keyboard, choose_grade_keyboard
@@ -25,3 +25,4 @@ from src.keyboards.admin.admin_manage import (
     admins_list_keyboard,
     check_admin_keyboard,
 )
+from src.keyboards.laundry import laundry_keyboard

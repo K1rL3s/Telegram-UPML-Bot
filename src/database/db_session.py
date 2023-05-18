@@ -56,7 +56,7 @@ def create_session(do_commit: bool = False) -> Session:
     if not __factory:
         raise RuntimeError("Брат, а кто global_init вызывать будет?")
 
-    session = __factory()
+    session = __factory(expire_on_commit=False)
     try:
         yield session
     except Exception as e:

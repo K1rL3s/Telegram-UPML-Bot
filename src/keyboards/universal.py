@@ -11,6 +11,11 @@ go_to_main_menu_button = InlineKeyboardButton(
     callback_data=CallbackData.OPEN_MAIN_MENU
 )
 
+go_to_settings_button = InlineKeyboardButton(
+    "⚙️Настройки",
+    callback_data=CallbackData.OPEN_SETTINGS
+)
+
 go_to_admin_panel_button = InlineKeyboardButton(
     '❗Админ панель',
     callback_data=CallbackData.OPEN_ADMIN_PANEL

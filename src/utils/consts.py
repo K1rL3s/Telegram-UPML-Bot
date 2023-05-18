@@ -22,6 +22,10 @@ notifies_eng_to_ru = {
     'grade_10': 'десятикам',
     'grade_11': 'одиннадцатым',
 }
+times_eng_to_ru = {
+    'washing_time': 'время стирки',
+    'drying_time': 'время_сушки'
+}
 
 
 class Config:
@@ -37,6 +41,7 @@ class Config:
 class CallbackData:
     OPEN_MAIN_MENU = 'open_main_menu'
     OPEN_SETTINGS = 'open_settings'
+    OPEN_LAUNDRY = 'open_laundry'
     OPEN_ADMIN_PANEL = 'open_admin_panel'
     OPEN_CAFE_MENU_ON_ = 'open_cafe_menu_on_'
     OPEN_CAFE_MENU_TODAY = OPEN_CAFE_MENU_ON_ + 'today'
@@ -47,6 +52,9 @@ class CallbackData:
     PREFIX_SWITCH = 'switch_'
     SWITCH_LESSONS_NOTIFY = PREFIX_SWITCH + 'lessons_notify'
     SWITCH_NEWS_NOTIFY = PREFIX_SWITCH + 'news_notify'
+    EDIT_SETTINGS_PREFIX = 'edit_settings_'
+    EDIT_WASHING_TIME = EDIT_SETTINGS_PREFIX + 'washing_time'
+    EDIT_DRYING_TIME = EDIT_SETTINGS_PREFIX + 'drying_time'
 
     CANCEL_STATE = 'cancel_state'
 
@@ -65,7 +73,7 @@ class CallbackData:
     FOR_ALL = DO_A_NOTIFY_FOR_ + 'all'
     FOR_GRADE = DO_A_NOTIFY_FOR_ + 'grade'
     FOR_CLASS = DO_A_NOTIFY_FOR_ + 'class'
-    NOTIFY_СONFIRM = 'notify_confirm'
+    NOTIFY_CONFIRM = 'notify_confirm'
 
     OPEN_ADMINS_LIST_PAGE_ = 'open_admins_list_page_'
     CHECK_ADMIN_ = 'check_admin_'
@@ -73,6 +81,11 @@ class CallbackData:
     REMOVE_ADMIN_SURE_ = 'remove_admin_sure_'
     ADD_NEW_ADMIN = 'add_new_admin'
     ADD_NEW_ADMIN_SURE = 'add_new_admin_sure'
+
+    START_LAUNDRY_PREFIX = 'start_laundry_'
+    START_WASHING_TIMER = START_LAUNDRY_PREFIX + 'washing_time'
+    START_DRYING_TIMER = START_LAUNDRY_PREFIX + 'drying_time'
+    CANCEL_LAUNDRY_TIMER = 'cancel_laundry_timer'
 
 
 class Roles(Enum):

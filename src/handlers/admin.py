@@ -2,19 +2,16 @@ import asyncio
 from datetime import date
 from io import BytesIO
 
-import aiogram.utils.exceptions
 import aiojobs
-from aiogram import Bot
 from loguru import logger
 
 from src.database.db_funcs import (
     get_menu_by_date, get_users_by_conditions, save_or_update_lessons,
-    update_user,
 )
 from src.database.models.users import User
 from src.upml.process_lessons import save_lessons
 from src.utils.funcs import (
-    bytes_io_to_image_id, tg_click_name,
+    one_notify, bytes_io_to_image_id, tg_click_name,
     username_by_user_id,
 )
 
@@ -63,19 +60,6 @@ def get_meal_by_date(meal: str, menu_date: date) -> str | None:
     return getattr(menu, meal, None)
 
 
-async def _one_notify(text: str, user: User) -> None:
-    try:
-        await Bot.get_current().send_message(
-            text=text,
-            chat_id=user.user_id
-        )
-        logger.debug(f'Рассылка успешна для {user.short_info()}')
-    except aiogram.utils.exceptions.Unauthorized:
-        update_user(user.user_id, is_active=0)
-    except Exception as e:
-        logger.warning(f'Ошибка при рассылке: {e}')
-
-
 async def do_a_notify(
         text: str,
         users: list[User],
@@ -97,7 +81,7 @@ async def do_a_notify(
 
     scheduler = aiojobs.Scheduler(limit=5)
     for user in users:
-        await scheduler.spawn(_one_notify(text, user))
+        await scheduler.spawn(one_notify(text, user))
 
     while scheduler.active_count:
         await asyncio.sleep(0.2)

@@ -2,7 +2,7 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 
 from src.keyboards import (
-    start_menu_keyboard, main_menu_keyboard, admin_panel_keyboard,
+    go_to_main_menu_keyboard, main_menu_keyboard, admin_panel_keyboard,
 )
 from src.utils.consts import CallbackData
 from src.utils.decorators import admin_required, save_new_user_decor
@@ -17,7 +17,7 @@ async def start_view(message: types.Message) -> None:
 
     await message.reply(
         text=text,
-        reply_markup=start_menu_keyboard
+        reply_markup=go_to_main_menu_keyboard
     )
 
 

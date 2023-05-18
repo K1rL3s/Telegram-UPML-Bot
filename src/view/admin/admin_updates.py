@@ -7,7 +7,7 @@ from src.database.db_funcs import edit_meal_by_date
 from src.handlers.admin import get_meal_by_date, load_lessons_handler
 from src.keyboards import (
     cancel_state_keyboard,
-    confirm_edit_menu_keyboard, start_menu_keyboard,
+    confirm_edit_menu_keyboard, go_to_main_menu_keyboard,
     choose_meal_keyboard,
     admin_panel_keyboard,
 )
@@ -220,7 +220,7 @@ async def load_lessons_view(
     if isinstance(text, str):
         await message.reply(
             text=text,
-            reply_markup=start_menu_keyboard
+            reply_markup=go_to_main_menu_keyboard
         )
         return
 
@@ -230,7 +230,7 @@ async def load_lessons_view(
 
     await message.reply(
         text=text,
-        reply_markup=start_menu_keyboard
+        reply_markup=go_to_main_menu_keyboard
     )
 
 
@@ -263,9 +263,9 @@ def register_admin_updates_view(dp: Dispatcher):
     )
     dp.register_message_handler(
         edit_cafe_menu_text_view,
-        state=EditingMenu.editing
+        state=EditingMenu.writing
     )
     dp.register_callback_query_handler(
         edit_cafe_menu_confirm_view,
-        state=EditingMenu.editing
+        state=EditingMenu.writing
     )

@@ -5,7 +5,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 class EditingMenu(StatesGroup):
     choose_date = State()
     choose_meal = State()
-    editing = State()
+    writing = State()
 
 
 class LoadingLessons(StatesGroup):
@@ -18,4 +18,8 @@ class AddingNewAdmin(StatesGroup):
 
 
 class DoNotify(StatesGroup):
+    writing = State()
+
+
+class EditingSettings(StatesGroup):
     writing = State()

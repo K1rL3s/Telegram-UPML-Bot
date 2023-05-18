@@ -11,7 +11,20 @@ def format_date(_date: date) -> str:
     :return: Отформатированная строка.
     """
 
-    return f'{_date.day:0>2}.{_date.month:0>2}.{_date.year:0>2}'
+    return f'{_date.day:0>2}.{_date.month:0>2}.{_date.year}'
+
+
+def format_datetime(_datetime: datetime) -> str:
+    """
+    Формат объекта даты и времени в вид "dd.MM.YYYY hh:mm:ss"
+    с лидирующими нулями.
+
+    :param _datetime: Объект даты и времени.
+    :return: Отформатированная строка.
+    """
+
+    return f'{_datetime.day:0>2}.{_datetime.month:0>2}.{_datetime.year} ' \
+           f'{_datetime.hour:0>2}:{_datetime.minute:0>2}:{_datetime.second:0>2}'  # noqa
 
 
 def date_by_format(_date: str) -> date:
@@ -58,7 +71,7 @@ def datetime_now() -> datetime:
 
     :return: datetime.
     """
-    return datetime.now(tz=Config.TIMEZONE)
+    return datetime.now(tz=Config.TIMEZONE).replace(tzinfo=None)
 
 
 def date_today() -> date:
