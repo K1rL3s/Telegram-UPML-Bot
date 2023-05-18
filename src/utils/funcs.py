@@ -3,7 +3,7 @@ from uuid import uuid1
 
 from aiocache import cached
 from aiogram import Bot, types
-from aiogram.types import InputFile
+from aiogram.types import InlineKeyboardMarkup, InputFile
 from aiogram.utils.exceptions import Unauthorized
 from loguru import logger
 
@@ -88,11 +88,23 @@ def limit_min_max(
     )
 
 
-async def one_notify(text: str, user: User) -> bool:
+async def one_notify(
+        text: str,
+        user: User,
+        keyboard: InlineKeyboardMarkup = None
+) -> bool:
+    """
+    Делатель одного уведомления.
+
+    :param text: Сообщение в уведомлении.
+    :param user: Информация о пользователе.
+    :param keyboard: Клавиатура на сообщении с уведомлением.
+    """
     try:
         await Bot.get_current().send_message(
             text=text,
-            chat_id=user.user_id
+            chat_id=user.user_id,
+            reply_markup=keyboard
         )
         logger.debug(f'Уведомление "{text}" успешно для {user.short_info()}')
         return True

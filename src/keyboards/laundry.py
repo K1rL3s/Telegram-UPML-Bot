@@ -8,7 +8,10 @@ from src.keyboards.universal import (
 from src.utils.consts import CallbackData
 
 
-def laundry_keyboard(user_id: int) -> InlineKeyboardMarkup():
+def laundry_keyboard(
+        user_id: int,
+        add_cancel_if_timer: bool = True
+) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup().add(
         InlineKeyboardButton(
             '🏖Запустить стирку',
@@ -20,7 +23,7 @@ def laundry_keyboard(user_id: int) -> InlineKeyboardMarkup():
         )
     )
 
-    if get_laundry(user_id).is_active:
+    if add_cancel_if_timer and get_laundry(user_id).is_active:
         keyboard.add(
             InlineKeyboardButton(
                 '❌Отменить таймер',

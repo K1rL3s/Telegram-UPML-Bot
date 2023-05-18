@@ -35,7 +35,7 @@ async def laundry_start_timer_view(callback: types.CallbackQuery) -> None:
     )
 
     text = f'⏰Таймер запущен!\n' \
-           f'Уведомление придёт через *{minutes} минут* ' \
+           f'Уведомление придёт через *~{minutes} минут* ' \
            f'({format_datetime(end_time)})'
     keyboard = go_to_main_menu_keyboard
 
