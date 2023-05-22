@@ -7,7 +7,7 @@ from src.database.db_funcs import get_menu_by_date
 from src.utils.datehelp import format_date, date_today, weekday_by_date
 
 
-@lru_cache(maxsize=128)
+@ttl_cache(ttl=60 * 60 * 24)  # Сутки
 def format_menu(meals: tuple[str, ...]) -> str:
     """
     Формат дневного меню для сообщения в телегу.
@@ -23,7 +23,7 @@ def format_menu(meals: tuple[str, ...]) -> str:
     ).strip()
 
 
-@ttl_cache(ttl=60 * 60)  # Час
+# @ttl_cache(ttl=60 * 60)  # Час
 def get_formatted_menu_by_date(menu_date: date = None) -> str:
     """
     Возвращает меню (список строк) по дате.
@@ -39,11 +39,11 @@ def get_formatted_menu_by_date(menu_date: date = None) -> str:
     menu = get_menu_by_date(menu_date)
 
     meals = (
-        menu.breakfast if menu else 'Н/д',
-        menu.lunch if menu else 'Н/д',
-        menu.dinner if menu else 'Н/д',
-        menu.snack if menu else 'Н/д',
-        menu.supper if menu else 'Н/д',
+        menu.breakfast if menu.breakfast else 'Н/д',
+        menu.lunch if menu.lunch else 'Н/д',
+        menu.dinner if menu.dinner else 'Н/д',
+        menu.snack if menu.snack else 'Н/д',
+        menu.supper if menu.supper else 'Н/д',
     )
 
     return f"🍺 *Меню на {format_date(menu_date)} " \

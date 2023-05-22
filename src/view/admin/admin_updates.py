@@ -44,7 +44,7 @@ async def edit_cafe_menu_start_view(
     """
     text = f"""
 Введите дату дня, меню которого хотите изменить в формате *ДД.ММ.ГГГГ*
-Например, *{format_date(date_today())}*
+Например, `{format_date(date_today())}`
 """.strip()
 
     await EditingMenu.choose_date.set()
@@ -108,7 +108,9 @@ async def edit_cafe_menu_meal_view(
     text = f'*Дата*: `{format_date(edit_menu_date)}`\n' \
            f'*Приём пищи*: `{menu_eng_to_ru[edit_meal].capitalize()}`\n' \
            f'*Меню*:\n' \
-           f'```\n{get_meal_by_date(edit_meal, edit_menu_date)}```\n\n' \
+           f'```\n' \
+           f'{get_meal_by_date(edit_meal, edit_menu_date) or "Н/д"}' \
+           f'```\n\n' \
            'Чтобы изменить, отправьте *одним сообщением* изменённую версию.'
 
     await EditingMenu.next()

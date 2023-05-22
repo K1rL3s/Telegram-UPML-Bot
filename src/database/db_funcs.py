@@ -76,7 +76,7 @@ def save_or_update_menu_in_db(
             menu.dinner = menu.dinner or dinner
             menu.snack = menu.snack or snack
             menu.supper = menu.supper or supper
-            menu.edit_by = menu.edit_by or (user.id if edit_by else 0)
+            menu.edit_by = menu.edit_by or (user.id if edit_by and user else 0)
         else:
             menu = Menu(
                 date=menu_date,
@@ -220,9 +220,9 @@ def get_users_by_conditions(
         conditions = []
         for attr, value in values:
             try:
-                conditions.append(getattr(Settings, attr) == value)
-            except AttributeError:
                 conditions.append(getattr(User, attr) == value)
+            except AttributeError:
+                conditions.append(getattr(Settings, attr) == value)
 
         if or_mode:
             find_query = sa.select(User).join(Settings).where(
@@ -411,7 +411,7 @@ def edit_meal_by_date(
         edit_by: int
 ) -> None:
     """
-    Обновляет приём пищи по названию и дате
+    Обновляет приём пищи по названию и дате вручную.
 
     :param meal: Название приёма пищи на английском.
     :param new_menu: Новая версия.

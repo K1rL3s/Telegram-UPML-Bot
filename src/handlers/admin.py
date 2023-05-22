@@ -60,7 +60,7 @@ def get_meal_by_date(meal: str, menu_date: date) -> str | None:
     return getattr(menu, meal, None)
 
 
-async def do_a_notify(
+async def do_notifies(
         text: str,
         users: list[User],
         from_who: int = 0,
@@ -79,12 +79,12 @@ async def do_a_notify(
     text = '🔔*Уведомление от администратора* ' \
            f'{tg_click_name(username, from_who)} *{for_who}*\n\n' + text
 
-    scheduler = aiojobs.Scheduler(limit=5)
+    scheduler = aiojobs.Scheduler(limit=3)
     for user in users:
         await scheduler.spawn(one_notify(text, user))
 
     while scheduler.active_count:
-        await asyncio.sleep(0.2)
+        await asyncio.sleep(0.5)
     await scheduler.close()
 
 

@@ -1,7 +1,7 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.dispatcher import FSMContext
 
-from src.handlers.admin import do_a_notify, get_users_for_notify
+from src.handlers.admin import do_notifies, get_users_for_notify
 from src.keyboards import (
     cancel_state_keyboard, notify_panel_keyboard, notify_for_grade_keyboard,
     notify_for_class_keyboard, admin_panel_keyboard, notify_confirm_keyboard,
@@ -99,7 +99,7 @@ async def notify_confirm_view(
     await state.finish()
 
     users = get_users_for_notify(notify_type, is_news=True)
-    await do_a_notify(
+    await do_notifies(
         message_text, users, callback.from_user.id,
         notifies_eng_to_ru.get(notify_type, notify_type)
     )
