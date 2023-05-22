@@ -46,11 +46,11 @@ def save_new_user(user_id: int, username: str) -> None:
 
 def save_or_update_menu_in_db(
         menu_date: date,
-        breakfast: str | None,
-        lunch: str | None,
-        dinner: str | None,
-        snack: str | None,
-        supper: str | None,
+        breakfast: str | None = None,
+        lunch: str | None = None,
+        dinner: str | None = None,
+        snack: str | None = None,
+        supper: str | None = None,
         edit_by: int = 0
 ) -> None:
     """
@@ -66,25 +66,22 @@ def save_or_update_menu_in_db(
     """
 
     with create_session(do_commit=True) as session:
-        user = get_user(edit_by)
-
+        user = get_user(edit_by) if edit_by != 0 else None
         find_query = sa.select(Menu).where(Menu.date == menu_date)
+        meals = {
+            'breakfast': breakfast, 'lunch': lunch, 'dinner': dinner,
+            'snack': snack, 'supper': supper
+        }
 
         if menu := session.scalar(find_query):
-            menu.breakfast = menu.breakfast or breakfast
-            menu.lunch = menu.lunch or lunch
-            menu.dinner = menu.dinner or dinner
-            menu.snack = menu.snack or snack
-            menu.supper = menu.supper or supper
-            menu.edit_by = menu.edit_by or (user.id if edit_by and user else 0)
+            for k, v in meals.items():
+                if edit_by or not getattr(menu, k, None):
+                    setattr(menu, k, v)
+            if user:
+                menu.edit_by = user.user_id
         else:
             menu = Menu(
-                date=menu_date,
-                breakfast=breakfast,
-                lunch=lunch,
-                dinner=dinner,
-                snack=snack,
-                supper=supper,
+                **meals,
                 edit_by=edit_by
             )
             session.add(menu)
@@ -219,9 +216,9 @@ def get_users_by_conditions(
     with create_session() as session:
         conditions = []
         for attr, value in values:
-            try:
+            if hasattr(User, attr):
                 conditions.append(getattr(User, attr) == value)
-            except AttributeError:
+            else:
                 conditions.append(getattr(Settings, attr) == value)
 
         if or_mode:
@@ -378,7 +375,6 @@ def get_expired_laundries() -> list[Laundry]:
     """
 
     with create_session() as session:
-        # noinspection PyTypeChecker
         query = sa.select(Laundry).where(
             Laundry.is_active == 1,
             Laundry.end_time <= datetime_now()

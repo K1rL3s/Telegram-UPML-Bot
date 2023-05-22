@@ -30,6 +30,15 @@ def main_menu_keyboard(user_id: int) -> InlineKeyboardMarkup:
             '💦Прачечная',
             callback_data=CallbackData.OPEN_LAUNDRY
         ),
+        InlineKeyboardButton(
+            '📖Элективы',
+            callback_data=CallbackData.OPEN_ELECTIVES
+        ),
+    ).add(
+        InlineKeyboardButton(
+            '👩‍✈️Воспитатели',
+            callback_data=CallbackData.OPEN_EDUCATORS
+        ),
         go_to_settings_button
     )
 

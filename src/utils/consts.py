@@ -42,6 +42,8 @@ class CallbackData:
     OPEN_MAIN_MENU = 'open_main_menu'
     OPEN_SETTINGS = 'open_settings'
     OPEN_LAUNDRY = 'open_laundry'
+    OPEN_EDUCATORS = 'open_educators'
+    OPEN_ELECTIVES = 'open_electives'
     OPEN_ADMIN_PANEL = 'open_admin_panel'
     OPEN_CAFE_MENU_ON_ = 'open_cafe_menu_on_'
     OPEN_CAFE_MENU_TODAY = OPEN_CAFE_MENU_ON_ + 'today'
@@ -96,4 +98,5 @@ class Roles(Enum):
 GRADES = tuple(
     f'{grade}{letter}' for grade in (range(10, 11 + 1)) for letter in 'АБВ'
 )
+LAUNDRY_REPEAT = 30  # Повтор таймера прачки через 30 минут
 

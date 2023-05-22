@@ -5,7 +5,7 @@ from src.handlers.laundry import (
     laundry_start_timer_handler,
 )
 from src.keyboards import go_to_main_menu_keyboard, laundry_keyboard
-from src.utils.consts import CallbackData
+from src.utils.consts import CallbackData, LAUNDRY_REPEAT
 from src.utils.datehelp import format_datetime
 
 
@@ -13,15 +13,17 @@ async def laundry_view(callback: types.CallbackQuery) -> None:
     """
     Обработчик кнопки "Прачечная".
     """
-    text = 'Привет! Я - таймер для прачки.\n\n'
+    text = 'Привет! Я - таймер для прачки.\n' \
+           'После конца таймер запустится ещё три раза ' \
+           f'на *{LAUNDRY_REPEAT}* минут.\n\n'
 
     if (minutes := laundry_welcome_handler(callback.from_user.id)) is not None:
-        text += f'Время до конца таймера: *{minutes}* минут'
+        text += f'Время до конца таймера: *{minutes}* минут\n'
 
     keyboard = laundry_keyboard(callback.from_user.id)
 
     await callback.message.edit_text(
-        text=text,
+        text=text.strip(),
         reply_markup=keyboard
     )
 

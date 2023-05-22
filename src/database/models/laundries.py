@@ -21,6 +21,8 @@ class Laundry(BaseModel):
     start_time = Column(DateTime)
     # Когда он должен закончится
     end_time = Column(DateTime)
+    # Сколько раз было уведомление
+    rings = Column(Integer)
     # Активен ли таймер
     is_active = Column(Boolean)
 

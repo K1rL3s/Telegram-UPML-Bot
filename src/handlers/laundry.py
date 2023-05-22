@@ -56,5 +56,5 @@ def laundry_cancel_timer_handler(user_id: int) -> None:
     Логика обработчика кнопки "Отменить таймер".
     """
     save_or_update_laundry(
-        user_id, start_time=None, end_time=None, is_active=False
+        user_id, start_time=None, end_time=None, is_active=False, rings=0
     )
