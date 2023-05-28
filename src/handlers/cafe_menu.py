@@ -39,11 +39,11 @@ def get_formatted_menu_by_date(menu_date: date = None) -> str:
     menu = get_menu_by_date(menu_date)
 
     meals = (
-        menu.breakfast if menu.breakfast else 'Н/д',
-        menu.lunch if menu.lunch else 'Н/д',
-        menu.dinner if menu.dinner else 'Н/д',
-        menu.snack if menu.snack else 'Н/д',
-        menu.supper if menu.supper else 'Н/д',
+        menu.breakfast if menu and menu.breakfast else 'Н/д',
+        menu.lunch if menu and menu.lunch else 'Н/д',
+        menu.dinner if menu and menu.dinner else 'Н/д',
+        menu.snack if menu and menu.snack else 'Н/д',
+        menu.supper if menu and menu.supper else 'Н/д',
     )
 
     return f"🍺 *Меню на {format_date(menu_date)} " \
