@@ -82,7 +82,8 @@ def save_or_update_menu_in_db(
         else:
             menu = Menu(
                 **meals,
-                edit_by=edit_by
+                edit_by=edit_by,
+                date=menu_date,
             )
             session.add(menu)
 
