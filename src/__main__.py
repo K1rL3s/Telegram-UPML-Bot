@@ -27,7 +27,7 @@ def main():
     abs_path = Path().absolute()
 
     logger.add(
-        abs_path / 'logs' / 'logs.log',
+        abs_path / 'database' / 'db_files' / 'logs.log',
         format="{time:YYYY-MM-DD HH:mm:ss.SSS} {level:<7} {message}",
         level='DEBUG',
         rotation="00:00",

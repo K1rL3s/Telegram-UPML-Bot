@@ -1,0 +1,27 @@
+version: "3.9"
+services:
+  bot:
+    image: upml-bot-image
+    container_name: upml-bot
+    build:
+      context: .
+      dockerfile: Dockerfile
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: "256M"
+        reservations:
+          cpus: "1"
+          memory: "128M"
+    volumes:
+      - db_files:/app/src/database/db_files
+    env_file: .env
+    environment:
+      TESSERACT_PATH: "/usr/bin/tesseract"
+      PYTHONUNBUFFERED: 1
+      PYTHONDONTWRITEBYTECODE: 1
+
+
+volumes:
+  db_files:

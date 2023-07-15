@@ -8,7 +8,6 @@ from httpx import AsyncClient
 
 load_dotenv()
 
-
 # Переводы всякого
 menu_eng_to_ru = {
     'breakfast': 'завтрак',
@@ -29,9 +28,9 @@ times_eng_to_ru = {
 
 
 class Config:
-    BOT_TOKEN = os.environ["BOT_TOKEN"]
+    BOT_TOKEN = os.getenv("BOT_TOKEN")
     DATABASE_PATH = 'src/database/db_files/database.sqlite?check_same_thread=False'  # noqa
-    TESSERACT_PATH = os.environ["TESSERACT_PATH"]
+    TESSERACT_PATH = os.getenv("TESSERACT_PATH")
     TIMEOUT = 60
     RELAX = 0.5
     TIMEZONE = timezone(timedelta(hours=int(os.getenv("TIMEZONE") or 0)))
@@ -99,4 +98,3 @@ GRADES = tuple(
     f'{grade}{letter}' for grade in (range(10, 11 + 1)) for letter in 'АБВ'
 )
 LAUNDRY_REPEAT = 30  # Повтор таймера прачки через 30 минут
-

@@ -1,6 +1,8 @@
 from sqlalchemy import Column, ForeignKey, Table
 
 from src.database.db_session import SqlAlchemyBase
+
+
 # from src.database.models.base_model import BaseModel
 
 
