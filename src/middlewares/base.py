@@ -1,6 +1,8 @@
-import aiogram
-from aiogram import types
-from aiogram.dispatcher.middlewares import BaseMiddleware
+from typing import Any, Awaitable, Callable
+
+from aiogram import BaseMiddleware, types
+
+from src.utils.funcs import extract_username
 
 
 class MyBaseMiddleware(BaseMiddleware):
@@ -8,29 +10,27 @@ class MyBaseMiddleware(BaseMiddleware):
     Базовый мидлварь. Он нужен, чтобы метод get_short_info был везде.
     """
 
-    @staticmethod
-    async def get_state() -> str | None:
-        return await aiogram.Dispatcher.get_current().storage.get_state(
-            chat=types.Chat.get_current().id,
-            user=types.User.get_current().id
-        )
-
-    async def get_short_info(
-            self, message: types.Message | types.CallbackQuery
+    async def __call__(
+            self,
+            handler: Callable[
+                [types.TelegramObject, dict[str, Any]],
+                Awaitable[Any]
+            ],
+            event: types.TelegramObject,
+            data: dict[str, Any],
     ):
-        username = (message.from_user.username or
-                    message.from_user.first_name or
-                    message.from_user.last_name)  # XD
-        state = await self.get_state()
+        return await handler(event, data)
+
+    @staticmethod
+    async def get_short_info(message: types.Message | types.CallbackQuery):
+        username = extract_username(message)
 
         if isinstance(message, types.Message):
             return f'id={message.from_user.id}, ' \
                    f'chat={message.chat.id}, ' \
-                   f'state={state}, ' \
                    f'username={username}'
 
         elif isinstance(message, types.CallbackQuery):
             return f'id={message.from_user.id}, ' \
                    f'chat={message.message.chat.id}, ' \
-                   f'state={state}, ' \
                    f'username={username}'

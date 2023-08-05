@@ -10,6 +10,8 @@ from src.middlewares.callbacks_answer import CallbackQueryAnswerMiddleware
 
 
 def setup_middlewares(dp: Dispatcher) -> None:
-    dp.setup_middleware(ThrottlingMiddleware())
-    dp.middleware.setup(LoggingMiddleware())
-    dp.middleware.setup(CallbackQueryAnswerMiddleware())
+    dp.message.middleware(ThrottlingMiddleware())
+    dp.callback_query.middleware(ThrottlingMiddleware())
+    dp.message.middleware(LoggingMiddleware())
+    dp.callback_query.middleware(LoggingMiddleware())
+    dp.callback_query.middleware(CallbackQueryAnswerMiddleware())

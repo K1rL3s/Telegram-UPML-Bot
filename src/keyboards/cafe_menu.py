@@ -1,6 +1,6 @@
 from datetime import date
 
-from aiogram.types.inline_keyboard import InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardMarkup
 
 from src.keyboards.universal import _get_keyboard_for_left_right_menu
 

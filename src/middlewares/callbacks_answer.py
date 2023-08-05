@@ -1,5 +1,6 @@
+from typing import Any, Awaitable, Callable
+
 from aiogram import types
-from aiogram.utils.exceptions import InvalidQueryID
 
 from src.middlewares.base import MyBaseMiddleware
 
@@ -9,11 +10,18 @@ class CallbackQueryAnswerMiddleware(MyBaseMiddleware):
     Мидлварь, который отвечает на callback query за меня.
     """
 
-    @staticmethod
-    async def on_post_process_callback_query(
-            callback: types.CallbackQuery, *_
+    async def __call__(
+            self,
+            handler: Callable[
+                [types.CallbackQuery, dict[str, Any]],
+                Awaitable[Any]
+            ],
+            event: types.CallbackQuery,
+            data: dict[str, Any],
     ):
+        # noinspection PyBroadException
         try:
-            await callback.answer()
-        except InvalidQueryID:
+            await event.answer()
+        except Exception:
             pass
+        return await handler(event, data)

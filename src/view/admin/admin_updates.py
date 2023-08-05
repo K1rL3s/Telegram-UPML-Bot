@@ -1,7 +1,8 @@
 from io import BytesIO
 
-from aiogram import Bot, Dispatcher, types
-from aiogram.dispatcher import FSMContext
+from aiogram import Bot, F, Router, types
+from aiogram.filters import StateFilter, Text
+from aiogram.fsm.context import FSMContext
 
 from src.database.db_funcs import edit_meal_by_date
 from src.handlers.admin import get_meal_by_date, load_lessons_handler
@@ -19,10 +20,12 @@ from src.utils.states import LoadingLessons, EditingMenu
 from src.utils.throttling import rate_limit
 
 
+router = Router(name='admin_updates')
+
+
+@router.callback_query(Text(CallbackData.AUTO_UPDATE_CAFE_MENU))
 @admin_required
-async def auto_update_cafe_menu_view(
-        callback: types.CallbackQuery, *_, **__
-) -> None:
+async def auto_update_cafe_menu_view(callback: types.CallbackQuery) -> None:
     """
     Обработчик кнопки "Загрузить меню",
     загружает и обрабатывает PDF расписание еды с сайта лицея.
@@ -35,9 +38,11 @@ async def auto_update_cafe_menu_view(
     )
 
 
+@router.callback_query(Text(CallbackData.EDIT_CAFE_MENU))
 @admin_required
 async def edit_cafe_menu_start_view(
-        callback: types.CallbackQuery, *_, **__
+        callback: types.CallbackQuery,
+        state: FSMContext,
 ) -> None:
     """
     Обрабочтки кнопки "Изменить меню".
@@ -47,12 +52,8 @@ async def edit_cafe_menu_start_view(
 Например, `{format_date(date_today())}`
 """.strip()
 
-    await EditingMenu.choose_date.set()
-    await Dispatcher.get_current().current_state().set_data(
-        {
-            "start_id": callback.message.message_id
-        }
-    )
+    await state.set_state(EditingMenu.choose_date)
+    await state.set_data({"start_id": callback.message.message_id})
 
     await callback.message.edit_text(
         text=text,
@@ -60,9 +61,11 @@ async def edit_cafe_menu_start_view(
     )
 
 
+@router.message(StateFilter(EditingMenu.choose_date))
 @admin_required
 async def edit_cafe_menu_date_view(
-        message: types.Message, state: FSMContext, *_, **__
+        message: types.Message,
+        state: FSMContext
 ) -> None:
     """
     Обработчик ввода доты для изменения меню.
@@ -76,12 +79,10 @@ async def edit_cafe_menu_date_view(
         text = f'*Дата*: `{format_date(edit_menu_date)}`\n' \
                f'Какой приём пищи вы хотите изменить?'
         keyboard = choose_meal_keyboard
-        await EditingMenu.next()
-        async with state.proxy() as data:
-            data['edit_menu_date'] = edit_menu_date
+        await state.set_state(EditingMenu.choose_meal)
+        await state.update_data(edit_menu_date=edit_menu_date)
 
-    async with state.proxy() as data:
-        start_id = data['start_id']
+    start_id = (await state.get_data())['start_id']
 
     await Bot.get_current().edit_message_text(
         text=text,
@@ -93,17 +94,18 @@ async def edit_cafe_menu_date_view(
     await message.delete()  # ?
 
 
+@router.callback_query(StateFilter(EditingMenu.choose_meal))
 @admin_required
 async def edit_cafe_menu_meal_view(
-        callback: types.CallbackQuery, state: FSMContext, *_, **__
+        callback: types.CallbackQuery,
+        state: FSMContext,
 ) -> None:
     """
     Обработчик кнопки с выбором приёма пищи для изменения.
     """
     edit_meal = callback.data.split("_")[-1]
-    async with state.proxy() as data:
-        edit_menu_date = data['edit_menu_date']
-        data['edit_meal'] = edit_meal
+    edit_menu_date = (await state.get_data())['edit_menu_date']
+    await state.update_data(edit_meal=edit_meal)
 
     text = f'*Дата*: `{format_date(edit_menu_date)}`\n' \
            f'*Приём пищи*: `{menu_eng_to_ru[edit_meal].capitalize()}`\n' \
@@ -113,7 +115,7 @@ async def edit_cafe_menu_meal_view(
            f'```\n\n' \
            'Чтобы изменить, отправьте *одним сообщением* изменённую версию.'
 
-    await EditingMenu.next()
+    await state.set_state(EditingMenu.writing)
 
     await callback.message.edit_text(
         text=text,
@@ -121,24 +123,24 @@ async def edit_cafe_menu_meal_view(
     )
 
 
+@router.message(StateFilter(EditingMenu.writing))
 @admin_required
 async def edit_cafe_menu_text_view(
         message: types.Message,
-        state: FSMContext, *_, **__
+        state: FSMContext,
 ) -> None:
     """
     Обработчик сообщения с изменённой версией приёма пищи.
     """
+    data = await state.get_data()
+    start_id = data['start_id']
+    edit_menu_date = data['edit_menu_date']
+    edit_meal = data['edit_meal']
+
     new_menu = message.text
-    async with state.proxy() as data:
-        start_id = data['start_id']
-        edit_menu_date = data['edit_menu_date']
-        edit_meal = data['edit_meal']
-        data['new_menu'] = new_menu
-        # Можно в одну строку, но пичарм жалуется
-        new_menu_ids = data.get('new_menu_ids', [])
-        new_menu_ids.append(message.message_id)
-        data['new_menu_ids'] = new_menu_ids
+    new_menu_ids = data.get('new_menu_ids', [])
+    new_menu_ids.append(message.message_id)
+    await state.update_data(new_menu=new_menu, new_menu_ids=new_menu_ids)
 
     text = f'*Дата*: `{format_date(edit_menu_date)}`\n' \
            f'*Приём пищи*: `{menu_eng_to_ru[edit_meal].capitalize()}`\n' \
@@ -154,19 +156,22 @@ async def edit_cafe_menu_text_view(
     )
 
 
+@router.callback_query(StateFilter(EditingMenu.writing))
 @admin_required
 async def edit_cafe_menu_confirm_view(
-        callback: types.CallbackQuery, state: FSMContext, *_, **__
+        callback: types.CallbackQuery,
+        state: FSMContext,
 ) -> None:
     """
     Обработчик подтверждения изменения меню.
     """
-    async with state.proxy() as data:
-        edit_menu_date = data['edit_menu_date']
-        edit_meal = data['edit_meal']
-        new_menu = data['new_menu']
-        new_menu_ids = data['new_menu_ids']
-    await state.finish()
+    data = await state.get_data()
+    edit_menu_date = data['edit_menu_date']
+    edit_meal = data['edit_meal']
+    new_menu = data['new_menu']
+    new_menu_ids = data['new_menu_ids']
+
+    await state.clear()
 
     edit_meal_by_date(
         edit_meal, new_menu, edit_menu_date, callback.from_user.id
@@ -187,6 +192,7 @@ async def edit_cafe_menu_confirm_view(
         )
 
 
+@router.callback_query(Text(CallbackData.UPLOAD_LESSONS))
 @admin_required
 async def start_load_lessons_view(
         callback: types.CallbackQuery, *_, **__
@@ -203,6 +209,7 @@ async def start_load_lessons_view(
     )
 
 
+@router.message(StateFilter(LoadingLessons.image), F.content_type == 'photo')
 @rate_limit(0)
 @admin_required
 async def load_lessons_view(
@@ -212,62 +219,28 @@ async def load_lessons_view(
     Обработчик сообщений с изображениями
     после нажатия кнопки "Загрузить уроки".
     """
-    await message.photo[-1].download(destination_file=(image := BytesIO()))
+    bot: Bot = Bot.get_current()
+    file_id = message.photo[-1].file_id
+    file = await bot.get_file(file_id)
+    await bot.download_file(file.file_path, image := BytesIO())
 
-    text = await load_lessons_handler(message.chat.id, image)
+    result = await load_lessons_handler(message.chat.id, image)
 
     if state:
-        await state.finish()
+        await state.clear()
 
-    if isinstance(text, str):
+    if isinstance(result, str):
         await message.reply(
-            text=text,
+            text=result,
             reply_markup=go_to_main_menu_keyboard
         )
         return
 
-    grade, lessons_date = text
+    grade, lessons_date = result
     text = f'Расписание для *{grade}-х классов* на ' \
            f'*{format_date(lessons_date)}* сохранено!'
 
     await message.reply(
         text=text,
         reply_markup=go_to_main_menu_keyboard
-    )
-
-
-def register_admin_updates_view(dp: Dispatcher):
-    dp.register_callback_query_handler(
-        auto_update_cafe_menu_view,
-        text=CallbackData.AUTO_UPDATE_CAFE_MENU
-    )
-    dp.register_callback_query_handler(
-        start_load_lessons_view,
-        text=CallbackData.UPLOAD_LESSONS
-    )
-    dp.register_message_handler(
-        load_lessons_view,
-        content_types=['photo'],
-        state=LoadingLessons.image
-    )
-
-    dp.register_callback_query_handler(
-        edit_cafe_menu_start_view,
-        text=CallbackData.EDIT_CAFE_MENU
-    )
-    dp.register_message_handler(
-        edit_cafe_menu_date_view,
-        state=EditingMenu.choose_date
-    )
-    dp.register_callback_query_handler(
-        edit_cafe_menu_meal_view,
-        state=EditingMenu.choose_meal
-    )
-    dp.register_message_handler(
-        edit_cafe_menu_text_view,
-        state=EditingMenu.writing
-    )
-    dp.register_callback_query_handler(
-        edit_cafe_menu_confirm_view,
-        state=EditingMenu.writing
     )

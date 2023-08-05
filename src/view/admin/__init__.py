@@ -1,3 +1,3 @@
-from src.view.admin.admin_updates import register_admin_updates_view
-from src.view.admin.admin_manage import register_admin_manage_view
-from src.view.admin.admin_notifies import register_admin_notifies_view
+from src.view.admin.admin_updates import router as admin_updates_router
+from src.view.admin.admin_manage import router as admin_manage_router
+from src.view.admin.admin_notifies import router as admin_notifies_router

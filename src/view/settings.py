@@ -1,5 +1,6 @@
-from aiogram import Bot, Dispatcher, types
-from aiogram.dispatcher import FSMContext
+from aiogram import Bot, Router, types
+from aiogram.filters import StateFilter, Text
+from aiogram.fsm.context import FSMContext
 
 from src.handlers.settings import (
     edit_bool_settings_handler, edit_grade_setting_handler,
@@ -14,6 +15,8 @@ from src.utils.decorators import save_new_user_decor
 from src.utils.states import EditingSettings
 
 
+router = Router(name='settings')
+
 settings_welcome_text = """
 Привет! Я - настройки!
 
@@ -25,6 +28,7 @@ settings_welcome_text = """
 """.strip()
 
 
+@router.callback_query(Text(CallbackData.OPEN_SETTINGS))
 @save_new_user_decor
 async def open_settings_view(callback: types.CallbackQuery) -> None:
     """
@@ -38,6 +42,7 @@ async def open_settings_view(callback: types.CallbackQuery) -> None:
     )
 
 
+@router.callback_query(Text(startswith=CallbackData.PREFIX_SWITCH))
 async def edit_bool_settings_view(callback: types.CallbackQuery):
     """
     Обработчик кнопок уведомлений "Уроки" и "Новости".
@@ -52,6 +57,7 @@ async def edit_bool_settings_view(callback: types.CallbackQuery):
     )
 
 
+@router.callback_query(Text(startswith=CallbackData.CHANGE_GRADE_TO_))
 async def edit_grade_settings_view(callback: types.CallbackQuery):
     """
     Обработчик кнопок изменения класса.
@@ -73,18 +79,19 @@ async def edit_grade_settings_view(callback: types.CallbackQuery):
     )
 
 
-async def edit_laundry_start_view(callback: types.CallbackQuery) -> None:
+@router.callback_query(Text(startswith=CallbackData.EDIT_SETTINGS_PREFIX))
+async def edit_laundry_start_view(
+        callback: types.CallbackQuery, state: FSMContext
+) -> None:
     """
     Обработчик кнопок изменения времени таймера прачки.
     """
     attr = callback.data.replace(CallbackData.EDIT_SETTINGS_PREFIX, '')
 
     await EditingSettings.writing.set()
-    await Dispatcher.get_current().current_state().set_data(
-        {
-            "start_id": callback.message.message_id,
-            "attr": attr,
-        }
+    await state.update_data(
+        start_id=callback.message.message_id,
+        attr=attr
     )
 
     text = f'🕛Введите `{times_eng_to_ru[attr]}` в минутах (целых)'
@@ -94,15 +101,16 @@ async def edit_laundry_start_view(callback: types.CallbackQuery) -> None:
     )
 
 
+@router.callback_query(StateFilter(EditingSettings.writing))
 async def edit_laundry_time_view(
         message: types.Message, state: FSMContext
 ) -> None:
     """
     Обработчик сообщения с минутами для изменения таймера прачки.
     """
-    async with state.proxy() as data:
-        start_id = data['start_id']
-        attr = data['attr']
+    data = await state.get_data()
+    start_id = data['start_id']
+    attr = data['attr']
 
     result = edit_laundry_time_handler(
         message.from_user.id, attr, message.text
@@ -112,7 +120,7 @@ async def edit_laundry_time_view(
         text = f'✅`{times_eng_to_ru[attr].capitalize()}` ' \
                f'установлено на `{result}` минут.'
         keyboard = settings_keyboard(message.from_user.id)
-        await state.finish()
+        await state.clear()
     else:
         text = f'❌Не распознал `{message.text}` как минуты. Попробуй ещё раз.'
         keyboard = cancel_state_keyboard
@@ -124,30 +132,3 @@ async def edit_laundry_time_view(
         chat_id=message.chat.id
     )
     await message.delete()
-
-
-def register_setings_view(dp: Dispatcher) -> None:
-    dp.register_callback_query_handler(
-        open_settings_view,
-        text=CallbackData.OPEN_SETTINGS
-    )
-    dp.register_callback_query_handler(
-        edit_bool_settings_view,
-        lambda callback: callback.data.startswith(CallbackData.PREFIX_SWITCH)
-    )
-    dp.register_callback_query_handler(
-        edit_grade_settings_view,
-        lambda callback: callback.data.startswith(
-            CallbackData.CHANGE_GRADE_TO_
-        )
-    )
-    dp.register_callback_query_handler(
-        edit_laundry_start_view,
-        lambda callback: callback.data.startswith(
-            CallbackData.EDIT_SETTINGS_PREFIX
-        )
-    )
-    dp.register_message_handler(
-        edit_laundry_time_view,
-        state=EditingSettings.writing
-    )

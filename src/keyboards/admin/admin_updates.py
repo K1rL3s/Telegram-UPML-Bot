@@ -1,12 +1,13 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-
+from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 from src.keyboards.universal import cancel_state_button
 from src.utils.consts import CallbackData
 
 
-choose_meal_keyboard = InlineKeyboardMarkup(row_width=3).add(
-    *[InlineKeyboardButton(dish, callback_data=callback_data)
-      for dish, callback_data in zip(
+choose_meal_keyboard = InlineKeyboardBuilder().add(
+    *[InlineKeyboardButton(
+        text=dish, callback_data=callback_data
+    )
+        for dish, callback_data in zip(
             ('🕗Завтрак', '🕙Второй завтрак',
              '🕐Обед', '🕖Полдник',
              '🕖Ужин'),
@@ -14,14 +15,15 @@ choose_meal_keyboard = InlineKeyboardMarkup(row_width=3).add(
              CallbackData.EDIT_DINNER, CallbackData.EDIT_SNACK,
              CallbackData.EDIT_SUPPER)
         )
-      ]
+    ]
 ).add(
     cancel_state_button
-)
-confirm_edit_menu_keyboard = InlineKeyboardMarkup().add(
+).as_markup()
+
+confirm_edit_menu_keyboard = InlineKeyboardBuilder().add(
     InlineKeyboardButton(
-        '✅Подтвердить',
+        text='✅Подтвердить',
         callback_data=CallbackData.EDIT_CONFIRM
     ),
     cancel_state_button
-)
+).as_markup()

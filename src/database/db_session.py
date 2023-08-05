@@ -42,7 +42,7 @@ def global_init(db_file: str | Path) -> None:
 
 
 @contextlib.contextmanager
-def create_session(do_commit: bool = False) -> Session:
+def get_session(do_commit: bool = False) -> Session:
     """
     Создатель сессии для работы с базой данных.
 

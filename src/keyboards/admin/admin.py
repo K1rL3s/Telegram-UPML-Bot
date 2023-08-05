@@ -1,4 +1,7 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.utils.keyboard import (
+    InlineKeyboardBuilder, InlineKeyboardButton,
+    InlineKeyboardMarkup,
+)
 
 from src.database.db_funcs import is_has_any_role
 from src.keyboards.admin.admin_manage import open_admins_list_button
@@ -7,7 +10,7 @@ from src.utils.consts import CallbackData, Roles
 
 
 def admin_panel_keyboard(user_id: int) -> InlineKeyboardMarkup:
-    keyboard = InlineKeyboardMarkup(row_width=2)
+    keyboard = InlineKeyboardBuilder()
 
     for button_text, callback_data in zip(
         ('🍴Загрузить меню', '🍴Изменить меню',
@@ -16,8 +19,11 @@ def admin_panel_keyboard(user_id: int) -> InlineKeyboardMarkup:
          CallbackData.EDIT_CAFE_MENU,
          CallbackData.UPLOAD_LESSONS, CallbackData.DO_A_NOTIFY_FOR_)
     ):
-        keyboard.insert(
-            InlineKeyboardButton(button_text, callback_data=callback_data)
+        keyboard.add(
+            InlineKeyboardButton(
+                text=button_text,
+                callback_data=callback_data
+            )
         )
 
     if is_has_any_role(user_id, [Roles.SUPERADMIN]):
@@ -25,4 +31,4 @@ def admin_panel_keyboard(user_id: int) -> InlineKeyboardMarkup:
 
     keyboard.add(go_to_main_menu_button)
 
-    return keyboard
+    return keyboard.as_markup()

@@ -1,29 +1,30 @@
 import asyncio
 from pathlib import Path
 
-from aiogram import Dispatcher, Bot, executor
-from loguru import logger
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram import Dispatcher, Bot
+from aiogram.fsm.storage.memory import MemoryStorage
 from sqlalchemy.orm import close_all_sessions
+from loguru import logger
 
 from src.database.db_session import global_init
 from src.schedule import run_schedule_jobs
 from src.utils.consts import Config
-from src.view import register_view
+from src.view import register_view_routers
 from src.middlewares import setup_middlewares
 
 
-async def on_startup(dp: Dispatcher) -> None:
+def on_startup(dp: Dispatcher) -> None:
     setup_middlewares(dp)
-    register_view(dp)
+    register_view_routers(dp)
     asyncio.create_task(run_schedule_jobs())
 
 
-async def on_shutdown(_) -> None:
+async def on_shutdown() -> None:
     close_all_sessions()
 
 
-def main():
+# Тодо: Починить клавиатуры :)
+async def main():
     abs_path = Path().absolute()
 
     logger.add(
@@ -39,18 +40,18 @@ def main():
 
     bot = Bot(token=Config.BOT_TOKEN, parse_mode='markdown')
     dp = Dispatcher(bot=bot, storage=MemoryStorage())
-
-    executor.start_polling(
-        dp,
-        skip_updates=True,
-        on_startup=on_startup,
-        on_shutdown=on_shutdown,
-        timeout=Config.TIMEOUT,
-        relax=Config.RELAX,
+    on_startup(dp)
+    dp.shutdown.register(on_shutdown)
+    await bot.delete_webhook(drop_pending_updates=True)
+    await dp.start_polling(
+        bot,
+        polling_timeout=Config.TIMEOUT,
+        allowed_updates=dp.resolve_used_update_types()
     )
 
 
 if __name__ == '__main__':
     logger.info('Запуск бота...')
-    main()
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    asyncio.run(main())
     logger.info('Выключение бота')

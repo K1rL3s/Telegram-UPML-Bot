@@ -1,4 +1,7 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.utils.keyboard import (
+    InlineKeyboardBuilder, InlineKeyboardButton,
+    InlineKeyboardMarkup,
+)
 
 from src.keyboards.universal import (
     cancel_state_button,
@@ -8,20 +11,20 @@ from src.utils.consts import CallbackData
 
 
 open_admins_list_button = InlineKeyboardButton(
-    '👮‍♀️Список админов',
+    text='👮‍♀️Список админов',
     callback_data=CallbackData.OPEN_ADMINS_LIST_PAGE_
 )
 add_new_admin_button = InlineKeyboardButton(
-    '🔎Добавить админа',
+    text='🔎Добавить админа',
     callback_data=CallbackData.ADD_NEW_ADMIN
 )
-add_new_admin_sure_keyboard = InlineKeyboardMarkup().add(
+add_new_admin_sure_keyboard = InlineKeyboardBuilder().add(
     InlineKeyboardButton(
-        '✅Подтвердить',
+        text='✅Подтвердить',
         callback_data=CallbackData.ADD_NEW_ADMIN_SURE
     ),
     cancel_state_button
-)
+).as_markup()
 
 
 def admins_list_keyboard(
@@ -29,12 +32,12 @@ def admins_list_keyboard(
         page: int
 ) -> InlineKeyboardMarkup:
     upp = 6  # 6 пользователей на страницу (users per page)
-    keyboard = InlineKeyboardMarkup(row_width=2)
+    keyboard = InlineKeyboardBuilder()
 
     for name, user_id in users[page * upp:page * upp + upp]:
-        keyboard.insert(
+        keyboard.add(
             InlineKeyboardButton(
-                name,
+                text=name,
                 callback_data=CallbackData.CHECK_ADMIN_ + f'{user_id}_{page}'
             )
         )
@@ -42,16 +45,16 @@ def admins_list_keyboard(
     if page > 0:
         keyboard.add(
             InlineKeyboardButton(
-                f'⬅️Назад',
+                text=f'⬅️Назад',
                 callback_data=
                 CallbackData.OPEN_ADMINS_LIST_PAGE_ + f'{page - 1}'
             )
         )
 
     if page * upp + upp < len(users):
-        keyboard.insert(
+        keyboard.add(
             InlineKeyboardButton(
-                f'➡️Вперёд',
+                text=f'➡️Вперёд',
                 callback_data=
                 CallbackData.OPEN_ADMINS_LIST_PAGE_ + f'{page + 1}'
             )
@@ -62,7 +65,7 @@ def admins_list_keyboard(
         add_new_admin_button
     )
 
-    return keyboard
+    return keyboard.as_markup()
 
 
 def check_admin_keyboard(
@@ -71,19 +74,19 @@ def check_admin_keyboard(
         sure: bool = False
 ) -> InlineKeyboardMarkup:
     remove_button = InlineKeyboardButton(
-        "🚫Точно снять роль" if sure else "🚫Снять роль админа",
+        text=("🚫Точно снять роль" if sure else "🚫Снять роль админа"),
         callback_data=(
             CallbackData.REMOVE_ADMIN_SURE_ + f'{user_id}'
             if sure else
             CallbackData.REMOVE_ADMIN_ + f'{user_id}_{page}'
         )
     )
-    return InlineKeyboardMarkup().add(
+    return InlineKeyboardBuilder().add(
         remove_button
     ).add(
         go_to_admin_panel_button,
         InlineKeyboardButton(
-            f'👨‍✈️Список админов',
+            text=f'👨‍✈️Список админов',
             callback_data=CallbackData.OPEN_ADMINS_LIST_PAGE_ + f'{page}'
         )
-    )
+    ).as_markup()

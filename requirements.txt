@@ -1,6 +1,6 @@
-SQLALchemy==2.0.18
-alembic==1.11.1
-aiogram==2.25.1
+SQLALchemy==2.0.19
+alembic==1.11.2
+aiogram==3.0.0b9
 httpx==0.24.1
 aiocache==0.12.1
 aioschedule==0.5.2
@@ -9,6 +9,6 @@ cachetools==5.3.1
 loguru==0.6.0
 pathlib==1.0.1
 python-dotenv==1.0.0
-pypdf==3.12.1
+pypdf==3.14.0
 Pillow==10.0.0
 pytesseract==0.3.10

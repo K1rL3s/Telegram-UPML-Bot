@@ -1,5 +1,6 @@
-from aiogram import Bot, Dispatcher, types
-from aiogram.dispatcher import FSMContext
+from aiogram import Bot, Router, types
+from aiogram.filters import StateFilter, Text
+from aiogram.fsm.context import FSMContext
 
 from src.handlers.admin import do_notifies, get_users_for_notify
 from src.keyboards import (
@@ -11,8 +12,12 @@ from src.utils.decorators import admin_required
 from src.utils.states import DoNotify
 
 
+router = Router(name='admin_notifies')
+
+
+@router.callback_query(Text(CallbackData.DO_A_NOTIFY_FOR_))
 @admin_required
-async def notify_panel_view(callback: types.CallbackQuery, *_, **__) -> None:
+async def notify_panel_view(callback: types.CallbackQuery) -> None:
     """
     Обработчик кнопки "Уведомление".
     """
@@ -30,8 +35,12 @@ async def notify_panel_view(callback: types.CallbackQuery, *_, **__) -> None:
     )
 
 
+@router.callback_query(Text(startswith=CallbackData.DO_A_NOTIFY_FOR_))
 @admin_required
-async def notify_for_who_view(callback: types.CallbackQuery, *_, **__) -> None:
+async def notify_for_who_view(
+        callback: types.CallbackQuery,
+        state: FSMContext,
+) -> None:
     """
     Обработчик нажатия одной из кнопок уведомления в панели уведомлений.
     """
@@ -45,7 +54,7 @@ async def notify_for_who_view(callback: types.CallbackQuery, *_, **__) -> None:
         keyboard = notify_for_class_keyboard
     else:
         await DoNotify.writing.set()
-        await Dispatcher.get_current().current_state().set_data(
+        await state.set_data(
             {
                 "start_id": callback.message.message_id,
                 # all, grade_10, grade_11, 10А, 10Б, 10В, 11А, 11Б, 11В
@@ -62,18 +71,22 @@ async def notify_for_who_view(callback: types.CallbackQuery, *_, **__) -> None:
     )
 
 
+@router.message(StateFilter(DoNotify.writing))
 @admin_required
 async def notify_message_view(
-        message: types.Message, state: FSMContext, *_, **__
+        message: types.Message,
+        state: FSMContext,
 ) -> None:
-    async with state.proxy() as data:
-        start_id = data['start_id']
-        notify_type = data['notify_type']
-        data['message_text'] = message.text
-        # можно в одну строку, но пичарм жалуется
-        messages_ids = data.get('messages_ids', [])
-        messages_ids.append(message.message_id)
-        data['messages_ids'] = messages_ids
+    data = await state.get_data()
+    start_id = data['start_id']
+    notify_type = data['notify_type']
+
+    messages_ids = data.get('messages_ids', [])
+    messages_ids.append(message.message_id)
+    await state.update_data(
+        message_text=message.text,
+        messages_ids=messages_ids
+    )
 
     text = f'Тип: `{notifies_eng_to_ru.get(notify_type, notify_type)}`\n' \
            f'Сообщение:\n```\n{message.text}```\n\n' \
@@ -88,15 +101,19 @@ async def notify_message_view(
     )
 
 
+@router.callback_query(
+    Text(CallbackData.NOTIFY_CONFIRM),
+    StateFilter(DoNotify.writing)
+)
 @admin_required
 async def notify_confirm_view(
         callback: types.CallbackQuery, state: FSMContext, *_, **__
 ) -> None:
-    async with state.proxy() as data:
-        notify_type = data['notify_type']
-        message_text = data['message_text']
-        messages_ids = data['messages_ids']
-    await state.finish()
+    data = await state.get_data()
+    notify_type = data['notify_type']
+    message_text = data['message_text']
+    messages_ids = data['messages_ids']
+    await state.clear()
 
     users = get_users_for_notify(notify_type, is_news=True)
     await do_notifies(
@@ -115,25 +132,3 @@ async def notify_confirm_view(
             chat_id=callback.message.chat.id,
             message_id=message_id
         )
-
-
-def register_admin_notifies_view(dp: Dispatcher) -> None:
-    dp.register_callback_query_handler(
-        notify_panel_view,
-        text=CallbackData.DO_A_NOTIFY_FOR_
-    )
-    dp.register_callback_query_handler(
-        notify_for_who_view,
-        lambda callback: callback.data.startswith(
-            CallbackData.DO_A_NOTIFY_FOR_
-        )
-    )
-    dp.register_message_handler(
-        notify_message_view,
-        state=DoNotify.writing
-    )
-    dp.register_callback_query_handler(
-        notify_confirm_view,
-        state=DoNotify.writing,
-        text=CallbackData.NOTIFY_CONFIRM
-    )

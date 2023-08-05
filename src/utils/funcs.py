@@ -3,8 +3,8 @@ from uuid import uuid1
 
 from aiocache import cached
 from aiogram import Bot, types
-from aiogram.types import InlineKeyboardMarkup, InputFile
-from aiogram.utils.exceptions import Unauthorized
+from aiogram.types import BufferedInputFile, InlineKeyboardMarkup
+from aiogram.exceptions import TelegramUnauthorizedError
 from loguru import logger
 
 from src.database.db_funcs import update_user
@@ -25,7 +25,7 @@ async def bytes_io_to_image_id(
     """
 
     image.seek(0)
-    file = InputFile(image, filename=str(uuid1()))
+    file = BufferedInputFile(image.read(), str(uuid1()))
     message = await Bot.get_current().send_photo(
         chat_id=chat_id,
         photo=file,
@@ -111,7 +111,7 @@ async def one_notify(
             f'успешно для {user.short_info()}'
         )
         return True
-    except Unauthorized:
+    except TelegramUnauthorizedError:
         update_user(user.user_id, is_active=0)
         return True
     except Exception as e:

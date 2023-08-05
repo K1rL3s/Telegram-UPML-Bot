@@ -1,5 +1,6 @@
-from aiogram import Dispatcher, types
-from aiogram.dispatcher import FSMContext
+from aiogram import types, Router
+from aiogram.filters import Command, StateFilter, Text
+from aiogram.fsm.context import FSMContext
 
 from src.keyboards import (
     go_to_main_menu_keyboard, main_menu_keyboard, admin_panel_keyboard,
@@ -8,6 +9,10 @@ from src.utils.consts import CallbackData
 from src.utils.decorators import admin_required, save_new_user_decor
 
 
+router = Router(name='start')
+
+
+@router.message(Command('start'))
 @save_new_user_decor
 async def start_view(message: types.Message) -> None:
     """
@@ -21,6 +26,8 @@ async def start_view(message: types.Message) -> None:
     )
 
 
+@router.message(Command('menu'))
+@router.callback_query(Text(CallbackData.OPEN_MAIN_MENU))
 @save_new_user_decor
 async def main_menu_view(message: types.Message | types.CallbackQuery) -> None:
     """
@@ -41,6 +48,7 @@ async def main_menu_view(message: types.Message | types.CallbackQuery) -> None:
         )
 
 
+@router.callback_query(Text(CallbackData.OPEN_ADMIN_PANEL))
 @admin_required
 async def admin_panel_view(callback: types.CallbackQuery, *_, **__) -> None:
     """
@@ -62,6 +70,8 @@ async def admin_panel_view(callback: types.CallbackQuery, *_, **__) -> None:
     )
 
 
+@router.message(Command('cancel', 'stop'), StateFilter('*'))
+@router.callback_query(Text(CallbackData.CANCEL_STATE), StateFilter('*'))
 async def cancel_state(
         message: types.Message | types.CallbackQuery,
         state: FSMContext
@@ -73,35 +83,5 @@ async def cancel_state(
     if current_state is None:
         return
 
-    await state.finish()
-
+    await state.clear()
     await main_menu_view(message)
-
-
-def register_start_view(dp: Dispatcher):
-    dp.register_message_handler(
-        cancel_state,
-        commands=['cancel', 'stop'],
-        state='*'
-    )
-    dp.register_callback_query_handler(
-        cancel_state,
-        text=CallbackData.CANCEL_STATE,
-        state='*'
-    )
-    dp.register_message_handler(
-        start_view,
-        commands=['start'],
-    )
-    dp.register_message_handler(
-        main_menu_view,
-        commands=['menu'],
-    )
-    dp.register_callback_query_handler(
-        main_menu_view,
-        text=CallbackData.OPEN_MAIN_MENU
-    )
-    dp.register_callback_query_handler(
-        admin_panel_view,
-        text=CallbackData.OPEN_ADMIN_PANEL
-    )

@@ -1,6 +1,6 @@
-from aiogram.types.inline_keyboard import (
+from aiogram.utils.keyboard import (
+    InlineKeyboardBuilder, InlineKeyboardButton,
     InlineKeyboardMarkup,
-    InlineKeyboardButton,
 )
 
 from src.database.db_funcs import get_settings
@@ -13,49 +13,51 @@ def settings_keyboard(
 ) -> InlineKeyboardMarkup:
     settings = get_settings(user_id)
 
-    return InlineKeyboardMarkup().add(
+    return InlineKeyboardBuilder().add(
         InlineKeyboardButton(
-            'Класс ' + (settings.class_ if settings.class_ else '❓'),
+            text='Класс ' + (settings.class_ if settings.class_ else '❓'),
             callback_data=CallbackData.CHANGE_GRADE_TO_
         ),
         InlineKeyboardButton(
-            'Уроки ' + ('✅' if settings.lessons_notify else '❌'),
+            text='Уроки ' + ('✅' if settings.lessons_notify else '❌'),
             callback_data=CallbackData.SWITCH_LESSONS_NOTIFY
         ),
         InlineKeyboardButton(
-            'Новости ' + ('✅' if settings.news_notify else '❌'),
+            text='Новости ' + ('✅' if settings.news_notify else '❌'),
             callback_data=CallbackData.SWITCH_NEWS_NOTIFY
         )
     ).add(
         InlineKeyboardButton(
-            f'⏳Стирка {settings.washing_time} мин.',
+            text=f'⏳Стирка {settings.washing_time} мин.',
             callback_data=CallbackData.EDIT_WASHING_TIME
         ),
         InlineKeyboardButton(
-            f'💨Сушка {settings.drying_time} мин.',
+            text=f'💨Сушка {settings.drying_time} мин.',
             callback_data=CallbackData.EDIT_DRYING_TIME
         )
     ).add(
         go_to_main_menu_button
-    )
+    ).as_markup()
 
 
-choose_grade_keyboard = InlineKeyboardMarkup(row_width=3)
+choose_grade_keyboard = InlineKeyboardBuilder()
 for grade_letter in GRADES:
-    choose_grade_keyboard.insert(
+    choose_grade_keyboard.add(
         InlineKeyboardButton(
-            f'{grade_letter}',
+            text=f'{grade_letter}',
             callback_data=CallbackData.CHANGE_GRADE_TO_ + grade_letter
         )
     )
 
 choose_grade_keyboard.row(
     InlineKeyboardButton(
-        f'⏪Настройки',
+        text=f'⏪Настройки',
         callback_data=CallbackData.OPEN_SETTINGS
     ),
     InlineKeyboardButton(
-        f'❓Сбросить класс',
+        text=f'❓Сбросить класс',
         callback_data=CallbackData.CHANGE_GRADE_TO_ + 'None'
     ),
 )
+
+choose_grade_keyboard = choose_grade_keyboard.as_markup()

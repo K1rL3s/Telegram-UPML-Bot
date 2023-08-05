@@ -13,7 +13,7 @@ from src.database.models.menus import Menu
 from src.database.models.roles import Role
 from src.database.models.settings import Settings
 from src.database.models.users import User
-from src.database.db_session import create_session
+from src.database.db_session import get_session
 from src.utils.consts import Roles, menu_eng_to_ru
 from src.utils.datehelp import datetime_now
 
@@ -28,7 +28,7 @@ def save_new_user(user_id: int, username: str) -> None:
     :param username: Имя пользователя.
     """
 
-    with create_session(do_commit=True) as session:
+    with get_session(do_commit=True) as session:
         user_query = sa.select(User).where(User.user_id == user_id)
         user: User = session.scalar(user_query)
 
@@ -65,7 +65,7 @@ def save_or_update_menu_in_db(
     :param edit_by: Кем редактируется, ТГ Айди, 0 - автоматически.
     """
 
-    with create_session(do_commit=True) as session:
+    with get_session(do_commit=True) as session:
         user = get_user(edit_by) if edit_by != 0 else None
         find_query = sa.select(Menu).where(Menu.date == menu_date)
         meals = {
@@ -105,7 +105,7 @@ def save_or_update_lessons(
 
     model = ClassLessons if letter else FullLessons
 
-    with create_session(do_commit=True) as session:
+    with get_session(do_commit=True) as session:
         find_query = sa.select(model).where(
             model.date == lessons_date,
             model.grade == grade,
@@ -140,7 +140,7 @@ def save_or_update_laundry(
     :return: Модель Laundry.
     """
 
-    with create_session(do_commit=True) as session:
+    with get_session(do_commit=True) as session:
         db_user_id_query = sa.select(User.id).where(User.user_id == user_id)
         db_user_id = session.scalar(db_user_id_query)
 
@@ -168,7 +168,7 @@ def save_or_update_settings(
     :param kwargs: Поле таблицы=значение.
     :return: модель Settings.
     """
-    with create_session(do_commit=True) as session:
+    with get_session(do_commit=True) as session:
         db_user_id_query = sa.select(User.id).where(User.user_id == user_id)
         db_user_id = session.scalar(db_user_id_query)
 
@@ -194,7 +194,7 @@ def get_menu_by_date(menu_date: date) -> Menu | None:
     :return: Модель Menu.
     """
 
-    with create_session() as session:
+    with get_session() as session:
         query = sa.select(Menu).where(Menu.date == menu_date)
         return session.scalar(query)
 
@@ -214,7 +214,7 @@ def get_users_by_conditions(
     :return: Список юзеров.
     """
 
-    with create_session() as session:
+    with get_session() as session:
         conditions = []
         for attr, value in values:
             if hasattr(User, attr):
@@ -245,7 +245,7 @@ def get_role(role: Roles | str) -> Role | None:
     if isinstance(role, Enum):
         role = role.value
 
-    with create_session() as session:
+    with get_session() as session:
         role_query = sa.select(Role).where(Role.role == role)
         return session.scalar(role_query)
 
@@ -261,7 +261,7 @@ def get_users_with_role(role: Roles | str) -> list[User]:
     if isinstance(role, Enum):
         role = role.value
 
-    with create_session() as session:
+    with get_session() as session:
         query = sa.select(User).where(
             User.roles.any(
                 sa.select(Role.id).where(
@@ -280,7 +280,7 @@ def get_user_id_by_username(username: str) -> int | None:
     :return: Айди юзера.
     """
 
-    with create_session() as session:
+    with get_session() as session:
         query = sa.select(User.user_id).where(User.username == username)
         return session.scalar(query)
 
@@ -294,7 +294,7 @@ def get_full_lessons(lessons_date: date, grade: str) -> str | None:
     :return: Айди картинки или None.
     """
 
-    with create_session() as session:
+    with get_session() as session:
         query = sa.select(FullLessons).where(
             FullLessons.date == lessons_date,
             FullLessons.grade == grade
@@ -315,7 +315,7 @@ def get_class_lessons(
     :return: Айди картинки или None.
     """
 
-    with create_session() as session:
+    with get_session() as session:
         query = sa.select(ClassLessons).where(
             ClassLessons.date == lessons_date,
             ClassLessons.class_ == class_
@@ -339,7 +339,7 @@ def _get_model(
     :return: Модель model.
     """
 
-    with create_session() as session:
+    with get_session() as session:
         query = sa.select(model)
 
         if do_subquery:
@@ -375,7 +375,7 @@ def get_expired_laundries() -> list[Laundry]:
     :return: Список из Laundry.
     """
 
-    with create_session() as session:
+    with get_session() as session:
         query = sa.select(Laundry).where(
             Laundry.is_active == 1,
             Laundry.end_time <= datetime_now()
@@ -392,7 +392,7 @@ def update_user(user_id: int, **params) -> None:
     :param params: Поле таблицы=значение, ...
     """
 
-    with create_session(do_commit=True) as session:
+    with get_session(do_commit=True) as session:
         query = sa.update(User).where(
             User.user_id == user_id
         ).values(
@@ -438,7 +438,7 @@ def is_has_any_role(user_id: int, roles: list[Roles | str]) -> bool:
     :return: Тру или фэлс.
     """
 
-    with create_session() as session:
+    with get_session() as session:
         user_query = sa.select(User).where(User.user_id == user_id)
         user = session.scalar(user_query)
         if user is None:
@@ -462,7 +462,7 @@ def remove_role_from_user(user_id: int, role: Roles | str) -> None:
     if isinstance(role, Roles):
         role = role.value
 
-    with create_session(do_commit=True) as session:
+    with get_session(do_commit=True) as session:
         user_query = sa.select(User).where(User.user_id == user_id)
         user = session.scalar(user_query)
         role_query = sa.select(Role).where(
@@ -486,7 +486,7 @@ def add_role_to_user(user_id: int, role: Roles | str) -> None:
     if isinstance(role, Roles):
         role = role.value
 
-    with create_session(do_commit=True) as session:
+    with get_session(do_commit=True) as session:
         user_query = sa.select(User).where(User.user_id == user_id)
         user = session.scalar(user_query)
         role_query = sa.select(Role).where(

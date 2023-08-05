@@ -1,34 +1,37 @@
 from datetime import date, timedelta
 
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.utils.keyboard import (
+    InlineKeyboardBuilder, InlineKeyboardButton,
+    InlineKeyboardMarkup,
+)
 
 from src.utils.consts import CallbackData
 from src.utils.datehelp import format_date, date_today
 
 
 go_to_main_menu_button = InlineKeyboardButton(
-    "🏠Главное меню",
+    text="🏠Главное меню",
     callback_data=CallbackData.OPEN_MAIN_MENU
 )
 
 go_to_settings_button = InlineKeyboardButton(
-    "⚙️Настройки",
+    text="⚙️Настройки",
     callback_data=CallbackData.OPEN_SETTINGS
 )
 
 go_to_admin_panel_button = InlineKeyboardButton(
-    '❗Админ панель',
+    text='❗Админ панель',
     callback_data=CallbackData.OPEN_ADMIN_PANEL
 )
 
 cancel_state_button = InlineKeyboardButton(
-    '❌Отмена',
+    text='❌Отмена',
     callback_data=CallbackData.CANCEL_STATE
 )
 
-cancel_state_keyboard = InlineKeyboardMarkup().add(
+cancel_state_keyboard = InlineKeyboardBuilder().add(
     cancel_state_button
-)
+).as_markup()
 
 
 def _get_keyboard_for_left_right_menu(
@@ -48,27 +51,27 @@ def _get_keyboard_for_left_right_menu(
     tomorrow_str = format_date(tomorrow)
     yesterday_str = format_date(yesterday)
 
-    keyboard = InlineKeyboardMarkup()
+    keyboard = InlineKeyboardBuilder()
 
     if abs((today - yesterday).days) < 7:
-        keyboard.insert(
+        keyboard.add(
             InlineKeyboardButton(
-                f'⬅️{yesterday_str}',
+                text=f'⬅️{yesterday_str}',
                 callback_data=open_smt_on_callback + yesterday_str
             )
         )
 
-    keyboard.insert(
+    keyboard.add(
         InlineKeyboardButton(
-            f'{today_smile}Сегодня',
+            text=f'{today_smile}Сегодня',
             callback_data=open_smt_today_callback
         )
     )
 
     if abs((today - tomorrow).days) < 7:
-        keyboard.insert(
+        keyboard.add(
             InlineKeyboardButton(
-                f'➡️{tomorrow_str}',
+                text=f'➡️{tomorrow_str}',
                 callback_data=open_smt_on_callback + tomorrow_str
             )
         )
@@ -77,4 +80,4 @@ def _get_keyboard_for_left_right_menu(
         go_to_main_menu_button
     )
 
-    return keyboard
+    return keyboard.as_markup()

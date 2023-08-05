@@ -1,5 +1,6 @@
-from aiogram import Dispatcher, types
-from aiogram.dispatcher import FSMContext
+from aiogram import Router, types
+from aiogram.filters import StateFilter, Text
+from aiogram.fsm.context import FSMContext
 
 from src.database.db_funcs import (
     add_role_to_user, get_user_id_by_username, get_users_with_role,
@@ -16,8 +17,12 @@ from src.utils.funcs import tg_click_name, username_by_user_id
 from src.utils.states import AddingNewAdmin
 
 
+router = Router(name='admin_manage')
+
+
+@router.callback_query(Text(startswith=CallbackData.OPEN_ADMINS_LIST_PAGE_))
 @superadmin_required
-async def admins_list_view(callback: types.CallbackQuery, *_, **__) -> None:
+async def admins_list_view(callback: types.CallbackQuery) -> None:
     """
     Обработчик кнопки "Список админов".
     """
@@ -41,12 +46,16 @@ async def admins_list_view(callback: types.CallbackQuery, *_, **__) -> None:
     )
 
 
+@router.callback_query(Text(CallbackData.ADD_NEW_ADMIN))
 @superadmin_required
-async def admin_add_view(callback: types.CallbackQuery, *_, **__) -> None:
+async def admin_add_view(
+        callback: types.CallbackQuery,
+        state: FSMContext,
+) -> None:
     """
     Обработчик кнопки "Добавить админа".
     """
-    await AddingNewAdmin.username.set()
+    await state.set_state(AddingNewAdmin.username)
     text = 'Введите имя пользователя, которого хотите сделать админом.'
     await callback.message.edit_text(
         text=text,
@@ -54,10 +63,11 @@ async def admin_add_view(callback: types.CallbackQuery, *_, **__) -> None:
     )
 
 
+@router.message(StateFilter(AddingNewAdmin.username))
 @superadmin_required
 async def admin_add_check_username_view(
         message: types.Message | types.CallbackQuery,
-        state: FSMContext, *_, **__
+        state: FSMContext,
 ) -> None:
     """
     Обработчик сообщения с юзернеймом админа, которого хотят добавить.
@@ -73,10 +83,9 @@ async def admin_add_check_username_view(
         )
         return
 
-    async with state.proxy() as data:
-        data['user_id'] = user_id
+    await state.update_data(user_id=user_id)
+    await state.set_state(AddingNewAdmin.confirm)
 
-    await AddingNewAdmin.confirm.set()
     text = f'Добавить в админы {tg_click_name(username, user_id)}?'
     await message.reply(
         text=text,
@@ -84,24 +93,30 @@ async def admin_add_check_username_view(
     )
 
 
+@router.callback_query(
+    Text(CallbackData.ADD_NEW_ADMIN_SURE),
+    StateFilter(AddingNewAdmin.confirm)
+)
 @superadmin_required
 async def admin_add_confirm_view(
-        callback: types.CallbackQuery, state: FSMContext, *_, **__
+        callback: types.CallbackQuery,
+        state: FSMContext,
 ) -> None:
     """
     Обработчик кнопки "Подтвердить" при добавлении админа.
     """
-    async with state.proxy() as data:
-        user_id = data['user_id']
-        add_role_to_user(user_id, Roles.ADMIN)
-        text = 'Успешно!'
-        await callback.message.edit_text(
-            text=text,
-            reply_markup=admin_panel_keyboard(callback.from_user.id)
-        )
-        await state.finish()
+    user_id = (await state.get_data())['user_id']
+    add_role_to_user(user_id, Roles.ADMIN)
+
+    text = 'Успешно!'
+    await callback.message.edit_text(
+        text=text,
+        reply_markup=admin_panel_keyboard(callback.from_user.id)
+    )
+    await state.clear()
 
 
+@router.callback_query(Text(startswith=CallbackData.CHECK_ADMIN_))
 @superadmin_required
 async def admin_check_view(callback: types.CallbackQuery, *_, **__) -> None:
     """
@@ -124,6 +139,7 @@ async def admin_check_view(callback: types.CallbackQuery, *_, **__) -> None:
     )
 
 
+@router.callback_query(Text(startswith=CallbackData.REMOVE_ADMIN_))
 @superadmin_required
 async def admin_remove_view(callback: types.CallbackQuery, *_, **__) -> None:
     """
@@ -154,38 +170,4 @@ async def admin_remove_view(callback: types.CallbackQuery, *_, **__) -> None:
     await callback.message.edit_text(
         text=text,
         reply_markup=keyboard
-    )
-
-
-def register_admin_manage_view(dp: Dispatcher) -> None:
-    dp.register_callback_query_handler(
-        admins_list_view,
-        lambda callback: callback.data.startswith(
-            CallbackData.OPEN_ADMINS_LIST_PAGE_
-        )
-    )
-    dp.register_callback_query_handler(
-        admin_add_view,
-        text=CallbackData.ADD_NEW_ADMIN
-    )
-    dp.register_message_handler(
-        admin_add_check_username_view,
-        state=AddingNewAdmin.username
-    )
-    dp.register_callback_query_handler(
-        admin_add_confirm_view,
-        text=CallbackData.ADD_NEW_ADMIN_SURE,
-        state=AddingNewAdmin.confirm
-    )
-    dp.register_callback_query_handler(
-        admin_check_view,
-        lambda callback: callback.data.startswith(
-            CallbackData.CHECK_ADMIN_
-        )
-    )
-    dp.register_callback_query_handler(
-        admin_remove_view,
-        lambda callback: callback.data.startswith(
-            CallbackData.REMOVE_ADMIN_
-        )
     )

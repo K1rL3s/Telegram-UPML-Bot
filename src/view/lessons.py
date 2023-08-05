@@ -1,4 +1,6 @@
-from aiogram import Dispatcher, types
+from aiogram import Router, types
+from aiogram.filters import Text
+from aiogram.methods import SendMediaGroup
 
 from src.handlers.lessons import get_lessons_text_and_image_id
 from src.keyboards import lessons_keyboard
@@ -7,6 +9,10 @@ from src.utils.datehelp import date_by_format
 from src.utils.decorators import save_new_user_decor
 
 
+router = Router(name='lessons')
+
+
+@router.callback_query(Text(startswith=CallbackData.OPEN_LESSONS_ON_))
 @save_new_user_decor
 async def open_date_lessons_view(callback: types.CallbackQuery) -> None:
     """
@@ -24,15 +30,15 @@ async def open_date_lessons_view(callback: types.CallbackQuery) -> None:
     )
 
     if images:
-        temp = await callback.bot.send_media_group(
+        messages = await SendMediaGroup(
             chat_id=callback.message.chat.id,
             media=[
-                types.InputMediaPhoto(media_id)
+                types.InputMediaPhoto(media=media_id)
                 for media_id in images
                 if media_id
             ]
         )
-        await temp[0].reply(
+        await messages[0].reply(
             text=text,
             reply_markup=lessons_keyboard(lessons_date)
         )
@@ -41,12 +47,3 @@ async def open_date_lessons_view(callback: types.CallbackQuery) -> None:
             text=text,
             reply_markup=lessons_keyboard(lessons_date)
         )
-
-
-def register_lessons_view(dp: Dispatcher) -> None:
-    dp.register_callback_query_handler(
-        open_date_lessons_view,
-        lambda callback: callback.data.startswith(
-            CallbackData.OPEN_LESSONS_ON_
-        )
-    )

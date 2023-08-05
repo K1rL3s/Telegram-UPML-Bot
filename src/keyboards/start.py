@@ -1,5 +1,6 @@
-from aiogram.types.inline_keyboard import (
-    InlineKeyboardButton, InlineKeyboardMarkup,
+from aiogram.utils.keyboard import (
+    InlineKeyboardBuilder, InlineKeyboardButton,
+    InlineKeyboardMarkup,
 )
 
 from src.database.db_funcs import is_has_any_role
@@ -10,33 +11,33 @@ from src.keyboards.universal import (
 from src.utils.consts import CallbackData, Roles
 
 
-go_to_main_menu_keyboard = InlineKeyboardMarkup().add(
+go_to_main_menu_keyboard = InlineKeyboardBuilder().add(
     go_to_main_menu_button
-)
+).as_markup()
 
 
 def main_menu_keyboard(user_id: int) -> InlineKeyboardMarkup:
-    keyboard = InlineKeyboardMarkup().add(
+    keyboard = InlineKeyboardBuilder().add(
         InlineKeyboardButton(
-            "🍴Меню",
+            text="🍴Меню",
             callback_data=CallbackData.OPEN_CAFE_MENU_TODAY
         ),
         InlineKeyboardButton(
-            "📓Уроки",
+            text="📓Уроки",
             callback_data=CallbackData.OPEN_LESSONS_TODAY
         )
     ).add(
         InlineKeyboardButton(
-            '💦Прачечная',
+            text='💦Прачечная',
             callback_data=CallbackData.OPEN_LAUNDRY
         ),
         InlineKeyboardButton(
-            '📖Элективы',
+            text='📖Элективы',
             callback_data=CallbackData.OPEN_ELECTIVES
         ),
     ).add(
         InlineKeyboardButton(
-            '👩‍✈️Воспитатели',
+            text='👩‍✈️Воспитатели',
             callback_data=CallbackData.OPEN_EDUCATORS
         ),
         go_to_settings_button
@@ -45,4 +46,4 @@ def main_menu_keyboard(user_id: int) -> InlineKeyboardMarkup:
     if is_has_any_role(user_id, [Roles.SUPERADMIN, Roles.ADMIN]):
         keyboard.add(go_to_admin_panel_button)
 
-    return keyboard
+    return keyboard.as_markup()

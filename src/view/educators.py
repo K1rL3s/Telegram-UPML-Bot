@@ -1,17 +1,15 @@
-from aiogram import Dispatcher, types
+from aiogram import Router, types
+from aiogram.filters import Text
 
 from src.utils.consts import CallbackData
 
 
+router = Router(name='educators')
+
+
+@router.callback_query(Text(CallbackData.OPEN_EDUCATORS))
 async def educators_view(callback: types.CallbackQuery) -> None:
     await callback.message.edit_text(
         text='😅',
         reply_markup=callback.message.reply_markup
-    )
-
-
-def register_educators_view(dp: Dispatcher) -> None:
-    dp.register_callback_query_handler(
-        educators_view,
-        text=CallbackData.OPEN_EDUCATORS
     )
