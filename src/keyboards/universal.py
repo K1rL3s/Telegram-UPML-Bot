@@ -29,9 +29,9 @@ cancel_state_button = InlineKeyboardButton(
     callback_data=CallbackData.CANCEL_STATE
 )
 
-cancel_state_keyboard = InlineKeyboardBuilder().add(
-    cancel_state_button
-).as_markup()
+cancel_state_keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[[cancel_state_button]]
+)
 
 
 def _get_keyboard_for_left_right_menu(

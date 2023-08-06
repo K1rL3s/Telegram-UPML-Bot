@@ -1,5 +1,5 @@
-from aiogram import Router, types
-from aiogram.filters import StateFilter, Text
+from aiogram import F, Router, types
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
 from src.database.db_funcs import (
@@ -20,20 +20,23 @@ from src.utils.states import AddingNewAdmin
 router = Router(name='admin_manage')
 
 
-@router.callback_query(Text(startswith=CallbackData.OPEN_ADMINS_LIST_PAGE_))
+@router.callback_query(F.data.startswith(CallbackData.OPEN_ADMINS_LIST_PAGE_))
 @superadmin_required
-async def admins_list_view(callback: types.CallbackQuery) -> None:
+async def admins_list_view(callback: types.CallbackQuery, **_) -> None:
     """
     Обработчик кнопки "Список админов".
     """
-    page = int(
-        callback.data.replace(
-            CallbackData.OPEN_ADMINS_LIST_PAGE_, ''
-        ) or 0
-    )
+    try:
+        page = int(
+            callback.data.replace(
+                CallbackData.OPEN_ADMINS_LIST_PAGE_, ''
+            ) or 0
+        )
+    except ValueError:
+        page = 0
 
     admins = [
-        (await username_by_user_id(user.user_id), user.user_id)
+        (await username_by_user_id(callback.bot, user.user_id), user.user_id)
         for user in get_users_with_role(Roles.ADMIN)
     ]
 
@@ -46,7 +49,7 @@ async def admins_list_view(callback: types.CallbackQuery) -> None:
     )
 
 
-@router.callback_query(Text(CallbackData.ADD_NEW_ADMIN))
+@router.callback_query(F.data == CallbackData.ADD_NEW_ADMIN)
 @superadmin_required
 async def admin_add_view(
         callback: types.CallbackQuery,
@@ -94,7 +97,7 @@ async def admin_add_check_username_view(
 
 
 @router.callback_query(
-    Text(CallbackData.ADD_NEW_ADMIN_SURE),
+    F.data == CallbackData.ADD_NEW_ADMIN_SURE,
     StateFilter(AddingNewAdmin.confirm)
 )
 @superadmin_required
@@ -116,9 +119,9 @@ async def admin_add_confirm_view(
     await state.clear()
 
 
-@router.callback_query(Text(startswith=CallbackData.CHECK_ADMIN_))
+@router.callback_query(F.data.startswith(CallbackData.CHECK_ADMIN_))
 @superadmin_required
-async def admin_check_view(callback: types.CallbackQuery, *_, **__) -> None:
+async def admin_check_view(callback: types.CallbackQuery, **__) -> None:
     """
     Обработчик кнопки с юзернеймом админа в списке админов.
     """
@@ -129,8 +132,9 @@ async def admin_check_view(callback: types.CallbackQuery, *_, **__) -> None:
         ).split('_')
     )
 
+    username = await username_by_user_id(callback.bot, user_id)
     text = "Телеграм - " \
-           f"{tg_click_name(await username_by_user_id(user_id), user_id)}"
+           f"{tg_click_name(username, user_id)}"
     keyboard = check_admin_keyboard(user_id, page, sure=False)
 
     await callback.message.edit_text(
@@ -139,9 +143,9 @@ async def admin_check_view(callback: types.CallbackQuery, *_, **__) -> None:
     )
 
 
-@router.callback_query(Text(startswith=CallbackData.REMOVE_ADMIN_))
+@router.callback_query(F.data.startswith(CallbackData.REMOVE_ADMIN_))
 @superadmin_required
-async def admin_remove_view(callback: types.CallbackQuery, *_, **__) -> None:
+async def admin_remove_view(callback: types.CallbackQuery, **__) -> None:
     """
     Обработчик кнопкок "Снять роль админа" и "Точно снять роль"
     при удалении админа.
@@ -153,8 +157,10 @@ async def admin_remove_view(callback: types.CallbackQuery, *_, **__) -> None:
             )
         )
         remove_role_from_user(user_id, Roles.ADMIN)
-        callback.data = CallbackData.OPEN_ADMINS_LIST_PAGE_
-        await admins_list_view(callback)
+        await admins_list_view(
+            callback,
+            callback_data=CallbackData.OPEN_ADMINS_LIST_PAGE_
+        )
         return
 
     user_id, page = map(
@@ -163,8 +169,9 @@ async def admin_remove_view(callback: types.CallbackQuery, *_, **__) -> None:
         ).split('_')
     )
 
+    username = await username_by_user_id(callback.bot, user_id)
     text = f"Вы точно хотите удалить из админов " \
-           f"{tg_click_name(await username_by_user_id(user_id), user_id)}?"
+           f"{tg_click_name(username, user_id)}?"
     keyboard = check_admin_keyboard(user_id, page, sure=True)
 
     await callback.message.edit_text(

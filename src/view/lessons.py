@@ -1,5 +1,4 @@
-from aiogram import Router, types
-from aiogram.filters import Text
+from aiogram import F, Router, types
 from aiogram.methods import SendMediaGroup
 
 from src.handlers.lessons import get_lessons_text_and_image_id
@@ -12,7 +11,7 @@ from src.utils.decorators import save_new_user_decor
 router = Router(name='lessons')
 
 
-@router.callback_query(Text(startswith=CallbackData.OPEN_LESSONS_ON_))
+@router.callback_query(F.data.startswith(CallbackData.OPEN_LESSONS_ON_))
 @save_new_user_decor
 async def open_date_lessons_view(callback: types.CallbackQuery) -> None:
     """

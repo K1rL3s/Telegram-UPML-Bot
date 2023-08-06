@@ -1,5 +1,4 @@
-from aiogram import Router, types
-from aiogram.filters import Text
+from aiogram import F, Router, types
 
 from src.handlers.cafe_menu import get_formatted_menu_by_date
 from src.keyboards import cafe_menu_keyboard
@@ -10,7 +9,7 @@ from src.utils.datehelp import date_by_format
 router = Router(name='cafe_menu')
 
 
-@router.callback_query(Text(startswith=CallbackData.OPEN_CAFE_MENU_ON_))
+@router.callback_query(F.data.startswith(CallbackData.OPEN_CAFE_MENU_ON_))
 async def open_date_cafe_menu(callback: types.CallbackQuery) -> None:
     """
     Обработчик кнопки "Меню", открывает расписание еды на текущий день.

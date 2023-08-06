@@ -39,4 +39,6 @@ def laundry_keyboard(
         go_to_settings_button
     )
 
+    keyboard.adjust(2, repeat=True)
+
     return keyboard.as_markup()

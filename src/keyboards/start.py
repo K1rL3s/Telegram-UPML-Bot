@@ -11,39 +11,35 @@ from src.keyboards.universal import (
 from src.utils.consts import CallbackData, Roles
 
 
-go_to_main_menu_keyboard = InlineKeyboardBuilder().add(
-    go_to_main_menu_button
-).as_markup()
+go_to_main_menu_keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[[go_to_main_menu_button]]
+)
 
 
 def main_menu_keyboard(user_id: int) -> InlineKeyboardMarkup:
-    keyboard = InlineKeyboardBuilder().add(
-        InlineKeyboardButton(
-            text="🍴Меню",
-            callback_data=CallbackData.OPEN_CAFE_MENU_TODAY
-        ),
-        InlineKeyboardButton(
-            text="📓Уроки",
-            callback_data=CallbackData.OPEN_LESSONS_TODAY
+    keyboard = InlineKeyboardBuilder()
+
+    for button_text, callback_data in zip(
+        ("🍴Меню", "📓Уроки",
+         "💦Прачечная", "📖Элективы",
+         "👩‍✈️Воспитатели"),
+        (CallbackData.OPEN_CAFE_MENU_TODAY, CallbackData.OPEN_LESSONS_TODAY,
+         CallbackData.OPEN_LAUNDRY, CallbackData.OPEN_ELECTIVES,
+         CallbackData.OPEN_EDUCATORS)
+
+    ):
+        keyboard.add(
+            InlineKeyboardButton(
+                text=button_text,
+                callback_data=callback_data
+            )
         )
-    ).add(
-        InlineKeyboardButton(
-            text='💦Прачечная',
-            callback_data=CallbackData.OPEN_LAUNDRY
-        ),
-        InlineKeyboardButton(
-            text='📖Элективы',
-            callback_data=CallbackData.OPEN_ELECTIVES
-        ),
-    ).add(
-        InlineKeyboardButton(
-            text='👩‍✈️Воспитатели',
-            callback_data=CallbackData.OPEN_EDUCATORS
-        ),
-        go_to_settings_button
-    )
+
+    keyboard.add(go_to_settings_button)
 
     if is_has_any_role(user_id, [Roles.SUPERADMIN, Roles.ADMIN]):
         keyboard.add(go_to_admin_panel_button)
+
+    keyboard.adjust(2, repeat=True)
 
     return keyboard.as_markup()

@@ -1,5 +1,5 @@
-from aiogram import types, Router
-from aiogram.filters import Command, StateFilter, Text
+from aiogram import F, types, Router
+from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 
 from src.keyboards import (
@@ -26,8 +26,7 @@ async def start_view(message: types.Message) -> None:
     )
 
 
-@router.message(Command('menu'))
-@router.callback_query(Text(CallbackData.OPEN_MAIN_MENU))
+@router.callback_query(F.data == CallbackData.OPEN_MAIN_MENU)
 @save_new_user_decor
 async def main_menu_view(message: types.Message | types.CallbackQuery) -> None:
     """
@@ -48,9 +47,9 @@ async def main_menu_view(message: types.Message | types.CallbackQuery) -> None:
         )
 
 
-@router.callback_query(Text(CallbackData.OPEN_ADMIN_PANEL))
+@router.callback_query(F.data == CallbackData.OPEN_ADMIN_PANEL)
 @admin_required
-async def admin_panel_view(callback: types.CallbackQuery, *_, **__) -> None:
+async def admin_panel_view(callback: types.CallbackQuery, **_) -> None:
     """
     Обработчик кнопки "Админ панель".
     """
@@ -71,10 +70,10 @@ async def admin_panel_view(callback: types.CallbackQuery, *_, **__) -> None:
 
 
 @router.message(Command('cancel', 'stop'), StateFilter('*'))
-@router.callback_query(Text(CallbackData.CANCEL_STATE), StateFilter('*'))
+@router.callback_query(F.data == CallbackData.CANCEL_STATE, StateFilter('*'))
 async def cancel_state(
         message: types.Message | types.CallbackQuery,
-        state: FSMContext
+        state: FSMContext,
 ) -> None:
     """
     Обработчик кнопок с отменой состояний и команд "/cancel", "/stop".

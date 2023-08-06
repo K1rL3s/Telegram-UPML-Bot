@@ -1,5 +1,5 @@
-from aiogram import Bot, Router, types
-from aiogram.filters import StateFilter, Text
+from aiogram import F, Router, types
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
 from src.handlers.settings import (
@@ -28,7 +28,7 @@ settings_welcome_text = """
 """.strip()
 
 
-@router.callback_query(Text(CallbackData.OPEN_SETTINGS))
+@router.callback_query(F.data == CallbackData.OPEN_SETTINGS)
 @save_new_user_decor
 async def open_settings_view(callback: types.CallbackQuery) -> None:
     """
@@ -42,7 +42,7 @@ async def open_settings_view(callback: types.CallbackQuery) -> None:
     )
 
 
-@router.callback_query(Text(startswith=CallbackData.PREFIX_SWITCH))
+@router.callback_query(F.data.startswith(CallbackData.PREFIX_SWITCH))
 async def edit_bool_settings_view(callback: types.CallbackQuery):
     """
     Обработчик кнопок уведомлений "Уроки" и "Новости".
@@ -57,7 +57,7 @@ async def edit_bool_settings_view(callback: types.CallbackQuery):
     )
 
 
-@router.callback_query(Text(startswith=CallbackData.CHANGE_GRADE_TO_))
+@router.callback_query(F.data.startswith(CallbackData.CHANGE_GRADE_TO_))
 async def edit_grade_settings_view(callback: types.CallbackQuery):
     """
     Обработчик кнопок изменения класса.
@@ -79,16 +79,17 @@ async def edit_grade_settings_view(callback: types.CallbackQuery):
     )
 
 
-@router.callback_query(Text(startswith=CallbackData.EDIT_SETTINGS_PREFIX))
+@router.callback_query(F.data.startswith(CallbackData.EDIT_SETTINGS_PREFIX))
 async def edit_laundry_start_view(
-        callback: types.CallbackQuery, state: FSMContext
+        callback: types.CallbackQuery,
+        state: FSMContext,
 ) -> None:
     """
     Обработчик кнопок изменения времени таймера прачки.
     """
     attr = callback.data.replace(CallbackData.EDIT_SETTINGS_PREFIX, '')
 
-    await EditingSettings.writing.set()
+    await state.set_state(EditingSettings.writing)
     await state.update_data(
         start_id=callback.message.message_id,
         attr=attr
@@ -101,9 +102,10 @@ async def edit_laundry_start_view(
     )
 
 
-@router.callback_query(StateFilter(EditingSettings.writing))
+@router.message(StateFilter(EditingSettings.writing))
 async def edit_laundry_time_view(
-        message: types.Message, state: FSMContext
+        message: types.Message,
+        state: FSMContext,
 ) -> None:
     """
     Обработчик сообщения с минутами для изменения таймера прачки.
@@ -125,7 +127,7 @@ async def edit_laundry_time_view(
         text = f'❌Не распознал `{message.text}` как минуты. Попробуй ещё раз.'
         keyboard = cancel_state_keyboard
 
-    await Bot.get_current().edit_message_text(
+    await message.bot.edit_message_text(
         text=text,
         reply_markup=keyboard,
         message_id=start_id,

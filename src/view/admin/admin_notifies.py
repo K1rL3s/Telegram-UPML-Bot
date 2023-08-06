@@ -1,5 +1,5 @@
-from aiogram import Bot, Router, types
-from aiogram.filters import StateFilter, Text
+from aiogram import F, Router, types
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
 from src.handlers.admin import do_notifies, get_users_for_notify
@@ -15,9 +15,9 @@ from src.utils.states import DoNotify
 router = Router(name='admin_notifies')
 
 
-@router.callback_query(Text(CallbackData.DO_A_NOTIFY_FOR_))
+@router.callback_query(F.data == CallbackData.DO_A_NOTIFY_FOR_)
 @admin_required
-async def notify_panel_view(callback: types.CallbackQuery) -> None:
+async def notify_panel_view(callback: types.CallbackQuery, **_) -> None:
     """
     Обработчик кнопки "Уведомление".
     """
@@ -35,7 +35,7 @@ async def notify_panel_view(callback: types.CallbackQuery) -> None:
     )
 
 
-@router.callback_query(Text(startswith=CallbackData.DO_A_NOTIFY_FOR_))
+@router.callback_query(F.data.startswith(CallbackData.DO_A_NOTIFY_FOR_))
 @admin_required
 async def notify_for_who_view(
         callback: types.CallbackQuery,
@@ -53,7 +53,7 @@ async def notify_for_who_view(
         text = 'Выберите, какому классу сделать уведомление'
         keyboard = notify_for_class_keyboard
     else:
-        await DoNotify.writing.set()
+        await state.set_state(DoNotify.writing)
         await state.set_data(
             {
                 "start_id": callback.message.message_id,
@@ -93,7 +93,7 @@ async def notify_message_view(
            'Для отправки нажмите кнопку. Если хотите изменить, ' \
            'отправьте сообщение повторно.'
 
-    await Bot.get_current().edit_message_text(
+    await message.bot.edit_message_text(
         text=text,
         message_id=start_id,
         chat_id=message.chat.id,
@@ -102,12 +102,13 @@ async def notify_message_view(
 
 
 @router.callback_query(
-    Text(CallbackData.NOTIFY_CONFIRM),
+    F.data == CallbackData.NOTIFY_CONFIRM,
     StateFilter(DoNotify.writing)
 )
 @admin_required
 async def notify_confirm_view(
-        callback: types.CallbackQuery, state: FSMContext, *_, **__
+        callback: types.CallbackQuery,
+        state: FSMContext,
 ) -> None:
     data = await state.get_data()
     notify_type = data['notify_type']
@@ -117,7 +118,7 @@ async def notify_confirm_view(
 
     users = get_users_for_notify(notify_type, is_news=True)
     await do_notifies(
-        message_text, users, callback.from_user.id,
+        callback.bot, message_text, users, callback.from_user.id,
         notifies_eng_to_ru.get(notify_type, notify_type)
     )
 
@@ -128,7 +129,7 @@ async def notify_confirm_view(
     )
 
     for message_id in messages_ids:
-        await Bot.get_current().delete_message(
+        await callback.bot.delete_message(
             chat_id=callback.message.chat.id,
             message_id=message_id
         )

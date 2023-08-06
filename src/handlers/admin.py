@@ -3,6 +3,7 @@ from datetime import date
 from io import BytesIO
 
 import aiojobs
+from aiogram import Bot
 from loguru import logger
 
 from src.database.db_funcs import (
@@ -18,13 +19,15 @@ from src.utils.funcs import (
 
 async def load_lessons_handler(
         chat_id: int,
-        image: BytesIO
+        image: BytesIO,
+        bot: Bot,
 ) -> tuple[str, date] | str:
     """
     Передача расписания в обработчик и сохранение результата в базу данных.
 
     :param chat_id: Айди чата, откуда пришло изображение с расписанием.
     :param image: Изображение с расписанием.
+    :param bot: ТГ Бот.
     :return: Паралелль и дата, если окей, иначе текст ошибки.
     """
 
@@ -35,9 +38,9 @@ async def load_lessons_handler(
         # raise e
         return text
 
-    lessons_id = await bytes_io_to_image_id(chat_id, full_lessons)
+    lessons_id = await bytes_io_to_image_id(chat_id, full_lessons, bot)
     class_ids = [
-        await bytes_io_to_image_id(chat_id, image)
+        await bytes_io_to_image_id(chat_id, image, bot)
         for image in class_lessons
     ]
 
@@ -61,6 +64,7 @@ def get_meal_by_date(meal: str, menu_date: date) -> str | None:
 
 
 async def do_notifies(
+        bot: Bot,
         text: str,
         users: list[User],
         from_who: int = 0,
@@ -69,19 +73,20 @@ async def do_notifies(
     """
     Делатель рассылки.
 
+    :param bot: ТГ Бот.
     :param text: Сообщение.
     :param users: Кому отправить сообщение.
     :param from_who: ТГ Айди отправителя (админа)
     :param for_who: Для кого рассылка.
     """
 
-    username = await username_by_user_id(from_who)
+    username = await username_by_user_id(bot, from_who)
     text = '🔔*Уведомление от администратора* ' \
            f'{tg_click_name(username, from_who)} *{for_who}*\n\n' + text
 
     scheduler = aiojobs.Scheduler(limit=3)
     for user in users:
-        await scheduler.spawn(one_notify(text, user))
+        await scheduler.spawn(one_notify(text, user, bot))
 
     while scheduler.active_count:
         await asyncio.sleep(0.5)

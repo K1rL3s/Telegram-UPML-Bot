@@ -31,4 +31,6 @@ def admin_panel_keyboard(user_id: int) -> InlineKeyboardMarkup:
 
     keyboard.add(go_to_main_menu_button)
 
+    keyboard.adjust(2, 2, 1, repeat=True)
+
     return keyboard.as_markup()

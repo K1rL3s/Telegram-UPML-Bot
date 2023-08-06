@@ -1,5 +1,4 @@
-from aiogram import Router, types
-from aiogram.filters import Text
+from aiogram import F, Router, types
 
 from src.handlers.laundry import (
     laundry_cancel_timer_handler, laundry_welcome_handler,
@@ -13,7 +12,7 @@ from src.utils.datehelp import format_datetime
 router = Router(name='laundry')
 
 
-@router.callback_query(Text(CallbackData.OPEN_LAUNDRY))
+@router.callback_query(F.data == CallbackData.OPEN_LAUNDRY)
 async def laundry_view(callback: types.CallbackQuery) -> None:
     """
     Обработчик кнопки "Прачечная".
@@ -33,7 +32,7 @@ async def laundry_view(callback: types.CallbackQuery) -> None:
     )
 
 
-@router.callback_query(Text(startswith=CallbackData.START_LAUNDRY_PREFIX))
+@router.callback_query(F.data.startswith(CallbackData.START_LAUNDRY_PREFIX))
 async def laundry_start_timer_view(callback: types.CallbackQuery) -> None:
     """
     Обработчик кнопок "Запустить стирку", "Запустить сушку".
@@ -53,7 +52,7 @@ async def laundry_start_timer_view(callback: types.CallbackQuery) -> None:
     )
 
 
-@router.callback_query(Text(CallbackData.CANCEL_LAUNDRY_TIMER))
+@router.callback_query(F.data == CallbackData.CANCEL_LAUNDRY_TIMER)
 async def laundry_cancel_timer_view(callback: types.CallbackQuery) -> None:
     """
     Обработчик кнопки "Отменить таймер".

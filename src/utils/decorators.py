@@ -20,7 +20,7 @@ def save_new_user_decor(func):
     return wrapper
 
 
-def is_has_role_decor(roles: list[Roles | str]):
+def is_has_any_role_decor(roles: list[Roles | str]):
     """
     Декоратор, дающий доступ к команде только имеющим роль.
     """
@@ -29,15 +29,15 @@ def is_has_role_decor(roles: list[Roles | str]):
 
         async def wrapper(
                 update: types.Message | types.CallbackQuery,
-                *args,
+                *args, **kwargs
         ):
             if is_has_any_role(update.from_user.id, roles):
-                return await func(update, *args)
+                return await func(update, *args, state=kwargs.get('state'))
 
         return wrapper
 
     return decorator
 
 
-superadmin_required = is_has_role_decor([Roles.SUPERADMIN])
-admin_required = is_has_role_decor([Roles.SUPERADMIN, Roles.ADMIN])
+superadmin_required = is_has_any_role_decor([Roles.SUPERADMIN])
+admin_required = is_has_any_role_decor([Roles.SUPERADMIN, Roles.ADMIN])

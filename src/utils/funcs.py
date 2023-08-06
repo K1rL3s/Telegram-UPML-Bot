@@ -2,7 +2,7 @@ from io import BytesIO
 from uuid import uuid1
 
 from aiocache import cached
-from aiogram import Bot, types
+from aiogram import Bot, Dispatcher, types
 from aiogram.types import BufferedInputFile, InlineKeyboardMarkup
 from aiogram.exceptions import TelegramUnauthorizedError
 from loguru import logger
@@ -14,6 +14,7 @@ from src.database.models.users import User
 async def bytes_io_to_image_id(
         chat_id: int,
         image: BytesIO,
+        bot: Bot,
 ) -> str:
     """
     Отправляет изображение в телеграм, сохраняет его уникальный айди
@@ -21,12 +22,13 @@ async def bytes_io_to_image_id(
 
     :param chat_id: Куда отправлять.
     :param image: Что отправлять.
+    :param bot: ТГ Бот.
     :return: Айди картинки.
     """
 
     image.seek(0)
     file = BufferedInputFile(image.read(), str(uuid1()))
-    message = await Bot.get_current().send_photo(
+    message = await bot.send_photo(
         chat_id=chat_id,
         photo=file,
     )
@@ -36,14 +38,15 @@ async def bytes_io_to_image_id(
 
 
 @cached(ttl=60 * 60)
-async def username_by_user_id(user_id: int) -> str | None:
+async def username_by_user_id(bot: Bot, user_id: int) -> str | None:
     """
     Получение имени для бд по айди пользователя.
 
+    :param bot: ТГ Бот.
     :param user_id: Айди юзера.
     :return: Имя для бд.
     """
-    chat = await Bot.get_current().get_chat(user_id)
+    chat = await bot.get_chat(user_id)
     return chat.username or chat.first_name or chat.last_name
 
 
@@ -91,6 +94,7 @@ def limit_min_max(
 async def one_notify(
         text: str,
         user: User,
+        bot: Bot,
         keyboard: InlineKeyboardMarkup = None
 ) -> bool:
     """
@@ -98,10 +102,11 @@ async def one_notify(
 
     :param text: Сообщение в уведомлении.
     :param user: Информация о пользователе.
+    :param bot: ТГ Бот.
     :param keyboard: Клавиатура на сообщении с уведомлением.
     """
     try:
-        await Bot.get_current().send_message(
+        await bot.send_message(
             text=text,
             chat_id=user.user_id,
             reply_markup=keyboard

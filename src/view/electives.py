@@ -1,5 +1,4 @@
-from aiogram import Router, types
-from aiogram.filters import Text
+from aiogram import F, Router, types
 
 from src.utils.consts import CallbackData
 
@@ -7,7 +6,7 @@ from src.utils.consts import CallbackData
 router = Router(name='electives')
 
 
-@router.callback_query(Text(CallbackData.OPEN_ELECTIVES))
+@router.callback_query(F.data == CallbackData.OPEN_ELECTIVES)
 async def electives_view(callback: types.CallbackQuery) -> None:
     await callback.message.edit_text(
         text='🥲',

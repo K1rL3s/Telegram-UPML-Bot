@@ -1,7 +1,8 @@
 from io import BytesIO
 
-from aiogram import Bot, F, Router, types
-from aiogram.filters import StateFilter, Text
+from aiogram import F, Router, types
+from aiogram.filters import StateFilter
+
 from aiogram.fsm.context import FSMContext
 
 from src.database.db_funcs import edit_meal_by_date
@@ -23,9 +24,11 @@ from src.utils.throttling import rate_limit
 router = Router(name='admin_updates')
 
 
-@router.callback_query(Text(CallbackData.AUTO_UPDATE_CAFE_MENU))
+@router.callback_query(F.data == CallbackData.AUTO_UPDATE_CAFE_MENU)
 @admin_required
-async def auto_update_cafe_menu_view(callback: types.CallbackQuery) -> None:
+async def auto_update_cafe_menu_view(
+        callback: types.CallbackQuery, **_
+) -> None:
     """
     Обработчик кнопки "Загрузить меню",
     загружает и обрабатывает PDF расписание еды с сайта лицея.
@@ -38,7 +41,7 @@ async def auto_update_cafe_menu_view(callback: types.CallbackQuery) -> None:
     )
 
 
-@router.callback_query(Text(CallbackData.EDIT_CAFE_MENU))
+@router.callback_query(F.data == CallbackData.EDIT_CAFE_MENU)
 @admin_required
 async def edit_cafe_menu_start_view(
         callback: types.CallbackQuery,
@@ -70,9 +73,8 @@ async def edit_cafe_menu_date_view(
     """
     Обработчик ввода доты для изменения меню.
     """
-    try:
-        edit_menu_date = date_by_format(message.text)
-    except ValueError:
+    edit_menu_date = date_by_format(message.text)
+    if not edit_menu_date:  # is False
         text = f'Не удалось понять дату "`{message.text}`", попробуйте ещё раз'
         keyboard = cancel_state_keyboard
     else:
@@ -84,7 +86,7 @@ async def edit_cafe_menu_date_view(
 
     start_id = (await state.get_data())['start_id']
 
-    await Bot.get_current().edit_message_text(
+    await message.bot.edit_message_text(
         text=text,
         chat_id=message.chat.id,
         message_id=start_id,
@@ -148,7 +150,7 @@ async def edit_cafe_menu_text_view(
            'Для сохранения нажмите кнопку. Если хотите изменить, ' \
            'отправьте сообщение повторно.'
 
-    await Bot.get_current().edit_message_text(
+    await message.bot.edit_message_text(
         text=text,
         chat_id=message.chat.id,
         message_id=start_id,
@@ -186,21 +188,22 @@ async def edit_cafe_menu_confirm_view(
     )
 
     for new_menu_id in new_menu_ids:
-        await Bot.get_current().delete_message(
+        await callback.bot.delete_message(
             chat_id=callback.message.chat.id,
             message_id=new_menu_id
         )
 
 
-@router.callback_query(Text(CallbackData.UPLOAD_LESSONS))
+@router.callback_query(F.data == CallbackData.UPLOAD_LESSONS)
 @admin_required
 async def start_load_lessons_view(
-        callback: types.CallbackQuery, *_, **__
+        callback: types.CallbackQuery,
+        state: FSMContext,
 ) -> None:
     """
     Обработчик кнопки "Загрузить уроки".
     """
-    await LoadingLessons.image.set()
+    await state.set_state(LoadingLessons.image)
     text = 'Отправьте изображение(-я) расписания уроков'
 
     await callback.message.edit_text(
@@ -213,18 +216,18 @@ async def start_load_lessons_view(
 @rate_limit(0)
 @admin_required
 async def load_lessons_view(
-        message: types.Message, state: FSMContext, *_, **__
+        message: types.Message,
+        state: FSMContext,
 ) -> None:
     """
     Обработчик сообщений с изображениями
     после нажатия кнопки "Загрузить уроки".
     """
-    bot: Bot = Bot.get_current()
     file_id = message.photo[-1].file_id
-    file = await bot.get_file(file_id)
-    await bot.download_file(file.file_path, image := BytesIO())
+    file = await message.bot.get_file(file_id)
+    await message.bot.download_file(file.file_path, image := BytesIO())
 
-    result = await load_lessons_handler(message.chat.id, image)
+    result = await load_lessons_handler(message.chat.id, image, message.bot)
 
     if state:
         await state.clear()

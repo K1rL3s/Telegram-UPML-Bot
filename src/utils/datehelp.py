@@ -27,7 +27,7 @@ def format_datetime(_datetime: datetime) -> str:
            f'{_datetime.hour:0>2}:{_datetime.minute:0>2}:{_datetime.second:0>2}'  # noqa
 
 
-def date_by_format(_date: str) -> date:
+def date_by_format(_date: str) -> date | bool:
     """
     Конвертация отформатированной строки в дату.
 
@@ -38,8 +38,13 @@ def date_by_format(_date: str) -> date:
     if _date.lower() == 'today':
         return date_today()
 
-    dd, mm, yyyy = map(int, _date.split('.'))
-    return date(day=dd, month=mm, year=yyyy)
+    _date = _date.replace('-', ' ').replace('.', ' ')
+    try:
+        dd, mm, yyyy = map(int, _date.strip().split())
+        date_obj = date(year=yyyy, month=mm, day=dd)
+    except ValueError:
+        return False
+    return date_obj
 
 
 def weekday_by_date(_date: date) -> str:

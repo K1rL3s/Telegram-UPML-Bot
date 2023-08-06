@@ -18,13 +18,17 @@ add_new_admin_button = InlineKeyboardButton(
     text='🔎Добавить админа',
     callback_data=CallbackData.ADD_NEW_ADMIN
 )
-add_new_admin_sure_keyboard = InlineKeyboardBuilder().add(
-    InlineKeyboardButton(
-        text='✅Подтвердить',
-        callback_data=CallbackData.ADD_NEW_ADMIN_SURE
-    ),
-    cancel_state_button
-).as_markup()
+add_new_admin_sure_keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text='✅Подтвердить',
+                callback_data=CallbackData.ADD_NEW_ADMIN_SURE
+            ),
+            cancel_state_button
+        ]
+    ]
+)
 
 
 def admins_list_keyboard(
@@ -61,9 +65,11 @@ def admins_list_keyboard(
         )
 
     keyboard.add(
+        add_new_admin_button,
         go_to_admin_panel_button,
-        add_new_admin_button
     )
+
+    keyboard.adjust(2, repeat=True)
 
     return keyboard.as_markup()
 
@@ -89,4 +95,4 @@ def check_admin_keyboard(
             text=f'👨‍✈️Список админов',
             callback_data=CallbackData.OPEN_ADMINS_LIST_PAGE_ + f'{page}'
         )
-    ).as_markup()
+    ).adjust(1, 2).as_markup()
