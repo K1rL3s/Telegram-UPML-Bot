@@ -44,14 +44,14 @@ async def load_lessons_handler(
         for image in class_lessons
     ]
 
-    save_or_update_lessons(lessons_id, lessons_date, grade)
+    await save_or_update_lessons(lessons_id, lessons_date, grade)
     for image_id, letter in zip(class_ids, 'АБВ'):
-        save_or_update_lessons(image_id, lessons_date, grade, letter)
+        await save_or_update_lessons(image_id, lessons_date, grade, letter)
 
     return grade, lessons_date
 
 
-def get_meal_by_date(meal: str, menu_date: date) -> str | None:
+async def get_meal_by_date(meal: str, menu_date: date) -> str | None:
     """
     Возвращает приём пищи по названию и дате.
 
@@ -59,7 +59,7 @@ def get_meal_by_date(meal: str, menu_date: date) -> str | None:
     :param menu_date: Дата.
     :return: Приём пищи из бд.
     """
-    menu = get_menu_by_date(menu_date)
+    menu = await get_menu_by_date(menu_date)
     return getattr(menu, meal, None)
 
 
@@ -94,14 +94,14 @@ async def do_notifies(
 
 
 # all, grade_10, grade_11, 10А, 10Б, 10В, 11А, 11Б, 11В
-def get_users_for_notify(
+async def get_users_for_notify(
         notify_type: str = '',
         is_lessons: bool = False,
         is_news: bool = False,
 ) -> list[User]:
     """
     Преобразование notify_type
-    из src/view/admin/admin_notifies.py ``def notify_for_who_view``
+    из src/view/admin/admin_notifies.py ``async def notify_for_who_view``
     в условия для фильтра.
 
     :param notify_type: Тип уведомления из функции.
@@ -109,12 +109,12 @@ def get_users_for_notify(
     :param is_news: Уведомление о новостях (ручная рассылка).
     """
 
-    conditions = [('is_active', 1)]
+    conditions = [('is_active', True)]
 
     if is_lessons:
-        conditions.append(('lessons_notify', 1))
+        conditions.append(('lessons_notify', True))
     if is_news:
-        conditions.append(('news_notify', 1))
+        conditions.append(('news_notify', True))
 
     if notify_type.startswith('grade'):
         conditions.append(('grade', notify_type.split('_')[-1]))
@@ -123,4 +123,4 @@ def get_users_for_notify(
             and any(notify_type.endswith(letter) for letter in 'АБВ'):  # XD
         conditions.append(('class_', notify_type))
 
-    return get_users_by_conditions(conditions)
+    return await get_users_by_conditions(conditions)

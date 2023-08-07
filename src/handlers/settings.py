@@ -6,7 +6,7 @@ from src.utils.consts import CallbackData
 from src.utils.funcs import limit_min_max
 
 
-def edit_bool_settings_handler(
+async def edit_bool_settings_handler(
         user_id: int,
         callback_data: str,
 ) -> None:
@@ -19,13 +19,16 @@ def edit_bool_settings_handler(
     """
 
     attr = callback_data.replace(CallbackData.PREFIX_SWITCH, '')
-    settings = get_settings(user_id)
-    save_or_update_settings(user_id, **{attr: not getattr(settings, attr)})
+    settings = await get_settings(user_id)
+    await save_or_update_settings(
+        user_id,
+        **{attr: not getattr(settings, attr)}
+    )
 
     # return get_settings(user_id)
 
 
-def edit_grade_setting_handler(
+async def edit_grade_setting_handler(
         user_id: int,
         callback_data: str,
 ) -> Settings | None:
@@ -43,17 +46,19 @@ def edit_grade_setting_handler(
         return None
 
     if grade.lower() == 'none':
-        save_or_update_settings(user_id, grade=None, letter=None)
+        grade = letter = None
     else:
-        save_or_update_settings(user_id, grade=grade[:2], letter=grade[-1:])
+        grade, letter = grade[:2], grade[-1:]
 
-    return get_settings(user_id)
+    await save_or_update_settings(user_id, grade=grade, letter=letter)
+
+    return await get_settings(user_id)
 
 
-def edit_laundry_time_handler(user_id: int, attr: str, text: str) -> int:
+async def edit_laundry_time_handler(user_id: int, attr: str, text: str) -> int:
     try:
         minutes = limit_min_max(int(float(text)), 1, 2 * 24 * 60)  # двое суток
-        save_or_update_settings(user_id, **{attr: minutes})
+        await save_or_update_settings(user_id, **{attr: minutes})
         return minutes
     except ValueError:
         return 0

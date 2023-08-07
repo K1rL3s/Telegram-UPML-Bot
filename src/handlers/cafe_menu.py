@@ -23,7 +23,7 @@ def format_menu(meals: tuple[str, ...]) -> str:
 
 
 # @ttl_cache(ttl=60 * 60)  # Час
-def get_formatted_menu_by_date(menu_date: date = None) -> str:
+async def get_formatted_menu_by_date(menu_date: date = None) -> str:
     """
     Возвращает меню (список строк) по дате.
     Н/д для каждого приёма пищи, если данных нет.
@@ -35,7 +35,7 @@ def get_formatted_menu_by_date(menu_date: date = None) -> str:
     if menu_date is None:
         menu_date = date_today()
 
-    menu = get_menu_by_date(menu_date)
+    menu = await get_menu_by_date(menu_date)
 
     meals = (
         menu.breakfast if menu and menu.breakfast else 'Н/д',

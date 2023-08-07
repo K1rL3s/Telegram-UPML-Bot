@@ -4,21 +4,18 @@ from typing import Any, Type
 
 import sqlalchemy as sa
 from loguru import logger
+from sqlalchemy.orm import selectinload
 
-from src.database.models.base_model import BaseModel
-from src.database.models.class_lessons import ClassLessons
-from src.database.models.full_lessons import FullLessons
-from src.database.models.laundries import Laundry
-from src.database.models.menus import Menu
-from src.database.models.roles import Role
-from src.database.models.settings import Settings
-from src.database.models.users import User
+from src.database.__all_models import (
+    BaseModel, ClassLessons, FullLessons,
+    Laundry, Menu, Role, Settings, User,
+)
 from src.database.db_session import get_session
 from src.utils.consts import Roles, menu_eng_to_ru
 from src.utils.datehelp import datetime_now
 
 
-def save_new_user(user_id: int, username: str) -> None:
+async def save_new_user(user_id: int, username: str) -> None:
     """
     Сохраняет пользователя в базе данных
     или обновляет его статус ``is_active``, никнейм,
@@ -28,9 +25,9 @@ def save_new_user(user_id: int, username: str) -> None:
     :param username: Имя пользователя.
     """
 
-    with get_session(do_commit=True) as session:
+    async with get_session() as session:
         user_query = sa.select(User).where(User.user_id == user_id)
-        user: User = session.scalar(user_query)
+        user: User = await session.scalar(user_query)
 
         if user and (not user.is_active or user.username != username):
             user.is_active = True
@@ -40,11 +37,13 @@ def save_new_user(user_id: int, username: str) -> None:
             session.add(user)
             logger.info(f'Новый пользователь {user}')
 
-    save_or_update_settings(user_id)
-    save_or_update_laundry(user_id)
+        await session.commit()
+
+    await save_or_update_settings(user_id)
+    await save_or_update_laundry(user_id)
 
 
-def save_or_update_menu_in_db(
+async def save_or_update_menu_in_db(
         menu_date: date,
         breakfast: str | None = None,
         lunch: str | None = None,
@@ -65,30 +64,32 @@ def save_or_update_menu_in_db(
     :param edit_by: Кем редактируется, ТГ Айди, 0 - автоматически.
     """
 
-    with get_session(do_commit=True) as session:
-        user = get_user(edit_by) if edit_by != 0 else None
+    async with get_session() as session:
+        user_db_id = (await get_user(edit_by)).id if edit_by != 0 else None
         find_query = sa.select(Menu).where(Menu.date == menu_date)
         meals = {
             'breakfast': breakfast, 'lunch': lunch, 'dinner': dinner,
             'snack': snack, 'supper': supper
         }
 
-        if menu := session.scalar(find_query):
+        if menu := await session.scalar(find_query):
             for k, v in meals.items():
                 if edit_by or not getattr(menu, k, None):
                     setattr(menu, k, v)
-            if user:
-                menu.edit_by = user.user_id
+            if user_db_id:
+                menu.edit_by = user_db_id
         else:
             menu = Menu(
                 **meals,
-                edit_by=edit_by,
+                edit_by=user_db_id,
                 date=menu_date,
             )
             session.add(menu)
 
+        await session.commit()
 
-def save_or_update_lessons(
+
+async def save_or_update_lessons(
         image: str,
         lessons_date: date,
         grade: str,
@@ -105,7 +106,7 @@ def save_or_update_lessons(
 
     model = ClassLessons if letter else FullLessons
 
-    with get_session(do_commit=True) as session:
+    async with get_session() as session:
         find_query = sa.select(model).where(
             model.date == lessons_date,
             model.grade == grade,
@@ -114,7 +115,7 @@ def save_or_update_lessons(
         if letter:
             find_query = find_query.where(model.letter == letter)
 
-        if lessons := session.scalar(find_query):
+        if lessons := await session.scalar(find_query):
             lessons.image = image
         else:
             data = {
@@ -127,11 +128,13 @@ def save_or_update_lessons(
             lessons = model(**data)
             session.add(lessons)
 
+        await session.commit()
 
-def save_or_update_laundry(
+
+async def save_or_update_laundry(
         user_id: int,
         **kwargs
-) -> Laundry:
+) -> None:
     """
     Сохраняет или обновляет уведомление о стирке/сушке.
 
@@ -140,24 +143,24 @@ def save_or_update_laundry(
     :return: Модель Laundry.
     """
 
-    with get_session(do_commit=True) as session:
+    async with get_session() as session:
         db_user_id_query = sa.select(User.id).where(User.user_id == user_id)
-        db_user_id = session.scalar(db_user_id_query)
+        db_user_id = await session.scalar(db_user_id_query)
 
         # noinspection PyTypeChecker
         query = sa.select(Laundry).where(Laundry.user_id == db_user_id)
 
-        if laundry := session.scalar(query):
+        if laundry := await session.scalar(query):
             for k, v in kwargs.items():
                 setattr(laundry, k, v)
         else:
             laundry = Laundry(user_id=db_user_id)
             session.add(laundry)
 
-    return laundry
+        await session.commit()
 
 
-def save_or_update_settings(
+async def save_or_update_settings(
         user_id: int,
         **kwargs
 ) -> None:
@@ -168,14 +171,14 @@ def save_or_update_settings(
     :param kwargs: Поле таблицы=значение.
     :return: модель Settings.
     """
-    with get_session(do_commit=True) as session:
+    async with get_session() as session:
         db_user_id_query = sa.select(User.id).where(User.user_id == user_id)
-        db_user_id = session.scalar(db_user_id_query)
+        db_user_id = await session.scalar(db_user_id_query)
 
         # noinspection PyTypeChecker
         query = sa.select(Settings).where(Settings.user_id == db_user_id)
 
-        if settings := session.scalar(query):
+        if settings := await session.scalar(query):
             for k, v in kwargs.items():
                 setattr(settings, k, v)
         else:
@@ -185,8 +188,10 @@ def save_or_update_settings(
             )
             session.add(settings)
 
+        await session.commit()
 
-def get_menu_by_date(menu_date: date) -> Menu | None:
+
+async def get_menu_by_date(menu_date: date) -> Menu | None:
     """
     Возвращает меню на день по дате.
 
@@ -194,12 +199,12 @@ def get_menu_by_date(menu_date: date) -> Menu | None:
     :return: Модель Menu.
     """
 
-    with get_session() as session:
+    async with get_session() as session:
         query = sa.select(Menu).where(Menu.date == menu_date)
-        return session.scalar(query)
+        return await session.scalar(query)
 
 
-def get_users_by_conditions(
+async def get_users_by_conditions(
         values: list[tuple[str, Any]],
         or_mode: bool = False
 ) -> list[User]:
@@ -214,7 +219,7 @@ def get_users_by_conditions(
     :return: Список юзеров.
     """
 
-    with get_session() as session:
+    async with get_session() as session:
         conditions = []
         for attr, value in values:
             if hasattr(User, attr):
@@ -223,18 +228,18 @@ def get_users_by_conditions(
                 conditions.append(getattr(Settings, attr) == value)
 
         if or_mode:
-            find_query = sa.select(User).join(Settings).where(
+            query = sa.select(User).join(Settings).where(
                 sa.or_(*conditions)
             )
         else:
-            find_query = sa.select(User).join(Settings).where(
+            query = sa.select(User).join(Settings).where(
                 sa.and_(*conditions)
             )
+        return list((await session.scalars(query)).all())
 
-        return list(session.scalars(find_query).all())
 
-
-def get_role(role: Roles | str) -> Role | None:
+# ???
+async def get_role(role: Roles | str) -> Role | None:
     """
     Возвращает модель Role по названию роли.
 
@@ -245,12 +250,12 @@ def get_role(role: Roles | str) -> Role | None:
     if isinstance(role, Enum):
         role = role.value
 
-    with get_session() as session:
+    async with get_session() as session:
         role_query = sa.select(Role).where(Role.role == role)
-        return session.scalar(role_query)
+        return await session.scalar(role_query)
 
 
-def get_users_with_role(role: Roles | str) -> list[User]:
+async def get_users_with_role(role: Roles | str) -> list[User]:
     """
     Возвращает всех пользователей, у которых есть роль.
 
@@ -261,18 +266,18 @@ def get_users_with_role(role: Roles | str) -> list[User]:
     if isinstance(role, Enum):
         role = role.value
 
-    with get_session() as session:
+    async with get_session() as session:
+        subquery = sa.select(Role.id).where(Role.role == role)
         query = sa.select(User).where(
             User.roles.any(
-                sa.select(Role.id).where(
-                    Role.role == role
-                ).scalar_subquery()
+                sa.cast(subquery.as_scalar(), sa.Boolean)
             )
-        )
-        return list(session.scalars(query).all())
+        ).options(selectinload(User.roles))
+
+        return list((await session.scalars(query)).all())
 
 
-def get_user_id_by_username(username: str) -> int | None:
+async def get_user_id_by_username(username: str) -> int | None:
     """
     Возвращает айди пользователя по его имени в базе.
 
@@ -280,12 +285,12 @@ def get_user_id_by_username(username: str) -> int | None:
     :return: Айди юзера.
     """
 
-    with get_session() as session:
+    async with get_session() as session:
         query = sa.select(User.user_id).where(User.username == username)
-        return session.scalar(query)
+        return await session.scalar(query)
 
 
-def get_full_lessons(lessons_date: date, grade: str) -> str | None:
+async def get_full_lessons(lessons_date: date, grade: str) -> str | None:
     """
     Возвращает айди картинки расписания уроков для параллели.
 
@@ -294,16 +299,16 @@ def get_full_lessons(lessons_date: date, grade: str) -> str | None:
     :return: Айди картинки или None.
     """
 
-    with get_session() as session:
+    async with get_session() as session:
         query = sa.select(FullLessons).where(
             FullLessons.date == lessons_date,
             FullLessons.grade == grade
         )
-        lessons: FullLessons = session.scalar(query)
+        lessons: FullLessons = await session.scalar(query)
         return lessons.image if lessons else None
 
 
-def get_class_lessons(
+async def get_class_lessons(
         lessons_date: date,
         class_: str
 ) -> str | None:
@@ -315,16 +320,16 @@ def get_class_lessons(
     :return: Айди картинки или None.
     """
 
-    with get_session() as session:
+    async with get_session() as session:
         query = sa.select(ClassLessons).where(
             ClassLessons.date == lessons_date,
             ClassLessons.class_ == class_
         )
-        lessons: ClassLessons = session.scalar(query)
+        lessons: ClassLessons = await session.scalar(query)
         return lessons.image if lessons else None
 
 
-def _get_model(
+async def _get_model(
         model: Type[BaseModel],
         user_id: int,
         do_subquery: bool = False
@@ -339,7 +344,7 @@ def _get_model(
     :return: Модель model.
     """
 
-    with get_session() as session:
+    async with get_session() as session:
         query = sa.select(model)
 
         if do_subquery:
@@ -353,38 +358,38 @@ def _get_model(
         else:
             query = query.where(model.user_id == user_id)
 
-        return session.scalar(query)
+        return await session.scalar(query)
 
 
-def get_user(user_id: int) -> User | None:
-    return _get_model(User, user_id)
+async def get_user(user_id: int) -> User | None:
+    return await _get_model(User, user_id)
 
 
-def get_settings(user_id: int) -> Settings:
-    return _get_model(Settings, user_id, do_subquery=True)
+async def get_settings(user_id: int) -> Settings | None:
+    return await _get_model(Settings, user_id, do_subquery=True)
 
 
-def get_laundry(user_id: int) -> Laundry:
-    return _get_model(Laundry, user_id, do_subquery=True)
+async def get_laundry(user_id: int) -> Laundry | None:
+    return await _get_model(Laundry, user_id, do_subquery=True)
 
 
-def get_expired_laundries() -> list[Laundry]:
+async def get_expired_laundries() -> list[Laundry]:
     """
     Возвращает список моделей Laundry, у которых пришло время для уведомления.
 
     :return: Список из Laundry.
     """
 
-    with get_session() as session:
+    async with get_session() as session:
+        now = datetime_now()
         query = sa.select(Laundry).where(
-            Laundry.is_active == 1,
-            Laundry.end_time <= datetime_now()
+            Laundry.is_active == True,
+            Laundry.end_time <= now
         )
+        return list((await session.scalars(query)).all())
 
-        return list(session.scalars(query).all())
 
-
-def update_user(user_id: int, **params) -> None:
+async def update_user(user_id: int, **params) -> None:
     """
     Обновление пользователя по айди.
 
@@ -392,16 +397,17 @@ def update_user(user_id: int, **params) -> None:
     :param params: Поле таблицы=значение, ...
     """
 
-    with get_session(do_commit=True) as session:
+    async with get_session() as session:
         query = sa.update(User).where(
             User.user_id == user_id
         ).values(
             **params
         )
-        session.execute(query)
+        await session.execute(query)
+        await session.commit()
 
 
-def edit_meal_by_date(
+async def edit_meal_by_date(
         meal: str,
         new_menu: str,
         menu_date: date,
@@ -415,21 +421,22 @@ def edit_meal_by_date(
     :param menu_date: Дата.
     :param edit_by: ТГ Айди того, кто меняет.
     """
-    menu = get_menu_by_date(menu_date)
+    menu = await get_menu_by_date(menu_date)
 
     meals = {
-        meal: getattr(menu, meal, None) for meal in menu_eng_to_ru.keys()
+        meal: getattr(menu, meal, None)
+        for meal in menu_eng_to_ru.keys()
     }
     meals[meal] = new_menu
 
-    save_or_update_menu_in_db(
+    await save_or_update_menu_in_db(
         menu_date=menu_date,
         edit_by=edit_by,
         **meals
     )
 
 
-def is_has_any_role(user_id: int, roles: list[Roles | str]) -> bool:
+async def is_has_any_role(user_id: int, roles: list[Roles | str]) -> bool:
     """
     Имеет ли юзер хотя бы одну роль из переданных.
 
@@ -438,9 +445,9 @@ def is_has_any_role(user_id: int, roles: list[Roles | str]) -> bool:
     :return: Тру или фэлс.
     """
 
-    with get_session() as session:
+    async with get_session() as session:
         user_query = sa.select(User).where(User.user_id == user_id)
-        user = session.scalar(user_query)
+        user: User = await session.scalar(user_query)
         if user is None:
             return False
 
@@ -451,7 +458,7 @@ def is_has_any_role(user_id: int, roles: list[Roles | str]) -> bool:
         return any(role.role in role_names for role in user.roles)
 
 
-def remove_role_from_user(user_id: int, role: Roles | str) -> None:
+async def remove_role_from_user(user_id: int, role: Roles | str) -> None:
     """
     Удаляет роль у юзера.
 
@@ -462,20 +469,21 @@ def remove_role_from_user(user_id: int, role: Roles | str) -> None:
     if isinstance(role, Roles):
         role = role.value
 
-    with get_session(do_commit=True) as session:
+    async with get_session() as session:
         user_query = sa.select(User).where(User.user_id == user_id)
-        user = session.scalar(user_query)
-        role_query = sa.select(Role).where(
-            Role.role == role
-        )
-        role = session.scalar(role_query)
+        role_query = sa.select(Role).where(Role.role == role)
+        user = await session.scalar(user_query)
+        role = await session.scalar(role_query)
+
         try:
             user.roles.remove(role)
         except ValueError:
             pass
 
+        await session.commit()
 
-def add_role_to_user(user_id: int, role: Roles | str) -> None:
+
+async def add_role_to_user(user_id: int, role: Roles | str) -> None:
     """
     Добавляет роль юзеру.
 
@@ -486,11 +494,11 @@ def add_role_to_user(user_id: int, role: Roles | str) -> None:
     if isinstance(role, Roles):
         role = role.value
 
-    with get_session(do_commit=True) as session:
+    async with get_session() as session:
         user_query = sa.select(User).where(User.user_id == user_id)
-        user = session.scalar(user_query)
-        role_query = sa.select(Role).where(
-            Role.role == role
-        )
-        role = session.scalar(role_query)
+        role_query = sa.select(Role).where(Role.role == role)
+        user = await session.scalar(user_query)
+        role = await session.scalar(role_query)
         user.roles.append(role)
+
+        await session.commit()

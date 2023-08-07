@@ -32,7 +32,7 @@ async def save_cafe_menu() -> tuple[bool, str]:
         logger.warning(text := 'Не удалось сравнять дату PDF и текущей недели')
         return False, text
 
-    _process_pdf_menu(pdf_reader, menu_date)
+    await _process_pdf_menu(pdf_reader, menu_date)
     return True, 'Расписание еды обновлено!'
 
 
@@ -114,7 +114,7 @@ async def _get_pdf_menu() -> None | PdfReader:
     return None
 
 
-def _process_pdf_menu(
+async def _process_pdf_menu(
         pdf_reader: PdfReader,
         menu_date: date,
 ) -> None:
@@ -141,7 +141,7 @@ def _process_pdf_menu(
             meals.append(_normalize_meal(meal))
             text_menu = text_menu[end:]
 
-        save_or_update_menu_in_db(
+        await save_or_update_menu_in_db(
             menu_date,
             *meals
         )

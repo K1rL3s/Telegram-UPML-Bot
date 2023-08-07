@@ -7,7 +7,7 @@ from src.database.db_funcs import (
 from src.utils.datehelp import format_date, weekday_by_date
 
 
-def get_lessons_text_and_image_id(
+async def get_lessons_text_and_image_id(
         user_id: int,
         lesson_date: date = None
 ) -> tuple[str, list[str] | None]:
@@ -24,16 +24,16 @@ def get_lessons_text_and_image_id(
     :return: Сообщение и список с двумя айди изображений.
     """
 
-    settings = get_settings(user_id)
+    settings = await get_settings(user_id)
 
     images = []
 
     if settings.class_:
-        images.append(get_full_lessons(lesson_date, settings.grade))
-        images.append(get_class_lessons(lesson_date, settings.class_))
+        images.append(await get_full_lessons(lesson_date, settings.grade))
+        images.append(await get_class_lessons(lesson_date, settings.class_))
     else:
-        images.append(get_full_lessons(lesson_date, "10"))
-        images.append(get_full_lessons(lesson_date, "11"))
+        images.append(await get_full_lessons(lesson_date, "10"))
+        images.append(await get_full_lessons(lesson_date, "11"))
 
     for_class = settings.class_ if settings.class_ else "❓"
 

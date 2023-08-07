@@ -6,7 +6,7 @@ from aiogram import Dispatcher
 
 from src.middlewares.throttling import ThrottlingMiddleware
 from src.middlewares.logging import LoggingMiddleware
-from src.middlewares.callbacks_answer import CallbackQueryAnswerMiddleware
+from src.middlewares.callbacks_answer import CallbackAnswerMiddleware
 
 
 def setup_middlewares(dp: Dispatcher) -> None:
@@ -14,4 +14,4 @@ def setup_middlewares(dp: Dispatcher) -> None:
     dp.callback_query.middleware(ThrottlingMiddleware())
     dp.message.middleware(LoggingMiddleware())
     dp.callback_query.middleware(LoggingMiddleware())
-    dp.callback_query.middleware(CallbackQueryAnswerMiddleware())
+    dp.callback_query.middleware(CallbackAnswerMiddleware())

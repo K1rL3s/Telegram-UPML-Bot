@@ -2,7 +2,6 @@ FROM python:3.10.11-slim as builder
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
-ENV TESSERACT_PATH="/usr/bin/tesseract"
 
 WORKDIR /app
 
@@ -15,6 +14,10 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 
 FROM python:3.10.11-slim
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV TESSERACT_PATH="/usr/bin/tesseract"
 
 WORKDIR /app
 
@@ -29,7 +32,5 @@ RUN pip install --no-cache --no-cache-dir /wheels/*
 COPY ./src ./src
 COPY ./migration ./migration
 COPY ./alembic.ini ./alembic.ini
-
-RUN alembic upgrade head
 
 CMD ["python", "-m", "src"]

@@ -1,5 +1,5 @@
 from aiogram import F, Router, types
-from aiogram.filters import StateFilter
+from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 
 from src.handlers.settings import (
@@ -10,7 +10,7 @@ from src.keyboards import (
     cancel_state_keyboard, settings_keyboard,
     choose_grade_keyboard,
 )
-from src.utils.consts import CallbackData, times_eng_to_ru
+from src.utils.consts import CallbackData, Commands, times_eng_to_ru
 from src.utils.decorators import save_new_user_decor
 from src.utils.states import EditingSettings
 
@@ -28,18 +28,27 @@ settings_welcome_text = """
 """.strip()
 
 
+@router.message(Command(Commands.SETTINGS))
 @router.callback_query(F.data == CallbackData.OPEN_SETTINGS)
 @save_new_user_decor
-async def open_settings_view(callback: types.CallbackQuery) -> None:
+async def open_settings_view(
+        callback: types.CallbackQuery | types.Message
+) -> None:
     """
     Обработчик кнопки "Настройки".
     """
-    keyboard = settings_keyboard(callback.from_user.id)
+    keyboard = await settings_keyboard(callback.from_user.id)
 
-    await callback.message.edit_text(
-        text=settings_welcome_text,
-        reply_markup=keyboard
-    )
+    if isinstance(callback, types.CallbackQuery):
+        await callback.message.edit_text(
+            text=settings_welcome_text,
+            reply_markup=keyboard
+        )
+    else:
+        await callback.answer(
+            text=settings_welcome_text,
+            reply_markup=keyboard
+        )
 
 
 @router.callback_query(F.data.startswith(CallbackData.PREFIX_SWITCH))
@@ -47,9 +56,9 @@ async def edit_bool_settings_view(callback: types.CallbackQuery):
     """
     Обработчик кнопок уведомлений "Уроки" и "Новости".
     """
-    edit_bool_settings_handler(callback.from_user.id, callback.data)
+    await edit_bool_settings_handler(callback.from_user.id, callback.data)
 
-    keyboard = settings_keyboard(callback.from_user.id)
+    keyboard = await settings_keyboard(callback.from_user.id)
 
     await callback.message.edit_text(
         text=settings_welcome_text,
@@ -62,7 +71,9 @@ async def edit_grade_settings_view(callback: types.CallbackQuery):
     """
     Обработчик кнопок изменения класса.
     """
-    settings = edit_grade_setting_handler(callback.from_user.id, callback.data)
+    settings = await edit_grade_setting_handler(
+        callback.from_user.id, callback.data
+    )
 
     if settings is None:
         await callback.message.edit_text(
@@ -71,7 +82,7 @@ async def edit_grade_settings_view(callback: types.CallbackQuery):
         )
         return
 
-    keyboard = settings_keyboard(callback.from_user.id)
+    keyboard = await settings_keyboard(callback.from_user.id)
 
     await callback.message.edit_text(
         text=settings_welcome_text,
@@ -114,14 +125,14 @@ async def edit_laundry_time_view(
     start_id = data['start_id']
     attr = data['attr']
 
-    result = edit_laundry_time_handler(
+    result = await edit_laundry_time_handler(
         message.from_user.id, attr, message.text
     )
 
     if result:
         text = f'✅`{times_eng_to_ru[attr].capitalize()}` ' \
                f'установлено на `{result}` минут.'
-        keyboard = settings_keyboard(message.from_user.id)
+        keyboard = await settings_keyboard(message.from_user.id)
         await state.clear()
     else:
         text = f'❌Не распознал `{message.text}` как минуты. Попробуй ещё раз.'

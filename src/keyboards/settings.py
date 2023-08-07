@@ -8,10 +8,8 @@ from src.keyboards.universal import go_to_main_menu_button
 from src.utils.consts import CallbackData, GRADES
 
 
-def settings_keyboard(
-        user_id: int
-) -> InlineKeyboardMarkup:
-    settings = get_settings(user_id)
+async def settings_keyboard(user_id: int) -> InlineKeyboardMarkup:
+    settings = await get_settings(user_id)
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -45,24 +43,20 @@ def settings_keyboard(
     )
 
 
-choose_grade_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text=f'{grade_letter}',
-                callback_data=CallbackData.CHANGE_GRADE_TO_ + grade_letter
-            )
-            for grade_letter in GRADES
-        ],
-        [
-            InlineKeyboardButton(
-                text=f'⏪Настройки',
-                callback_data=CallbackData.OPEN_SETTINGS
-            ),
-            InlineKeyboardButton(
-                text=f'❓Сбросить класс',
-                callback_data=CallbackData.CHANGE_GRADE_TO_ + 'None'
-            )
-        ]
-    ]
-)
+choose_grade_keyboard = InlineKeyboardBuilder().add(
+    *[
+        InlineKeyboardButton(
+            text=f'{grade_letter}',
+            callback_data=CallbackData.CHANGE_GRADE_TO_ + grade_letter
+        )
+        for grade_letter in GRADES
+    ],
+    InlineKeyboardButton(
+        text=f'⏪Настройки',
+        callback_data=CallbackData.OPEN_SETTINGS
+    ),
+    InlineKeyboardButton(
+        text=f'❓Сбросить класс',
+        callback_data=CallbackData.CHANGE_GRADE_TO_ + 'None'
+    )
+).adjust(3, 3, 2).as_markup()

@@ -5,7 +5,7 @@ from aiogram import types
 from src.middlewares.base import MyBaseMiddleware
 
 
-class CallbackQueryAnswerMiddleware(MyBaseMiddleware):
+class CallbackAnswerMiddleware(MyBaseMiddleware):
     """
     Мидлварь, который отвечает на callback query за меня.
     """

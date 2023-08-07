@@ -37,7 +37,7 @@ async def auto_update_cafe_menu_view(
 
     await callback.message.edit_text(
         text=text,
-        reply_markup=admin_panel_keyboard(callback.from_user.id)
+        reply_markup=await admin_panel_keyboard(callback.from_user.id)
     )
 
 
@@ -113,7 +113,7 @@ async def edit_cafe_menu_meal_view(
            f'*Приём пищи*: `{menu_eng_to_ru[edit_meal].capitalize()}`\n' \
            f'*Меню*:\n' \
            f'```\n' \
-           f'{get_meal_by_date(edit_meal, edit_menu_date) or "Н/д"}' \
+           f'{(await get_meal_by_date(edit_meal, edit_menu_date)) or "Н/д"}' \
            f'```\n\n' \
            'Чтобы изменить, отправьте *одним сообщением* изменённую версию.'
 
@@ -175,7 +175,7 @@ async def edit_cafe_menu_confirm_view(
 
     await state.clear()
 
-    edit_meal_by_date(
+    await edit_meal_by_date(
         edit_meal, new_menu, edit_menu_date, callback.from_user.id
     )
 
@@ -184,7 +184,7 @@ async def edit_cafe_menu_confirm_view(
 
     await callback.message.edit_text(
         text=text,
-        reply_markup=admin_panel_keyboard(callback.from_user.id)
+        reply_markup=await admin_panel_keyboard(callback.from_user.id)
     )
 
     for new_menu_id in new_menu_ids:

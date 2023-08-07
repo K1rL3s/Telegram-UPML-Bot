@@ -16,7 +16,7 @@ go_to_main_menu_keyboard = InlineKeyboardMarkup(
 )
 
 
-def main_menu_keyboard(user_id: int) -> InlineKeyboardMarkup:
+async def main_menu_keyboard(user_id: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     for button_text, callback_data in zip(
@@ -37,7 +37,7 @@ def main_menu_keyboard(user_id: int) -> InlineKeyboardMarkup:
 
     keyboard.add(go_to_settings_button)
 
-    if is_has_any_role(user_id, [Roles.SUPERADMIN, Roles.ADMIN]):
+    if await is_has_any_role(user_id, [Roles.SUPERADMIN, Roles.ADMIN]):
         keyboard.add(go_to_admin_panel_button)
 
     keyboard.adjust(2, repeat=True)

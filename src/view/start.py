@@ -5,14 +5,14 @@ from aiogram.fsm.context import FSMContext
 from src.keyboards import (
     go_to_main_menu_keyboard, main_menu_keyboard, admin_panel_keyboard,
 )
-from src.utils.consts import CallbackData
+from src.utils.consts import CallbackData, Commands
 from src.utils.decorators import admin_required, save_new_user_decor
 
 
 router = Router(name='start')
 
 
-@router.message(Command('start'))
+@router.message(Command(Commands.START))
 @save_new_user_decor
 async def start_view(message: types.Message) -> None:
     """
@@ -26,6 +26,7 @@ async def start_view(message: types.Message) -> None:
     )
 
 
+@router.message(Command(Commands.MENU))
 @router.callback_query(F.data == CallbackData.OPEN_MAIN_MENU)
 @save_new_user_decor
 async def main_menu_view(message: types.Message | types.CallbackQuery) -> None:
@@ -33,7 +34,7 @@ async def main_menu_view(message: types.Message | types.CallbackQuery) -> None:
     Обработчик команды "/menu" и кнопки "Главное меню".
     """
     text = 'Привет! Я - главное меню.'
-    keyboard = main_menu_keyboard(message.from_user.id)
+    keyboard = await main_menu_keyboard(message.from_user.id)
 
     if isinstance(message, types.CallbackQuery):
         await message.message.edit_text(
@@ -45,6 +46,15 @@ async def main_menu_view(message: types.Message | types.CallbackQuery) -> None:
             text=text,
             reply_markup=keyboard
         )
+
+
+@router.message(Command(Commands.HELP))
+@save_new_user_decor
+async def help_view(message: types.Message) -> None:
+    """
+    Обработчик команды "/help".
+    """
+    await message.reply('Помощь!')
 
 
 @router.callback_query(F.data == CallbackData.OPEN_ADMIN_PANEL)
@@ -61,7 +71,7 @@ async def admin_panel_view(callback: types.CallbackQuery, **_) -> None:
 *Загрузить уроки* - ручная загрузка изображений с расписанием уроков.
 *Уведомление* - сделать оповещение.
 """.strip()
-    keyboard = admin_panel_keyboard(callback.from_user.id)
+    keyboard = await admin_panel_keyboard(callback.from_user.id)
 
     await callback.message.edit_text(
         text=text,
@@ -69,7 +79,7 @@ async def admin_panel_view(callback: types.CallbackQuery, **_) -> None:
     )
 
 
-@router.message(Command('cancel', 'stop'), StateFilter('*'))
+@router.message(Command(Commands.CANCEL, Commands.STOP), StateFilter('*'))
 @router.callback_query(F.data == CallbackData.CANCEL_STATE, StateFilter('*'))
 async def cancel_state(
         message: types.Message | types.CallbackQuery,

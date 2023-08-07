@@ -1,22 +1,24 @@
 import contextlib
-from pathlib import Path
 
-import sqlalchemy
 import sqlalchemy.ext.declarative as dec
-from sqlalchemy.orm import Session, sessionmaker
 from loguru import logger
+from sqlalchemy import URL
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import (
+    AsyncSession, async_sessionmaker,
+    create_async_engine,
+)
+
+from src.utils.consts import Config
 
 
 SqlAlchemyBase = dec.declarative_base()
+__factory: async_sessionmaker | None = None
 
-__factory: sessionmaker | None = None
 
-
-def global_init(db_file: str | Path) -> None:
+async def database_init() -> None:
     """
-    Иницализация подключения к файлу базы данной.
-
-    :param db_file: Название файла бд или путь до него.
+    Иницализация подключения к базе данных.
     """
 
     global __factory
@@ -24,46 +26,37 @@ def global_init(db_file: str | Path) -> None:
     if __factory:
         return
 
-    if isinstance(db_file, str):
-        db_file = db_file.strip()
+    DATABASE_URL = URL.create(
+        drivername="postgresql+asyncpg",
+        username=Config.POSTGRES_USER,
+        password=Config.POSTGRES_PASSWORD,
+        host=Config.POSTGRES_HOST,
+        port=Config.POSTGRES_PORT,
+        database=Config.POSTGRES_DB,
+    )
 
-    if not db_file:
-        raise RuntimeError("Необходимо указать файл (путь до) базы данных.")
-
-    conn_str = f'sqlite:///{db_file}'
-    engine = sqlalchemy.create_engine(conn_str, echo=False)
-    __factory = sessionmaker(bind=engine)
-
-    logger.info(f'Подключение к базе данных успешно')
-
-    from src.database import __all_models  # noqa
-
-    SqlAlchemyBase.metadata.create_all(engine)
+    async_engine = create_async_engine(DATABASE_URL)
+    __factory = async_sessionmaker(
+        bind=async_engine,
+        autoflush=False,
+        future=True,
+        expire_on_commit=False,
+    )
 
 
-@contextlib.contextmanager
-def get_session(do_commit: bool = False) -> Session:
+@contextlib.asynccontextmanager
+async def get_session() -> AsyncSession:
     """
     Создатель сессии для работы с базой данных.
 
-    :param do_commit: Делать ли коммит изменений после выхода
-                      из контекстного менеджера.
     :return: Сессия SqlAlchemy.
     """
-
-    global __factory
-
     if not __factory:
-        raise RuntimeError("Брат, а кто global_init вызывать будет?")
+        raise RuntimeError("Брат, а кто database_init вызывать будет?")
 
-    session = __factory(expire_on_commit=False)
     try:
-        yield session
-    except Exception as e:
-        do_commit = False
-        session.rollback()
+        async with __factory() as session:
+            yield session
+    except SQLAlchemyError as e:
+        logger.exception(e)
         raise e
-    finally:
-        if do_commit:
-            session.commit()
-        session.close()

@@ -2,7 +2,7 @@ from io import BytesIO
 from uuid import uuid1
 
 from aiocache import cached
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, types
 from aiogram.types import BufferedInputFile, InlineKeyboardMarkup
 from aiogram.exceptions import TelegramUnauthorizedError
 from loguru import logger
@@ -117,7 +117,7 @@ async def one_notify(
         )
         return True
     except TelegramUnauthorizedError:
-        update_user(user.user_id, is_active=0)
+        await update_user(user.user_id, is_active=0)
         return True
     except Exception as e:
         logger.warning(f'Ошибка при уведомлении: {e}')

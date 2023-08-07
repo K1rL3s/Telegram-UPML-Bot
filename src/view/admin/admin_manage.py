@@ -37,7 +37,7 @@ async def admins_list_view(callback: types.CallbackQuery, **_) -> None:
 
     admins = [
         (await username_by_user_id(callback.bot, user.user_id), user.user_id)
-        for user in get_users_with_role(Roles.ADMIN)
+        for user in await get_users_with_role(Roles.ADMIN)
     ]
 
     keyboard = admins_list_keyboard(admins, page)
@@ -76,7 +76,7 @@ async def admin_add_check_username_view(
     Обработчик сообщения с юзернеймом админа, которого хотят добавить.
     """
     username = message.text
-    user_id = get_user_id_by_username(username)
+    user_id = await get_user_id_by_username(username)
 
     if user_id is None:
         text = 'Не могу найти у себя такого пользователя.'
@@ -109,12 +109,12 @@ async def admin_add_confirm_view(
     Обработчик кнопки "Подтвердить" при добавлении админа.
     """
     user_id = (await state.get_data())['user_id']
-    add_role_to_user(user_id, Roles.ADMIN)
+    await add_role_to_user(user_id, Roles.ADMIN)
 
     text = 'Успешно!'
     await callback.message.edit_text(
         text=text,
-        reply_markup=admin_panel_keyboard(callback.from_user.id)
+        reply_markup=await admin_panel_keyboard(callback.from_user.id)
     )
     await state.clear()
 
@@ -156,7 +156,7 @@ async def admin_remove_view(callback: types.CallbackQuery, **__) -> None:
                 CallbackData.REMOVE_ADMIN_SURE_, ''
             )
         )
-        remove_role_from_user(user_id, Roles.ADMIN)
+        await remove_role_from_user(user_id, Roles.ADMIN)
         await admins_list_view(
             callback,
             callback_data=CallbackData.OPEN_ADMINS_LIST_PAGE_

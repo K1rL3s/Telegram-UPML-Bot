@@ -1,3 +1,4 @@
+from .models.base_model import BaseModel
 from .models.menus import Menu
 from .models.users import User
 from .models.full_lessons import FullLessons

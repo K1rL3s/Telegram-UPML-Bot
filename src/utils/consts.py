@@ -29,12 +29,34 @@ times_eng_to_ru = {
 
 class Config:
     BOT_TOKEN = os.getenv("BOT_TOKEN")
-    DATABASE_PATH = 'src/database/db_files/database.sqlite?check_same_thread=False'  # noqa
     TESSERACT_PATH = os.getenv("TESSERACT_PATH")
-    TIMEOUT = 60
-    RELAX = 0.5
+    TIMEOUT = 30
     TIMEZONE = timezone(timedelta(hours=int(os.getenv("TIMEZONE") or 0)))
     async_session = AsyncClient(timeout=TIMEOUT)
+
+    POSTGRES_HOST = os.getenv("POSTGRES_HOST")
+    POSTGRES_PORT = os.getenv("POSTGRES_PORT")
+    POSTGRES_DB = os.getenv("POSTGRES_DB")
+    POSTGRES_USER = os.getenv("POSTGRES_USER")
+    POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+
+
+class Commands:
+    START = 'start'
+    HELP = 'help'
+    SETTINGS = 'settings'
+    MENU = 'menu'
+    LESSONS = 'lessons'
+    CAFE = 'cafe'
+    LAUNDRY = 'laundry'
+    ELECTIVES = 'electives'
+    EDUCATORS = 'educators'
+    CANCEL = 'cancel'
+    STOP = 'stop'
+
+
+class TextCommands:
+    pass
 
 
 class CallbackData:
@@ -98,3 +120,16 @@ GRADES = tuple(
     f'{grade}{letter}' for grade in (range(10, 11 + 1)) for letter in 'АБВ'
 )
 LAUNDRY_REPEAT = 30  # Повтор таймера прачки через 30 минут
+
+bot_commands = {
+    Commands.START: 'Старт',
+    Commands.HELP: 'Помощь',
+    Commands.SETTINGS: 'Настройки',
+    Commands.MENU: 'Меню',
+    Commands.LESSONS: 'Уроки',
+    Commands.CAFE: 'Столовая',
+    Commands.LAUNDRY: 'Прачечная',
+    Commands.ELECTIVES: 'Элективы',
+    Commands.EDUCATORS: 'Воспитатели',
+    Commands.CANCEL: 'Отмена ввода',
+}

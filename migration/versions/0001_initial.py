@@ -1,10 +1,12 @@
-"""initial
+"""'initial'
 
 Revision ID: 0001
 Revises: 
-Create Date: 2023-05-12 23:12:45.375331
+Create Date: 2023-08-07 21:01:11.578928
 
 """
+from typing import Sequence, Union
+
 from alembic import op
 import sqlalchemy as sa
 
@@ -12,10 +14,10 @@ from src.utils.consts import Roles
 
 
 # revision identifiers, used by Alembic.
-revision = '0001'
-down_revision = None
-branch_labels = None
-depends_on = None
+revision: str = '0001'
+down_revision: Union[str, None] = None
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
@@ -24,7 +26,7 @@ def upgrade() -> None:
         'class_lessons',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
         sa.Column('date', sa.Date(), nullable=False),
-        sa.Column('grade', sa.Integer(), nullable=False),
+        sa.Column('grade', sa.String(length=2), nullable=False),
         sa.Column('letter', sa.String(length=1), nullable=False),
         sa.Column('image', sa.String(), nullable=False),
         sa.PrimaryKeyConstraint('id'),
@@ -34,7 +36,7 @@ def upgrade() -> None:
         'full_lessons',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
         sa.Column('date', sa.Date(), nullable=False),
-        sa.Column('grade', sa.Integer(), nullable=False),
+        sa.Column('grade', sa.String(length=2), nullable=False),
         sa.Column('image', sa.String(), nullable=False),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('id')
@@ -42,40 +44,43 @@ def upgrade() -> None:
     op.create_table(
         'roles',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column('role', sa.String(), nullable=False),
+        sa.Column('role', sa.String(length=32), nullable=False),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('id'),
         sa.UniqueConstraint('role')
     )
-
-    for role in Roles:
-        op.execute(f'INSERT INTO roles (role) VALUES ("{role.value}")')
-
     op.create_table(
         'users',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column('user_id', sa.Integer(), nullable=False),
-        sa.Column('username', sa.String(length=32), nullable=True),
-        sa.Column('grade', sa.Integer(), nullable=True),
-        sa.Column('letter', sa.String(length=1), nullable=True),
-        sa.Column('lessons_notify', sa.Boolean(), nullable=False),
-        sa.Column('news_notify', sa.Boolean(), nullable=False),
+        sa.Column('user_id', sa.BigInteger(), nullable=False),
+        sa.Column('username', sa.String(length=32), nullable=False),
         sa.Column('is_active', sa.Boolean(), nullable=False),
         sa.Column('createad_time', sa.DateTime(), nullable=False),
         sa.Column('modified_time', sa.DateTime(), nullable=False),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('id')
     )
-    with op.batch_alter_table('users', schema=None) as batch_op:
-        batch_op.create_index(
-            batch_op.f('ix_users_user_id'), ['user_id'], unique=True
-        )
-
+    op.create_index(
+        op.f('ix_users_user_id'), 'users', ['user_id'], unique=True
+    )
+    op.create_table(
+        'laundries',
+        sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('start_time', sa.DateTime(), nullable=True),
+        sa.Column('end_time', sa.DateTime(), nullable=True),
+        sa.Column('rings', sa.Integer(), nullable=True),
+        sa.Column('is_active', sa.Boolean(), nullable=True),
+        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+        sa.PrimaryKeyConstraint('id'),
+        sa.UniqueConstraint('id'),
+        sa.UniqueConstraint('user_id')
+    )
     op.create_table(
         'menus',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
         sa.Column('date', sa.Date(), nullable=False),
-        sa.Column('edit_by', sa.Integer(), nullable=True),
+        sa.Column('edit_by', sa.Integer(), nullable=False),
         sa.Column('breakfast', sa.String(), nullable=True),
         sa.Column('lunch', sa.String(), nullable=True),
         sa.Column('dinner', sa.String(), nullable=True),
@@ -85,11 +90,22 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('id')
     )
-    with op.batch_alter_table('menus', schema=None) as batch_op:
-        batch_op.create_index(
-            batch_op.f('ix_menus_date'), ['date'], unique=True
-        )
-
+    op.create_index(op.f('ix_menus_date'), 'menus', ['date'], unique=True)
+    op.create_table(
+        'settings',
+        sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('grade', sa.String(length=2), nullable=True),
+        sa.Column('letter', sa.String(length=1), nullable=True),
+        sa.Column('lessons_notify', sa.Boolean(), nullable=False),
+        sa.Column('news_notify', sa.Boolean(), nullable=False),
+        sa.Column('washing_time', sa.Integer(), nullable=False),
+        sa.Column('drying_time', sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+        sa.PrimaryKeyConstraint('id'),
+        sa.UniqueConstraint('id'),
+        sa.UniqueConstraint('user_id')
+    )
     op.create_table(
         'users_to_roles',
         sa.Column('user_id', sa.Integer(), nullable=False),
@@ -98,19 +114,19 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
         sa.PrimaryKeyConstraint('user_id', 'role_id')
     )
+    for role in Roles:
+        op.execute(f"INSERT INTO roles (role) VALUES ('{role.value}')")
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('users_to_roles')
-    with op.batch_alter_table('menus', schema=None) as batch_op:
-        batch_op.drop_index(batch_op.f('ix_menus_date'))
-
+    op.drop_table('settings')
+    op.drop_index(op.f('ix_menus_date'), table_name='menus')
     op.drop_table('menus')
-    with op.batch_alter_table('users', schema=None) as batch_op:
-        batch_op.drop_index(batch_op.f('ix_users_user_id'))
-
+    op.drop_table('laundries')
+    op.drop_index(op.f('ix_users_user_id'), table_name='users')
     op.drop_table('users')
     op.drop_table('roles')
     op.drop_table('full_lessons')

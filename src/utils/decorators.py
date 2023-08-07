@@ -1,3 +1,5 @@
+import functools
+
 from aiogram import types
 
 from src.database.db_funcs import is_has_any_role, save_new_user
@@ -11,8 +13,9 @@ def save_new_user_decor(func):
     при их взаимодействии с ботом.
     """
 
+    @functools.wraps(func)
     async def wrapper(update: types.Message | types.CallbackQuery):
-        save_new_user(
+        await save_new_user(
             update.from_user.id, extract_username(update)
         )
         await func(update)
@@ -27,11 +30,12 @@ def is_has_any_role_decor(roles: list[Roles | str]):
 
     def decorator(func):
 
+        @functools.wraps(func)
         async def wrapper(
                 update: types.Message | types.CallbackQuery,
                 *args, **kwargs
         ):
-            if is_has_any_role(update.from_user.id, roles):
+            if await is_has_any_role(update.from_user.id, roles):
                 return await func(update, *args, state=kwargs.get('state'))
 
         return wrapper

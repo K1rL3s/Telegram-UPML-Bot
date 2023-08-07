@@ -6,7 +6,7 @@ from src.utils.datehelp import get_this_week_monday
 
 
 async def update_cafe_menu() -> None:
-    if get_menu_by_date(get_this_week_monday()):
+    if await get_menu_by_date(get_this_week_monday()):
         return
     status, message = await save_cafe_menu()
     logger.info(f"Обновление меню - {status}, {message}")

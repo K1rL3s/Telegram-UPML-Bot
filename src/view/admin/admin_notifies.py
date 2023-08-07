@@ -116,7 +116,7 @@ async def notify_confirm_view(
     messages_ids = data['messages_ids']
     await state.clear()
 
-    users = get_users_for_notify(notify_type, is_news=True)
+    users = await get_users_for_notify(notify_type, is_news=True)
     await do_notifies(
         callback.bot, message_text, users, callback.from_user.id,
         notifies_eng_to_ru.get(notify_type, notify_type)
@@ -125,7 +125,7 @@ async def notify_confirm_view(
     text = 'Рассылка завершена!'
     await callback.message.edit_text(
         text=text,
-        reply_markup=admin_panel_keyboard(callback.from_user.id)
+        reply_markup=await admin_panel_keyboard(callback.from_user.id)
     )
 
     for message_id in messages_ids:

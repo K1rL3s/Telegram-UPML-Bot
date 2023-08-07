@@ -1,15 +1,40 @@
+import asyncio
+import os
 from logging.config import fileConfig
 
-from alembic.script import ScriptDirectory
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
+from alembic.script import ScriptDirectory
+from dotenv import load_dotenv
+from sqlalchemy import pool
+from sqlalchemy.engine import Connection
+from sqlalchemy.ext.asyncio import async_engine_from_config
+
+
+load_dotenv()
 
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+# here we allow ourselves to pass interpolation vars to alembic.ini
+# fron the host env
+section = config.config_ini_section
+config.set_section_option(
+    section, "POSTGRES_HOST", os.environ["POSTGRES_HOST"]
+)
+config.set_section_option(
+    section, "POSTGRES_PORT", os.environ["POSTGRES_PORT"]
+)
+config.set_section_option(
+    section, "POSTGRES_DB", os.environ["POSTGRES_DB"]
+)
+config.set_section_option(
+    section, "POSTGRES_USER", os.environ["POSTGRES_USER"]
+)
+config.set_section_option(
+    section, "POSTGRES_PASSWORD", os.environ["POSTGRES_PASSWORD"]
+)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -20,18 +45,11 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from src.database.db_session import SqlAlchemyBase
-import src.database.__all_models
 from src.database.__all_models import *
+from src.database.db_session import SqlAlchemyBase
 
 
 target_metadata = SqlAlchemyBase.metadata
-
-
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
 
 
 def process_revision_directives(context, revision, directives):
@@ -46,6 +64,12 @@ def process_revision_directives(context, revision, directives):
         last_rev_id = int(head_revision.lstrip('0'))
         new_rev_id = last_rev_id + 1
     migration_script.rev_id = '{0:04}'.format(new_rev_id)
+
+
+# other values from the config, defined by the needs of env.py,
+# can be acquired:
+# my_important_option = config.get_main_option("my_important_option")
+# ... etc.
 
 
 def run_migrations_offline() -> None:
@@ -66,7 +90,6 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        render_as_batch=True,
         process_revision_directives=process_revision_directives,
     )
 
@@ -74,29 +97,39 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
+def do_run_migrations(connection: Connection) -> None:
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        process_revision_directives=process_revision_directives,
+    )
 
-    In this scenario we need to create an Engine
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+async def run_async_migrations() -> None:
+    """In this scenario we need to create an Engine
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
+
+    connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
 
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata,
-            render_as_batch=True,
-            process_revision_directives=process_revision_directives,
-        )
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_run_migrations)
 
-        with context.begin_transaction():
-            context.run_migrations()
+    await connectable.dispose()
+
+
+def run_migrations_online() -> None:
+    """Run migrations in 'online' mode."""
+
+    asyncio.run(run_async_migrations())
 
 
 if context.is_offline_mode():

@@ -9,7 +9,7 @@ from src.keyboards.universal import go_to_main_menu_button
 from src.utils.consts import CallbackData, Roles
 
 
-def admin_panel_keyboard(user_id: int) -> InlineKeyboardMarkup:
+async def admin_panel_keyboard(user_id: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardBuilder()
 
     for button_text, callback_data in zip(
@@ -26,7 +26,7 @@ def admin_panel_keyboard(user_id: int) -> InlineKeyboardMarkup:
             )
         )
 
-    if is_has_any_role(user_id, [Roles.SUPERADMIN]):
+    if await is_has_any_role(user_id, [Roles.SUPERADMIN]):
         keyboard.add(open_admins_list_button)
 
     keyboard.add(go_to_main_menu_button)
