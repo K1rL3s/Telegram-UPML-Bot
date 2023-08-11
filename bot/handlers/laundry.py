@@ -1,0 +1,84 @@
+from aiogram import F, Router, types
+from aiogram.filters import Command
+
+from bot.database.db_funcs import Repository
+from bot.funcs.laundry import (
+    laundry_cancel_timer_func, laundry_welcome_func,
+    laundry_start_timer_func,
+)
+from bot.keyboards import go_to_main_menu_keyboard, laundry_keyboard
+from bot.utils.consts import CallbackData, Commands, LAUNDRY_REPEAT
+from bot.utils.datehelp import format_datetime
+
+
+router = Router(name=__name__)
+
+
+@router.message(Command(Commands.LAUNDRY))
+@router.callback_query(F.data == CallbackData.OPEN_LAUNDRY)
+async def laundry_handler(
+        callback: types.CallbackQuery | types.Message,
+        repo: Repository,
+) -> None:
+    """
+    Обработчик кнопки "Прачечная".
+    """
+    text = 'Привет! Я - таймер для прачки.\n' \
+           'После конца таймер запустится ещё три раза ' \
+           f'на *{LAUNDRY_REPEAT}* минут.\n\n'
+
+    laundry = await repo.get_laundry(callback.from_user.id)
+
+    minutes = await laundry_welcome_func(laundry)
+    if minutes is not None:
+        text += f'Время до конца таймера: *{minutes}* минут\n'
+
+    keyboard = await laundry_keyboard(laundry)
+    if isinstance(callback, types.CallbackQuery):
+        await callback.message.edit_text(
+            text=text.strip(),
+            reply_markup=keyboard
+        )
+    else:
+        await callback.answer(
+            text=text.strip(),
+            reply_markup=keyboard
+        )
+
+
+@router.callback_query(F.data.startswith(CallbackData.START_LAUNDRY_PREFIX))
+async def laundry_start_timer_handler(
+        callback: types.CallbackQuery,
+        repo: Repository,
+) -> None:
+    """
+    Обработчик кнопок "Запустить стирку", "Запустить сушку".
+    """
+    minutes, end_time = await laundry_start_timer_func(
+        repo, callback.from_user.id, callback.data
+    )
+
+    text = f'⏰Таймер запущен!\n' \
+           f'Уведомление придёт через *~{minutes} минут* ' \
+           f'({format_datetime(end_time)})'
+    keyboard = go_to_main_menu_keyboard
+
+    await callback.message.edit_text(
+        text=text,
+        reply_markup=keyboard
+    )
+
+
+@router.callback_query(F.data == CallbackData.CANCEL_LAUNDRY_TIMER)
+async def laundry_cancel_timer_handler(callback: types.CallbackQuery) -> None:
+    """
+    Обработчик кнопки "Отменить таймер".
+    """
+    await laundry_cancel_timer_func(callback.from_user.id)
+    text = 'Таймер отменён.'
+    keyboard = go_to_main_menu_keyboard
+
+    await callback.message.edit_text(
+        text=text,
+        reply_markup=keyboard
+    )

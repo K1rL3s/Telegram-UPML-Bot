@@ -29,8 +29,8 @@ COPY --from=builder /app/requirements.txt .
 
 RUN pip install --no-cache --no-cache-dir /wheels/*
 
-COPY ./src ./src
+COPY ./bot ./bot
 COPY ./migration ./migration
 COPY ./alembic.ini ./alembic.ini
 
-CMD ["python", "-m", "src"]
+CMD ["python", "-m", "bot"]

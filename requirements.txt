@@ -2,6 +2,7 @@ SQLALchemy==2.0.19
 asyncpg==0.28.0
 alembic==1.11.2
 aiogram==3.0.0rc1
+pydantic==2.1.1
 httpx==0.24.1
 aiocache==0.12.2
 aioschedule==0.5.2

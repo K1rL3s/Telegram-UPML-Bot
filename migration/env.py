@@ -12,7 +12,6 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 load_dotenv()
 
-
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -45,8 +44,8 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from src.database.__all_models import *
-from src.database.db_session import SqlAlchemyBase
+from bot.database import *
+from bot.database.db_session import SqlAlchemyBase
 
 
 target_metadata = SqlAlchemyBase.metadata
