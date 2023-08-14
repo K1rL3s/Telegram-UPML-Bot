@@ -31,7 +31,7 @@ async def check_laundry_timers(bot: Bot) -> None:
                 continue
 
             if laundry.rings >= 2:
-                await laundry_cancel_timer_func(laundry.user.user_id)
+                await laundry_cancel_timer_func(repo, laundry.user.user_id)
             else:
                 now = datetime_now()
                 await repo.save_or_update_laundry(

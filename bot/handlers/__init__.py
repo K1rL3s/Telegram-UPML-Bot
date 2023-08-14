@@ -10,13 +10,10 @@ from bot.handlers.admin import (
     admin_manage,
     admin_notifies,
 )
-from bot.handlers import start
-from bot.handlers import settings
-from bot.handlers import lessons
-from bot.handlers import cafe_menu
-from bot.handlers import laundry
-from bot.handlers import educators
-from bot.handlers import electives
+from bot.handlers.client import (
+    start, settings, lessons, cafe_menu,
+    laundry, educators, electives,
+)
 from bot.handlers import errors
 
 

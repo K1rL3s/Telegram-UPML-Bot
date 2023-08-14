@@ -48,10 +48,13 @@ async def laundry_start_timer_func(
     return minutes, end_time
 
 
-async def laundry_cancel_timer_func(user_id: int) -> None:
+async def laundry_cancel_timer_func(
+        repo: Repository,
+        user_id: int
+) -> None:
     """
     Логика обработчика кнопки "Отменить таймер".
     """
-    await save_or_update_laundry(
+    await repo.save_or_update_laundry(
         user_id, start_time=None, end_time=None, is_active=False, rings=None
     )

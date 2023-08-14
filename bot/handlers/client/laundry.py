@@ -70,11 +70,14 @@ async def laundry_start_timer_handler(
 
 
 @router.callback_query(F.data == CallbackData.CANCEL_LAUNDRY_TIMER)
-async def laundry_cancel_timer_handler(callback: types.CallbackQuery) -> None:
+async def laundry_cancel_timer_handler(
+        callback: types.CallbackQuery,
+        repo: Repository,
+) -> None:
     """
     Обработчик кнопки "Отменить таймер".
     """
-    await laundry_cancel_timer_func(callback.from_user.id)
+    await laundry_cancel_timer_func(repo, callback.from_user.id)
     text = 'Таймер отменён.'
     keyboard = go_to_main_menu_keyboard
 

@@ -1,3 +1,4 @@
+from datetime import date
 from io import BytesIO
 
 from aiogram import F, Router, types
@@ -5,6 +6,7 @@ from aiogram.filters import StateFilter
 
 from aiogram.fsm.context import FSMContext
 
+from bot.custom_types import Album
 from bot.database.db_funcs import Repository
 from bot.filters import IsAdmin
 from bot.funcs.admin import get_meal_by_date, load_lessons_func
@@ -210,7 +212,7 @@ async def start_load_lessons_handler(
 
 @router.message(
     StateFilter(LoadingLessons.image),
-    F.media_group_id,
+    F.content_type.in_({'photo'}),
     IsAdmin(),
 )
 async def load_lessons_handler(
@@ -218,30 +220,60 @@ async def load_lessons_handler(
         state: FSMContext,
         repo: Repository,
 ) -> None:
+    album = Album.model_validate(
+        {
+            "photo": [message.photo[-1]],
+            "messages": [message],
+            "caption": message.html_text,
+        },
+        context={"bot": message.bot}
+    )
+    await load_lessons_album_handler(message, state, repo, album)
+
+
+@router.message(
+    StateFilter(LoadingLessons.image),
+    F.media_group_id,
+    IsAdmin(),
+)
+async def load_lessons_album_handler(
+        message: types.Message,
+        state: FSMContext,
+        repo: Repository,
+        album: Album,
+) -> None:
     """
     Обработчик сообщений с изображениями
     после нажатия кнопки "Загрузить уроки".
     """
-    file_id = message.photo[-1].file_id
-    file = await message.bot.get_file(file_id)
-    await message.bot.download_file(file.file_path, image := BytesIO())
+    photos = album.photo
+    proccess_results: list[str | tuple[str, date]] = []
 
-    result = await load_lessons_func(message.chat.id, image, message.bot, repo)
+    for photo in photos:
+        photo_id = photo.file_id
+        photo = await message.bot.get_file(photo_id)
+        await message.bot.download_file(photo.file_path, image := BytesIO())
+
+        result = await load_lessons_func(
+            message.chat.id, image, message.bot, repo
+        )
+        proccess_results.append(result)
 
     if state:
         await state.clear()
 
-    if isinstance(result, str):
-        await message.reply(
-            text=result,
-            reply_markup=go_to_main_menu_keyboard
-        )
-        return
+    results: list[str] = []
+    for result in proccess_results:
+        if isinstance(result, tuple):
+            grade, lessons_date = result
+            results.append(
+                f'Расписание для *{grade}-х классов* на '
+                f'*{format_date(lessons_date)}* сохранено!'
+            )
+        else:
+            results.append(result)
 
-    grade, lessons_date = result
-    text = f'Расписание для *{grade}-х классов* на ' \
-           f'*{format_date(lessons_date)}* сохранено!'
-
+    text = '\n'.join(results)
     await message.reply(
         text=text,
         reply_markup=go_to_main_menu_keyboard
