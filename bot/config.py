@@ -19,7 +19,11 @@ class Config:
     async_session: Final[AsyncClient] = AsyncClient(timeout=TIMEOUT)
 
     POSTGRES_HOST: Final[str] = os.getenv("POSTGRES_HOST")
-    POSTGRES_PORT: Final[int] = os.getenv("POSTGRES_PORT")
+    POSTGRES_PORT = (
+        int(os.getenv('POSTGRES_DOCKER_PORT'))
+        if POSTGRES_HOST == 'database' else
+        int(os.getenv('POSTGRES_HOST_PORT'))
+    )
     POSTGRES_DB: Final[str] = os.getenv("POSTGRES_DB")
     POSTGRES_USER: Final[str] = os.getenv("POSTGRES_USER")
     POSTGRES_PASSWORD: Final[str] = os.getenv("POSTGRES_PASSWORD")
