@@ -7,7 +7,6 @@ from loguru import logger
 from sqlalchemy.orm import close_all_sessions
 
 from bot.handlers import include_routers
-from bot.middlewares import setup_middlewares
 from bot.config import Config
 from bot.utils.consts import bot_slash_commands
 
@@ -25,7 +24,8 @@ async def set_commands(bot: Bot) -> bool:
         [
             BotCommand(command=command, description=description)
             for command, description in bot_slash_commands.items()
-        ]
+        ],
+        language_code='ru'
     )
 
 
@@ -33,7 +33,6 @@ def make_dispatcher() -> Dispatcher:
     dp = Dispatcher(storage=MemoryStorage(), name='__main__')
 
     include_routers(dp)
-    setup_middlewares(dp)
 
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)

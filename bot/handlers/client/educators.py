@@ -1,5 +1,6 @@
-from aiogram import F, Router, types
+from aiogram import F, Router
 from aiogram.filters import Command
+from aiogram.types import CallbackQuery
 
 from bot.database.db_funcs import Repository
 from bot.funcs.educators import get_formatted_educators_schedule_by_date
@@ -15,14 +16,14 @@ router = Router(name=__name__)
 @router.message(Command(SlashCommands.EDUCATORS))
 @router.callback_query(F.data.startswith(CallbackData.OPEN_EDUCATORS_ON_))
 async def educators_handler(
-        callback: types.CallbackQuery,
+        callback: CallbackQuery,
         repo: Repository,
 ) -> None:
     """
     Обработчик команды "/educators" и кнопки "Воспитатели",
     открывает расписание воспитателей на текущий день.
     """
-    if isinstance(callback, types.CallbackQuery):
+    if isinstance(callback, CallbackQuery):
         _date = callback.data.replace(CallbackData.OPEN_EDUCATORS_ON_, '')
     else:
         _date = 'today'
@@ -30,7 +31,7 @@ async def educators_handler(
 
     text = await get_formatted_educators_schedule_by_date(repo, schedule_date)
 
-    if isinstance(callback, types.CallbackQuery):
+    if isinstance(callback, CallbackQuery):
         await callback.message.edit_text(
             text=text,
             reply_markup=educators_keyboard(schedule_date),

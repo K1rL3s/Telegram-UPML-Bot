@@ -1,6 +1,7 @@
 from typing import Any, AsyncIterator, Awaitable, Callable, Dict, Final, Union
 
-from aiogram import BaseMiddleware, types
+from aiogram import BaseMiddleware
+from aiogram.types import TelegramObject
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 
 from bot.database.db_funcs import Repository
@@ -27,10 +28,10 @@ class RepositoryMiddleware(BaseMiddleware):
     async def __call__(
             self,
             handler: Callable[
-                [types.TelegramObject,
+                [TelegramObject,
                  Dict[str, Any]], Awaitable[Any]
             ],
-            event: types.TelegramObject,
+            event: TelegramObject,
             data: Dict[str, Any],
     ) -> Any:
         async with self.session_pool() as session:

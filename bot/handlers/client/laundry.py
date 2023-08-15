@@ -1,5 +1,6 @@
-from aiogram import F, Router, types
+from aiogram import F, Router
 from aiogram.filters import Command
+from aiogram.types import CallbackQuery, Message
 
 from bot.database.db_funcs import Repository
 from bot.funcs.laundry import (
@@ -21,7 +22,7 @@ router = Router(name=__name__)
 @router.message(Command(SlashCommands.LAUNDRY))
 @router.callback_query(F.data == CallbackData.OPEN_LAUNDRY)
 async def laundry_handler(
-        callback: types.CallbackQuery | types.Message,
+        callback: CallbackQuery | Message,
         repo: Repository,
 ) -> None:
     """
@@ -38,7 +39,7 @@ async def laundry_handler(
         text += f'Время до конца таймера: *{minutes}* минут\n'
 
     keyboard = await laundry_keyboard(laundry)
-    if isinstance(callback, types.CallbackQuery):
+    if isinstance(callback, CallbackQuery):
         await callback.message.edit_text(
             text=text.strip(),
             reply_markup=keyboard
@@ -52,7 +53,7 @@ async def laundry_handler(
 
 @router.callback_query(F.data.startswith(CallbackData.START_LAUNDRY_PREFIX))
 async def laundry_start_timer_handler(
-        callback: types.CallbackQuery,
+        callback: CallbackQuery,
         repo: Repository,
 ) -> None:
     """
@@ -75,7 +76,7 @@ async def laundry_start_timer_handler(
 
 @router.callback_query(F.data == CallbackData.CANCEL_LAUNDRY_TIMER)
 async def laundry_cancel_timer_handler(
-        callback: types.CallbackQuery,
+        callback: CallbackQuery,
         repo: Repository,
 ) -> None:
     """

@@ -38,15 +38,16 @@ class SlashCommands:
 class TextCommands:
     START: Final[str] = 'Старт'
     HELP: Final[str] = 'Помощь'
-    SETTINGS: Final[str] = 'Настройки'
+    SETTINGS: Final[str] = '⚙️Настройки'
     MENU: Final[str] = 'Меню'
-    LESSONS: Final[str] = 'Уроки'
-    CAFE: Final[str] = 'Столовая'
-    LAUNDRY: Final[str] = 'Прачечная'
-    ELECTIVES: Final[str] = 'Элективы'
-    EDUCATORS: Final[str] = 'Воспитатели'
+    LESSONS: Final[str] = '📓Уроки'
+    CAFE: Final[str] = '🍴Меню'
+    LAUNDRY: Final[str] = '💦Прачечная'
+    ELECTIVES: Final[str] = '📖Элективы'
+    EDUCATORS: Final[str] = '👩‍✈️Воспитатели'
+    ADMIN_PANEL: Final[str] = '❗Админ панель'
     CANCEL: Final[str] = 'Отмена'
-    STOP: Final[str] = 'Отмена'
+    STOP: Final[str] = CANCEL
 
 
 class CallbackData:
@@ -122,10 +123,10 @@ bot_slash_commands: Final[dict[str, str]] = {
     SlashCommands.HELP: 'Помощь',
     SlashCommands.SETTINGS: 'Настройки',
     SlashCommands.MENU: 'Меню',
-    SlashCommands.LESSONS: 'Уроки',
-    SlashCommands.CAFE: 'Столовая',
-    SlashCommands.LAUNDRY: 'Прачечная',
-    SlashCommands.ELECTIVES: 'Элективы',
-    SlashCommands.EDUCATORS: 'Воспитатели',
-    SlashCommands.CANCEL: 'Отмена ввода',
+    # SlashCommands.LESSONS: 'Уроки',
+    # SlashCommands.CAFE: 'Столовая',
+    # SlashCommands.LAUNDRY: 'Прачечная',
+    # SlashCommands.ELECTIVES: 'Элективы',
+    # SlashCommands.EDUCATORS: 'Воспитатели',
+    # SlashCommands.CANCEL: 'Отмена ввода',
 }

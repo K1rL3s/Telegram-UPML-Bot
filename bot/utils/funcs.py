@@ -2,8 +2,11 @@ from io import BytesIO
 from uuid import uuid1
 
 from aiocache import cached
-from aiogram import Bot, types
-from aiogram.types import BufferedInputFile, InlineKeyboardMarkup
+from aiogram import Bot
+from aiogram.types import (
+    BufferedInputFile, CallbackQuery,
+    InlineKeyboardMarkup, Message,
+)
 from aiogram.exceptions import TelegramUnauthorizedError
 from loguru import logger
 
@@ -50,9 +53,7 @@ async def username_by_user_id(bot: Bot, user_id: int) -> str | None:
     return chat.username or chat.first_name or chat.last_name
 
 
-def extract_username(
-        message: types.CallbackQuery | types.Message
-) -> str | None:
+def extract_username(message: CallbackQuery | Message) -> str | None:
     """
     Получение имени для бд из сообщения или нажатия кнопки.
 

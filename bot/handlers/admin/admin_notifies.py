@@ -1,6 +1,7 @@
-from aiogram import F, Router, types
+from aiogram import F, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, Message
 
 from bot.database.db_funcs import Repository
 from bot.filters import IsAdmin
@@ -17,7 +18,7 @@ router = Router(name=__name__)
 
 
 @router.callback_query(F.data == CallbackData.DO_A_NOTIFY_FOR_, IsAdmin())
-async def notify_panel_handler(callback: types.CallbackQuery, **_) -> None:
+async def notify_panel_handler(callback: CallbackQuery) -> None:
     """
     Обработчик кнопки "Уведомление".
     """
@@ -40,7 +41,7 @@ async def notify_panel_handler(callback: types.CallbackQuery, **_) -> None:
     IsAdmin(),
 )
 async def notify_for_who_handler(
-        callback: types.CallbackQuery,
+        callback: CallbackQuery,
         state: FSMContext,
 ) -> None:
     """
@@ -75,7 +76,7 @@ async def notify_for_who_handler(
 
 @router.message(StateFilter(DoNotify.writing), IsAdmin())
 async def notify_message_handler(
-        message: types.Message,
+        message: Message,
         state: FSMContext,
 ) -> None:
     data = await state.get_data()
@@ -108,7 +109,7 @@ async def notify_message_handler(
     IsAdmin(),
 )
 async def notify_confirm_handler(
-        callback: types.CallbackQuery,
+        callback: CallbackQuery,
         state: FSMContext,
         repo: Repository,
 ) -> None:

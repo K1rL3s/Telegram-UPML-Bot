@@ -1,6 +1,6 @@
 from typing import Any, Awaitable, Callable
 
-from aiogram import types
+from aiogram.types import CallbackQuery
 
 from bot.middlewares.base import MyBaseMiddleware
 
@@ -13,10 +13,10 @@ class CallbackAnswerMiddleware(MyBaseMiddleware):
     async def __call__(
             self,
             handler: Callable[
-                [types.CallbackQuery, dict[str, Any]],
+                [CallbackQuery, dict[str, Any]],
                 Awaitable[Any]
             ],
-            event: types.CallbackQuery,
+            event: CallbackQuery,
             data: dict[str, Any],
     ):
         try:

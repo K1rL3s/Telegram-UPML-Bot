@@ -1,6 +1,7 @@
-from aiogram import F, Router, types
+from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.methods import SendMediaGroup
+from aiogram.types import CallbackQuery, InputMediaPhoto, Message
 
 from bot.database.db_funcs import Repository
 from bot.filters import SaveUser
@@ -20,7 +21,7 @@ router = Router(name=__name__)
     SaveUser(),
 )
 async def open_date_lessons_handler(
-        callback: types.CallbackQuery | types.Message,
+        callback: CallbackQuery | Message,
         repo: Repository,
 ) -> None:
     """
@@ -29,7 +30,7 @@ async def open_date_lessons_handler(
     Отправляет расписание двух паралеллей, если не выбран класс.
     """
 
-    if isinstance(callback, types.CallbackQuery):
+    if isinstance(callback, CallbackQuery):
         _date = callback.data.replace(CallbackData.OPEN_LESSONS_ON_, '')
     else:
         _date = 'today'
@@ -43,7 +44,7 @@ async def open_date_lessons_handler(
         messages = await SendMediaGroup(
             chat_id=callback.message.chat.id,
             media=[
-                types.InputMediaPhoto(media=media_id)
+                InputMediaPhoto(media=media_id)
                 for media_id in images
                 if media_id
             ]
@@ -54,7 +55,7 @@ async def open_date_lessons_handler(
         )
         return
 
-    if isinstance(callback, types.CallbackQuery):
+    if isinstance(callback, CallbackQuery):
         await callback.message.edit_text(
             text=text,
             reply_markup=lessons_keyboard(lessons_date)

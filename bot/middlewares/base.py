@@ -1,6 +1,7 @@
 from abc import ABC
 
-from aiogram import BaseMiddleware, types
+from aiogram import BaseMiddleware
+from aiogram.types import CallbackQuery, Message
 
 from bot.utils.funcs import extract_username
 
@@ -11,15 +12,15 @@ class MyBaseMiddleware(BaseMiddleware, ABC):
     """
 
     @staticmethod
-    async def get_short_info(message: types.Message | types.CallbackQuery):
+    async def get_short_info(message: Message | CallbackQuery):
         username = extract_username(message)
 
-        if isinstance(message, types.Message):
+        if isinstance(message, Message):
             return f'id={message.from_user.id}, ' \
                    f'chat={message.chat.id}, ' \
                    f'username={username}'
 
-        elif isinstance(message, types.CallbackQuery):
+        elif isinstance(message, CallbackQuery):
             return f'id={message.from_user.id}, ' \
                    f'chat={message.message.chat.id}, ' \
                    f'username={username}'

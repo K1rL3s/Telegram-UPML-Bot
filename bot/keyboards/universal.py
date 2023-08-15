@@ -5,7 +5,7 @@ from aiogram.utils.keyboard import (
     InlineKeyboardMarkup,
 )
 
-from bot.utils.consts import CallbackData
+from bot.utils.consts import CallbackData, TextCommands
 from bot.utils.datehelp import format_date, date_today
 
 
@@ -15,12 +15,12 @@ go_to_main_menu_button = InlineKeyboardButton(
 )
 
 go_to_settings_button = InlineKeyboardButton(
-    text="⚙️Настройки",
+    text=TextCommands.SETTINGS,
     callback_data=CallbackData.OPEN_SETTINGS
 )
 
 go_to_admin_panel_button = InlineKeyboardButton(
-    text='❗Админ панель',
+    text=TextCommands.ADMIN_PANEL,
     callback_data=CallbackData.OPEN_ADMIN_PANEL
 )
 

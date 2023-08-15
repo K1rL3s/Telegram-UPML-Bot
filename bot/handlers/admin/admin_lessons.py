@@ -1,6 +1,7 @@
-from aiogram import F, Router, types
+from aiogram import F, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, Message
 
 from bot.custom_types import Album
 from bot.database.db_funcs import Repository
@@ -16,7 +17,7 @@ router = Router(name=__name__)
 
 @router.callback_query(F.data == CallbackData.UPLOAD_LESSONS, IsAdmin())
 async def start_load_lessons_handler(
-        callback: types.CallbackQuery,
+        callback: CallbackQuery,
         state: FSMContext,
 ) -> None:
     """
@@ -37,7 +38,7 @@ async def start_load_lessons_handler(
     IsAdmin(),
 )
 async def load_lessons_handler(
-        message: types.Message,
+        message: Message,
         state: FSMContext,
         repo: Repository,
 ) -> None:
@@ -58,7 +59,7 @@ async def load_lessons_handler(
     IsAdmin(),
 )
 async def load_lessons_album_handler(
-        message: types.Message,
+        message: Message,
         state: FSMContext,
         repo: Repository,
         album: Album,

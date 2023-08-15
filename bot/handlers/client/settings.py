@@ -1,6 +1,7 @@
-from aiogram import F, Router, types
+from aiogram import F, Router
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, Message
 
 from bot.database.db_funcs import Repository
 from bot.filters import SaveUser
@@ -36,7 +37,7 @@ settings_welcome_text = """
 @router.message(Command(SlashCommands.SETTINGS), SaveUser())
 @router.callback_query(F.data == CallbackData.OPEN_SETTINGS, SaveUser())
 async def open_settings_handler(
-        callback: types.CallbackQuery | types.Message,
+        callback: CallbackQuery | Message,
         repo: Repository,
 ) -> None:
     """
@@ -45,7 +46,7 @@ async def open_settings_handler(
     settings = await repo.get_settings(callback.from_user.id)
     keyboard = await settings_keyboard(settings)
 
-    if isinstance(callback, types.CallbackQuery):
+    if isinstance(callback, CallbackQuery):
         await callback.message.edit_text(
             text=settings_welcome_text,
             reply_markup=keyboard
@@ -59,7 +60,7 @@ async def open_settings_handler(
 
 @router.callback_query(F.data.startswith(CallbackData.PREFIX_SWITCH))
 async def edit_bool_settings_handler(
-        callback: types.CallbackQuery,
+        callback: CallbackQuery,
         repo: Repository,
 ) -> None:
     """
@@ -78,7 +79,7 @@ async def edit_bool_settings_handler(
 
 @router.callback_query(F.data.startswith(CallbackData.CHANGE_GRADE_TO_))
 async def edit_grade_settings_handler(
-        callback: types.CallbackQuery,
+        callback: CallbackQuery,
         repo: Repository,
 ) -> None:
     """
@@ -99,7 +100,7 @@ async def edit_grade_settings_handler(
 
 @router.callback_query(F.data.startswith(CallbackData.EDIT_SETTINGS_PREFIX))
 async def edit_laundry_start_handler(
-        callback: types.CallbackQuery,
+        callback: CallbackQuery,
         state: FSMContext,
 ) -> None:
     """
@@ -122,7 +123,7 @@ async def edit_laundry_start_handler(
 
 @router.message(StateFilter(EditingSettings.writing))
 async def edit_laundry_time_handler(
-        message: types.Message,
+        message: Message,
         state: FSMContext,
         repo: Repository,
 ) -> None:

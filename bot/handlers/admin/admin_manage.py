@@ -1,6 +1,7 @@
-from aiogram import F, Router, types
+from aiogram import F, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, Message
 
 from bot.database.db_funcs import Repository
 from bot.filters import IsSuperAdmin
@@ -22,7 +23,7 @@ router = Router(name=__name__)
     IsSuperAdmin(),
 )
 async def admins_list_handler(
-        callback: types.CallbackQuery,
+        callback: CallbackQuery,
         repo: Repository,
         callback_data: str = None,
 ) -> None:
@@ -55,7 +56,7 @@ async def admins_list_handler(
     IsSuperAdmin(),
 )
 async def admin_add_handler(
-        callback: types.CallbackQuery,
+        callback: CallbackQuery,
         state: FSMContext,
 ) -> None:
     """
@@ -74,7 +75,7 @@ async def admin_add_handler(
     IsSuperAdmin(),
 )
 async def admin_add_check_username_handler(
-        message: types.Message | types.CallbackQuery,
+        message: Message | CallbackQuery,
         state: FSMContext,
         repo: Repository,
 ) -> None:
@@ -108,7 +109,7 @@ async def admin_add_check_username_handler(
     IsSuperAdmin(),
 )
 async def admin_add_confirm_handler(
-        callback: types.CallbackQuery,
+        callback: CallbackQuery,
         state: FSMContext,
         repo: Repository,
 ) -> None:
@@ -130,7 +131,7 @@ async def admin_add_confirm_handler(
     F.data.startswith(CallbackData.CHECK_ADMIN_),
     IsSuperAdmin(),
 )
-async def admin_check_handler(callback: types.CallbackQuery) -> None:
+async def admin_check_handler(callback: CallbackQuery) -> None:
     """
     Обработчик кнопки с юзернеймом админа в списке админов.
     """
@@ -157,7 +158,7 @@ async def admin_check_handler(callback: types.CallbackQuery) -> None:
     IsSuperAdmin(),
 )
 async def admin_remove_handler(
-        callback: types.CallbackQuery,
+        callback: CallbackQuery,
         repo: Repository,
 ) -> None:
     """

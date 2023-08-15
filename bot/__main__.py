@@ -3,6 +3,7 @@ import asyncio
 from loguru import logger
 
 from bot.database.db_session import database_init
+from bot.middlewares import setup_middlewares
 from bot.setup import make_bot, make_dispatcher, setup_logs
 from bot.schedule import run_schedule_jobs
 from bot.config import Config
@@ -15,6 +16,8 @@ async def main():
 
     bot = await make_bot()
     dp = make_dispatcher()
+
+    setup_middlewares(bot, dp)
 
     asyncio.create_task(run_schedule_jobs(bot))
 

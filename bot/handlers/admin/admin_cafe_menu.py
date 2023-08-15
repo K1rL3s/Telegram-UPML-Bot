@@ -1,6 +1,7 @@
-from aiogram import F, Router, types
+from aiogram import F, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, Message
 
 from bot.database.db_funcs import Repository
 from bot.filters import IsAdmin
@@ -20,7 +21,7 @@ router = Router(name=__name__)
 
 @router.callback_query(F.data == CallbackData.AUTO_UPDATE_CAFE_MENU, IsAdmin())
 async def auto_update_cafe_menu_handler(
-        callback: types.CallbackQuery,
+        callback: CallbackQuery,
         repo: Repository,
 ) -> None:
     """
@@ -37,7 +38,7 @@ async def auto_update_cafe_menu_handler(
 
 @router.callback_query(F.data == CallbackData.EDIT_CAFE_MENU, IsAdmin())
 async def edit_cafe_menu_start_handler(
-        callback: types.CallbackQuery,
+        callback: CallbackQuery,
         state: FSMContext,
 ) -> None:
     """
@@ -59,7 +60,7 @@ async def edit_cafe_menu_start_handler(
 
 @router.message(StateFilter(EditingMenu.choose_date), IsAdmin())
 async def edit_cafe_menu_date_handler(
-        message: types.Message,
+        message: Message,
         state: FSMContext
 ) -> None:
     """
@@ -90,7 +91,7 @@ async def edit_cafe_menu_date_handler(
 
 @router.callback_query(StateFilter(EditingMenu.choose_meal), IsAdmin())
 async def edit_cafe_menu_meal_handler(
-        callback: types.CallbackQuery,
+        callback: CallbackQuery,
         state: FSMContext,
         repo: Repository,
 ) -> None:
@@ -120,7 +121,7 @@ async def edit_cafe_menu_meal_handler(
 
 @router.message(StateFilter(EditingMenu.writing), IsAdmin())
 async def edit_cafe_menu_text_handler(
-        message: types.Message,
+        message: Message,
         state: FSMContext,
 ) -> None:
     """
@@ -152,7 +153,7 @@ async def edit_cafe_menu_text_handler(
 
 @router.callback_query(StateFilter(EditingMenu.writing), IsAdmin())
 async def edit_cafe_menu_confirm_handler(
-        callback: types.CallbackQuery,
+        callback: CallbackQuery,
         state: FSMContext,
         repo: Repository,
 ) -> None:
