@@ -7,14 +7,18 @@ from bot.funcs.laundry import (
     laundry_start_timer_func,
 )
 from bot.keyboards import go_to_main_menu_keyboard, laundry_keyboard
-from bot.utils.consts import CallbackData, Commands, LAUNDRY_REPEAT
+from bot.utils.consts import (
+    CallbackData, SlashCommands, LAUNDRY_REPEAT,
+    TextCommands,
+)
 from bot.utils.datehelp import format_datetime
 
 
 router = Router(name=__name__)
 
 
-@router.message(Command(Commands.LAUNDRY))
+@router.message(F.text == TextCommands.LAUNDRY)
+@router.message(Command(SlashCommands.LAUNDRY))
 @router.callback_query(F.data == CallbackData.OPEN_LAUNDRY)
 async def laundry_handler(
         callback: types.CallbackQuery | types.Message,

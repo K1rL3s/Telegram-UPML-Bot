@@ -3,20 +3,19 @@ from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 
 from bot.database.db_funcs import Repository
-from bot.filters import IsAdmin
+from bot.filters import IsAdmin, SaveUser
 from bot.keyboards import (
     go_to_main_menu_keyboard, main_menu_keyboard, admin_panel_keyboard,
 )
-from bot.utils.consts import CallbackData, Commands
-from bot.utils.decorators import save_new_user
+from bot.utils.consts import CallbackData, SlashCommands, TextCommands
 
 
 router = Router(name=__name__)
 
 
-@router.message(Command(Commands.START))
-@save_new_user
-async def start_handler(message: types.Message, repo) -> None:
+@router.message(F.text == TextCommands.START, SaveUser())
+@router.message(Command(SlashCommands.START), SaveUser())
+async def start_handler(message: types.Message) -> None:
     """
     Обработчик команды "/start".
     """
@@ -28,9 +27,8 @@ async def start_handler(message: types.Message, repo) -> None:
     )
 
 
-@router.message(Command(Commands.MENU))
-@router.callback_query(F.data == CallbackData.OPEN_MAIN_MENU)
-@save_new_user
+@router.message(F.text == TextCommands.MENU, SaveUser())
+@router.callback_query(F.data == CallbackData.OPEN_MAIN_MENU, SaveUser())  #
 async def main_menu_handler(
         message: types.Message | types.CallbackQuery,
         repo: Repository,
@@ -53,9 +51,9 @@ async def main_menu_handler(
         )
 
 
-@router.message(Command(Commands.HELP))
-@save_new_user
-async def help_handler(message: types.Message, repo) -> None:
+@router.message(F.text == TextCommands.HELP, SaveUser())
+@router.message(Command(SlashCommands.HELP), SaveUser())
+async def help_handler(message: types.Message) -> None:
     """
     Обработчик команды "/help".
     """
@@ -86,7 +84,10 @@ async def admin_panel_handler(
     )
 
 
-@router.message(Command(Commands.CANCEL, Commands.STOP), StateFilter('*'))
+@router.message(F.text == TextCommands.CANCEL, StateFilter('*'))
+@router.message(
+    Command(SlashCommands.CANCEL, SlashCommands.STOP), StateFilter('*')
+)
 @router.callback_query(F.data == CallbackData.CANCEL_STATE, StateFilter('*'))
 async def cancel_state(
         message: types.Message | types.CallbackQuery,

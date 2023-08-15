@@ -7,6 +7,11 @@ class EditingMenu(StatesGroup):
     writing = State()
 
 
+class EditingEducators(StatesGroup):
+    choose_date = State()
+    writing = State()
+
+
 class LoadingLessons(StatesGroup):
     image = State()
 

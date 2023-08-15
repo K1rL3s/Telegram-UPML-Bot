@@ -3,13 +3,14 @@ from aiogram.filters import Command
 
 from bot.database.db_funcs import Repository
 from bot.keyboards import main_menu_keyboard
-from bot.utils.consts import CallbackData, Commands
+from bot.utils.consts import CallbackData, SlashCommands, TextCommands
 
 
 router = Router(name=__name__)
 
 
-@router.message(Command(Commands.ELECTIVES))
+@router.message(F.text == TextCommands.ELECTIVES)
+@router.message(Command(SlashCommands.ELECTIVES))
 @router.callback_query(F.data == CallbackData.OPEN_ELECTIVES)
 async def electives_handler(
         callback: types.CallbackQuery | types.Message,

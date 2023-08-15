@@ -6,7 +6,10 @@
 from aiogram import Dispatcher
 
 from bot.handlers.admin import (
-    admin_updates,
+    admin_cafe_menu,
+    admin_educators,
+    admin_electives,
+    admin_lessons,
     admin_manage,
     admin_notifies,
 )
@@ -27,7 +30,10 @@ def include_routers(dp: Dispatcher) -> None:
             laundry.router,
             educators.router,
             electives.router,
-            admin_updates.router,
+            admin_cafe_menu.router,
+            admin_educators.router,
+            admin_electives.router,
+            admin_lessons.router,
             admin_manage.router,
             admin_notifies.router,
             # errors_router,

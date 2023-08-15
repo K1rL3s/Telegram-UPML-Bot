@@ -17,10 +17,11 @@ async def admin_panel_keyboard(
 
     for button_text, callback_data in zip(
         ('🍴Загрузить меню', '🍴Изменить меню',
-         '📓Загрузить уроки', '🔔Уведомление'),
-        (CallbackData.AUTO_UPDATE_CAFE_MENU,
-         CallbackData.EDIT_CAFE_MENU,
-         CallbackData.UPLOAD_LESSONS, CallbackData.DO_A_NOTIFY_FOR_)
+         '📓Загрузить уроки', '🔔Уведомление',
+         '👩‍✈️Изменить расписание воспитателей'),
+        (CallbackData.AUTO_UPDATE_CAFE_MENU, CallbackData.EDIT_CAFE_MENU,
+         CallbackData.UPLOAD_LESSONS, CallbackData.DO_A_NOTIFY_FOR_,
+         CallbackData.EDIT_EDUCATORS)
     ):
         keyboard.add(
             InlineKeyboardButton(
@@ -34,6 +35,6 @@ async def admin_panel_keyboard(
 
     keyboard.add(go_to_main_menu_button)
 
-    keyboard.adjust(2, 2, 1, repeat=True)
+    keyboard.adjust(2, 2, 1, 1, repeat=True)
 
     return keyboard.as_markup()

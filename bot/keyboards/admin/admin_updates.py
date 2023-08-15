@@ -21,12 +21,12 @@ choose_meal_keyboard = InlineKeyboardBuilder().add(
     cancel_state_button
 ).adjust(3, 2, 1).as_markup()
 
-confirm_edit_menu_keyboard = InlineKeyboardMarkup(
+confirm_edit_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [
             InlineKeyboardButton(
                 text='✅Подтвердить',
-                callback_data=CallbackData.EDIT_CONFIRM
+                callback_data=CallbackData.CONFIRM
             ),
             cancel_state_button
         ]

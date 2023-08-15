@@ -3,6 +3,7 @@ from datetime import date
 from cachetools.func import ttl_cache
 
 from bot.database.db_funcs import Repository
+from bot.utils.consts import NO_DATA
 from bot.utils.datehelp import format_date, date_today, weekday_by_date
 
 
@@ -13,7 +14,7 @@ def format_menu(meals: tuple[str, ...]) -> str:
     """
 
     return '\n\n'.join(
-        f'*{meal_type}:*\n{meal or "Н/д"}'.strip()
+        f'*{meal_type}:*\n{meal or NO_DATA}'.strip()
         for meal_type, meal in zip(
             ('🕗Завтрак', '🕙Второй завтрак',
              '🕐Обед', '🕖Полдник', '🕖Ужин'),
@@ -28,7 +29,7 @@ async def get_formatted_menu_by_date(
         menu_date: date = None
 ) -> str:
     """
-    Возвращает меню (список строк) по дате.
+    Возвращает меню по дате.
     Н/д для каждого приёма пищи, если данных нет.
 
     :param repo: Доступ к базе данных.
@@ -42,11 +43,11 @@ async def get_formatted_menu_by_date(
     menu = await repo.get_menu_by_date(menu_date)
 
     meals = (
-        menu.breakfast if menu and menu.breakfast else 'Н/д',
-        menu.lunch if menu and menu.lunch else 'Н/д',
-        menu.dinner if menu and menu.dinner else 'Н/д',
-        menu.snack if menu and menu.snack else 'Н/д',
-        menu.supper if menu and menu.supper else 'Н/д',
+        menu.breakfast if menu and menu.breakfast else NO_DATA,
+        menu.lunch if menu and menu.lunch else NO_DATA,
+        menu.dinner if menu and menu.dinner else NO_DATA,
+        menu.snack if menu and menu.snack else NO_DATA,
+        menu.supper if menu and menu.supper else NO_DATA,
     )
 
     return f"🍺 *Меню на {format_date(menu_date)} " \

@@ -1,25 +1,18 @@
-from datetime import date
-from io import BytesIO
-
 from aiogram import F, Router, types
 from aiogram.filters import StateFilter
-
 from aiogram.fsm.context import FSMContext
 
-from bot.custom_types import Album
 from bot.database.db_funcs import Repository
 from bot.filters import IsAdmin
-from bot.funcs.admin import get_meal_by_date, load_lessons_func
+from bot.funcs.admin import get_meal_by_date
 from bot.keyboards import (
-    cancel_state_keyboard,
-    confirm_edit_menu_keyboard, go_to_main_menu_keyboard,
-    choose_meal_keyboard,
-    admin_panel_keyboard,
+    cancel_state_keyboard, admin_panel_keyboard,
+    choose_meal_keyboard, confirm_edit_keyboard,
 )
 from bot.upml.save_cafe_menu import save_cafe_menu
 from bot.utils.consts import CallbackData, menu_eng_to_ru
 from bot.utils.datehelp import date_by_format, date_today, format_date
-from bot.utils.states import LoadingLessons, EditingMenu
+from bot.utils.states import EditingMenu
 
 
 router = Router(name=__name__)
@@ -110,7 +103,7 @@ async def edit_cafe_menu_meal_handler(
 
     meal_date = format_date(edit_menu_date)
     meal = menu_eng_to_ru[edit_meal].capitalize()
-    menu = await get_meal_by_date(repo, edit_meal, edit_menu_date) or "Н/д"
+    menu = await get_meal_by_date(repo, edit_meal, edit_menu_date)
     text = f'*Дата*: `{meal_date}`\n' \
            f'*Приём пищи*: `{meal}`\n' \
            f'*Меню*:\n' \
@@ -153,7 +146,7 @@ async def edit_cafe_menu_text_handler(
         text=text,
         chat_id=message.chat.id,
         message_id=start_id,
-        reply_markup=confirm_edit_menu_keyboard
+        reply_markup=confirm_edit_keyboard
     )
 
 
@@ -174,7 +167,7 @@ async def edit_cafe_menu_confirm_handler(
 
     await state.clear()
 
-    await repo.edit_meal_by_date(
+    await repo.edit_menu_by_date(
         edit_meal, new_menu, edit_menu_date, callback.from_user.id
     )
 
@@ -191,90 +184,3 @@ async def edit_cafe_menu_confirm_handler(
             chat_id=callback.message.chat.id,
             message_id=new_menu_id
         )
-
-
-@router.callback_query(F.data == CallbackData.UPLOAD_LESSONS, IsAdmin())
-async def start_load_lessons_handler(
-        callback: types.CallbackQuery,
-        state: FSMContext,
-) -> None:
-    """
-    Обработчик кнопки "Загрузить уроки".
-    """
-    await state.set_state(LoadingLessons.image)
-    text = 'Отправьте изображение(-я) расписания уроков'
-
-    await callback.message.edit_text(
-        text=text,
-        reply_markup=cancel_state_keyboard
-    )
-
-
-@router.message(
-    StateFilter(LoadingLessons.image),
-    F.content_type.in_({'photo'}),
-    IsAdmin(),
-)
-async def load_lessons_handler(
-        message: types.Message,
-        state: FSMContext,
-        repo: Repository,
-) -> None:
-    album = Album.model_validate(
-        {
-            "photo": [message.photo[-1]],
-            "messages": [message],
-            "caption": message.html_text,
-        },
-        context={"bot": message.bot}
-    )
-    await load_lessons_album_handler(message, state, repo, album)
-
-
-@router.message(
-    StateFilter(LoadingLessons.image),
-    F.media_group_id,
-    IsAdmin(),
-)
-async def load_lessons_album_handler(
-        message: types.Message,
-        state: FSMContext,
-        repo: Repository,
-        album: Album,
-) -> None:
-    """
-    Обработчик сообщений с изображениями
-    после нажатия кнопки "Загрузить уроки".
-    """
-    photos = album.photo
-    proccess_results: list[str | tuple[str, date]] = []
-
-    for photo in photos:
-        photo_id = photo.file_id
-        photo = await message.bot.get_file(photo_id)
-        await message.bot.download_file(photo.file_path, image := BytesIO())
-
-        result = await load_lessons_func(
-            message.chat.id, image, message.bot, repo
-        )
-        proccess_results.append(result)
-
-    if state:
-        await state.clear()
-
-    results: list[str] = []
-    for result in proccess_results:
-        if isinstance(result, tuple):
-            grade, lessons_date = result
-            results.append(
-                f'Расписание для *{grade}-х классов* на '
-                f'*{format_date(lessons_date)}* сохранено!'
-            )
-        else:
-            results.append(result)
-
-    text = '\n'.join(results)
-    await message.reply(
-        text=text,
-        reply_markup=go_to_main_menu_keyboard
-    )

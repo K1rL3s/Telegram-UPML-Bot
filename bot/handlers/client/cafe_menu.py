@@ -4,14 +4,15 @@ from aiogram.filters import Command
 from bot.database.db_funcs import Repository
 from bot.funcs.cafe_menu import get_formatted_menu_by_date
 from bot.keyboards import cafe_menu_keyboard
-from bot.utils.consts import CallbackData, Commands
+from bot.utils.consts import CallbackData, SlashCommands, TextCommands
 from bot.utils.datehelp import date_by_format
 
 
 router = Router(name=__name__)
 
 
-@router.message(Command(Commands.CAFE))
+@router.message(F.text == TextCommands.CAFE)
+@router.message(Command(SlashCommands.CAFE))
 @router.callback_query(F.data.startswith(CallbackData.OPEN_CAFE_MENU_ON_))
 async def open_date_cafe_menu(
         callback: types.CallbackQuery | types.Message,

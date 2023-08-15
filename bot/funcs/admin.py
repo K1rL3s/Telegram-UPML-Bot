@@ -6,17 +6,50 @@ import aiojobs
 from aiogram import Bot
 from loguru import logger
 
+from bot.custom_types import Album
 from bot.database.db_funcs import Repository
 from bot.database.models.settings import Settings
 from bot.database.models.users import User
 from bot.upml.process_lessons import save_lessons
+from bot.utils.consts import NO_DATA
+from bot.utils.datehelp import format_date
 from bot.utils.funcs import (
     one_notify, bytes_io_to_image_id, name_link,
     username_by_user_id,
 )
 
 
-async def load_lessons_func(
+async def load_album_lessons_func(
+        chat_id: int,
+        album: Album,
+        bot: Bot,
+        repo: Repository,
+) -> str:
+
+    proccess_results: list[str | tuple[str, date]] = []
+    for photo in album.photo:
+        photo_id = photo.file_id
+        photo = await bot.get_file(photo_id)
+        await bot.download_file(photo.file_path, image := BytesIO())
+
+        result = await load_one_lesson_func(chat_id, image, bot, repo)
+        proccess_results.append(result)
+
+    results: list[str] = []
+    for result in proccess_results:
+        if isinstance(result, tuple):
+            grade, lessons_date = result
+            results.append(
+                f'Расписание для *{grade}-х классов* на '
+                f'*{format_date(lessons_date)}* сохранено!'
+            )
+        else:
+            results.append(result)
+
+    return '\n'.join(results)
+
+
+async def load_one_lesson_func(
         chat_id: int,
         image: BytesIO,
         bot: Bot,
@@ -57,7 +90,7 @@ async def load_lessons_func(
 async def get_meal_by_date(
         repo: Repository,
         meal: str,
-        menu_date: date
+        menu_date: date,
 ) -> str | None:
     """
     Возвращает приём пищи по названию и дате.
@@ -68,7 +101,22 @@ async def get_meal_by_date(
     :return: Приём пищи из бд.
     """
     menu = await repo.get_menu_by_date(menu_date)
-    return getattr(menu, meal, None)
+    return getattr(menu, meal, None) or NO_DATA
+
+
+async def get_educators_schedule_by_date(
+        repo: Repository,
+        schedule_date: date,
+) -> str | None:
+    """
+    Возвращает расписание.
+
+    :param repo: Доступ к базе данных.
+    :param schedule_date: Дата.
+    :return: Расписание воспитателей из бд.
+    """
+    schedule = await repo.get_educators_schedule_by_date(schedule_date)
+    return getattr(schedule, 'schedule', None) or NO_DATA
 
 
 async def do_notifies(

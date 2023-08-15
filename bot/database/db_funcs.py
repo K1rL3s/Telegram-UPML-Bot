@@ -11,6 +11,7 @@ from bot.database import (
     UserRelatedModel, ClassLessons, FullLessons,
     Laundry, Menu, Role, Settings, User,
 )
+from bot.database.models.educators_schedules import EducatorsSchedule
 from bot.utils.consts import Roles, menu_eng_to_ru
 from bot.utils.datehelp import datetime_now
 
@@ -39,10 +40,9 @@ class Repository:
         :param user_id: Айди юзера.
         :param username: Имя пользователя.
         """
+        user = await self.get_user(user_id)
 
-        user_query = sa.select(User).where(User.user_id == user_id)
-        user: User = await self.session.scalar(user_query)
-
+        # Если юзер в бд и (он помечен как неактивный или изменился никнейм)
         if user and (not user.is_active or user.username != username):
             user.is_active = True
             user.username = username
@@ -56,7 +56,7 @@ class Repository:
         await self.save_or_update_settings(user_id)
         await self.save_or_update_laundry(user_id)
 
-    async def save_or_update_menu_in_db(
+    async def save_or_update_menu(
             self,
             menu_date: date,
             breakfast: str | None = None,
@@ -81,8 +81,8 @@ class Repository:
             'breakfast': breakfast, 'lunch': lunch, 'dinner': dinner,
             'snack': snack, 'supper': supper
         }
-        find_query = sa.select(Menu).where(Menu.date == menu_date)
-        if menu := await self.session.scalar(find_query):
+
+        if menu := await self.get_menu_by_date(menu_date):
             for k, v in meals.items():
                 # Если редактируется вручную или информации о еде нет:
                 if edit_by or not getattr(menu, k, None):
@@ -153,9 +153,7 @@ class Repository:
         :return: Модель Laundry.
         """
 
-        query = sa.select(Laundry).where(Laundry.user_id == user_id)
-
-        if laundry := await self.session.scalar(query):
+        if laundry := await self.get_laundry(user_id):
             for k, v in fields.items():
                 setattr(laundry, k, v)
         else:
@@ -177,14 +175,41 @@ class Repository:
         :return: модель Settings.
         """
 
-        query = sa.select(Settings).where(Settings.user_id == user_id)
-
-        if settings := await self.session.scalar(query):
+        if settings := await self.get_settings(user_id):
             for k, v in fields.items():
                 setattr(settings, k, v)
         else:
             settings = Settings(user_id=user_id, **fields)
             self.session.add(settings)
+
+        await self.session.commit()
+
+    async def save_or_update_educators_schedule(
+            self,
+            schedule_date: date,
+            schedule_text: str,
+            edit_by: int = 0,
+    ) -> None:
+        """
+        Сохраняет или обновляет расписание воспитателей.
+
+        :param schedule_date: Дата расписания.
+        :param schedule_text: Текст расписания.
+        :param edit_by: Кем редактируется.
+        """
+
+        schedule = await self.get_educators_schedule_by_date(schedule_date)
+
+        if schedule:
+            schedule.schedule = schedule_text
+            schedule.edit_by = edit_by
+        else:
+            schedule = EducatorsSchedule(
+                date=schedule_date,
+                schedule=schedule_text,
+                edit_by=edit_by,
+            )
+            self.session.add(schedule)
 
         await self.session.commit()
 
@@ -200,6 +225,21 @@ class Repository:
         """
 
         query = sa.select(Menu).where(Menu.date == menu_date)
+        return await self.session.scalar(query)
+
+    async def get_educators_schedule_by_date(
+            self,
+            schedule_date: date,
+    ) -> EducatorsSchedule | None:
+        """
+        Возвращает расписание воспитателей на день по дате.
+
+        :param schedule_date: Дата запрашеваемого меню.
+        :return: Модель EducatorsSchedule.
+        """
+        query = sa.select(EducatorsSchedule).where(
+            EducatorsSchedule.date == schedule_date
+        )
         return await self.session.scalar(query)
 
     async def get_users_by_conditions(
@@ -284,7 +324,7 @@ class Repository:
             self,
             lessons_date: date,
             grade: str,
-    ) -> str | None:
+    ) -> FullLessons | None:
         """
         Возвращает айди картинки расписания уроков для параллели.
 
@@ -297,14 +337,13 @@ class Repository:
             FullLessons.date == lessons_date,
             FullLessons.grade == grade
         )
-        lessons = await self.session.scalar(query)
-        return lessons.image if lessons else None
+        return await self.session.scalar(query)
 
     async def get_class_lessons(
             self,
             lessons_date: date,
             class_: str,
-    ) -> str | None:
+    ) -> ClassLessons | None:
         """
         Возвращает айди картинки расписания уроков для класса.
 
@@ -317,8 +356,7 @@ class Repository:
             ClassLessons.date == lessons_date,
             ClassLessons.class_ == class_
         )
-        lessons = await self.session.scalar(query)
-        return lessons.image if lessons else None
+        return await self.session.scalar(query)
 
     async def _get_model(
             self,
@@ -326,9 +364,9 @@ class Repository:
             user_id: int,
     ) -> UserRelatedModel | None:
         """
-        Возвращает модель Model по айди пользователя.
+        Возвращает связанную с юзером модель по айди пользователя.
 
-        :param model: Модель из папки models.
+        :param model: Модель-наследник от UserRelatedModel.
         :param user_id: ТГ Айди юзера.
         :return: Модель model.
         """
@@ -356,7 +394,7 @@ class Repository:
 
         now = datetime_now()
         query = sa.select(Laundry).where(
-            Laundry.is_active == True,
+            Laundry.is_active == True,  # noqa
             Laundry.end_time <= now
         )
         return list((await self.session.scalars(query)).all())
@@ -381,7 +419,7 @@ class Repository:
         await self.session.execute(query)
         await self.session.commit()
 
-    async def edit_meal_by_date(
+    async def edit_menu_by_date(
             self,
             meal: str,
             new_menu: str,
@@ -404,7 +442,7 @@ class Repository:
         }
         meals[meal] = new_menu
 
-        await self.save_or_update_menu_in_db(
+        await self.save_or_update_menu(
             menu_date=menu_date,
             edit_by=edit_by,
             **meals
@@ -423,8 +461,7 @@ class Repository:
         :return: Тру или фэлс.
         """
 
-        user_query = sa.select(User).where(User.user_id == user_id)
-        user = await self.session.scalar(user_query)
+        user = await self.get_user(user_id)
         if user is None:
             return False
 
@@ -449,10 +486,8 @@ class Repository:
         if isinstance(role, Roles):
             role = role.value
 
-        user_query = sa.select(User).where(User.user_id == user_id)
-        role_query = sa.select(Role).where(Role.role == role)
-        user = await self.session.scalar(user_query)
-        role = await self.session.scalar(role_query)
+        user = await self.get_user(user_id)
+        role = await self.get_role(role)
 
         try:
             user.roles.remove(role)
@@ -476,10 +511,9 @@ class Repository:
         if isinstance(role, Roles):
             role = role.value
 
-        user_query = sa.select(User).where(User.user_id == user_id)
-        role_query = sa.select(Role).where(Role.role == role)
-        user = await self.session.scalar(user_query)
-        role = await self.session.scalar(role_query)
+        user = await self.get_user(user_id)
+        role = await self.get_role(role)
+
         user.roles.append(role)
 
         await self.session.commit()

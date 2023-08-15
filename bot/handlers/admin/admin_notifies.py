@@ -48,10 +48,10 @@ async def notify_for_who_handler(
     """
     notify_type = callback.data.replace(CallbackData.DO_A_NOTIFY_FOR_, '')
 
-    if callback.data == CallbackData.FOR_GRADE:
+    if callback.data == CallbackData.NOTIFY_FOR_GRADE:
         text = 'Выберите, каким классам сделать уведомление'
         keyboard = notify_for_grade_keyboard
-    elif callback.data == CallbackData.FOR_CLASS:
+    elif callback.data == CallbackData.NOTIFY_FOR_CLASS:
         text = 'Выберите, какому классу сделать уведомление'
         keyboard = notify_for_class_keyboard
     else:
@@ -103,7 +103,7 @@ async def notify_message_handler(
 
 
 @router.callback_query(
-    F.data == CallbackData.NOTIFY_CONFIRM,
+    F.data == CallbackData.CONFIRM,
     StateFilter(DoNotify.writing),
     IsAdmin(),
 )

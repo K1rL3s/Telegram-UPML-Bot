@@ -6,17 +6,17 @@ https://github.com/wakaree/simple_echo_bot
 from asyncio import sleep
 from typing import Any, Callable, Awaitable, Final, MutableMapping, cast
 
-from aiogram import BaseMiddleware
 from aiogram.types import Message, TelegramObject
 from cachetools import TTLCache
 
 from bot.custom_types import Album, Media
+from bot.middlewares.base import MyBaseMiddleware
 
 
 ALBUM_KEY: Final[str] = "album"
 
 
-class AlbumMiddleware(BaseMiddleware):
+class AlbumMiddleware(MyBaseMiddleware):
     DEFAULT_LATENCY = 2
     DEFAULT_TTL = 6
 

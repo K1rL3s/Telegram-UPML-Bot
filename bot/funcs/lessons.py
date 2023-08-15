@@ -25,14 +25,16 @@ async def get_lessons_text_and_image_id(
 
     settings = await repo.get_settings(user_id)
 
-    images = []
-
     if settings.class_:
-        images.append(await repo.get_full_lessons(lesson_date, settings.grade))
-        images.append(await repo.get_class_lessons(lesson_date, settings.class_))  # noqa
+        images = [
+            (await repo.get_full_lessons(lesson_date, settings.grade)).image,
+            (await repo.get_class_lessons(lesson_date, settings.class_)).image  # noqa
+        ]
     else:
-        images.append(await repo.get_full_lessons(lesson_date, "10"))
-        images.append(await repo.get_full_lessons(lesson_date, "11"))
+        images = [
+            (await repo.get_full_lessons(lesson_date, "10")).image,
+            (await repo.get_full_lessons(lesson_date, "11")).image
+        ]
 
     for_class = settings.class_ if settings.class_ else "❓"
 

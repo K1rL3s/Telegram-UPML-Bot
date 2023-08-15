@@ -3,6 +3,7 @@ from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 
 from bot.database.db_funcs import Repository
+from bot.filters import SaveUser
 from bot.funcs.settings import (
     edit_bool_settings_func, edit_grade_setting_func,
     edit_laundry_time_func,
@@ -11,8 +12,10 @@ from bot.keyboards import (
     cancel_state_keyboard, settings_keyboard,
     choose_grade_keyboard,
 )
-from bot.utils.consts import CallbackData, Commands, times_eng_to_ru
-from bot.utils.decorators import save_new_user
+from bot.utils.consts import (
+    CallbackData, SlashCommands, TextCommands,
+    times_eng_to_ru,
+)
 from bot.utils.states import EditingSettings
 
 
@@ -29,9 +32,9 @@ settings_welcome_text = """
 """.strip()
 
 
-@router.message(Command(Commands.SETTINGS))
-@router.callback_query(F.data == CallbackData.OPEN_SETTINGS)
-@save_new_user
+@router.message(F.text == TextCommands.SETTINGS, SaveUser())
+@router.message(Command(SlashCommands.SETTINGS), SaveUser())
+@router.callback_query(F.data == CallbackData.OPEN_SETTINGS, SaveUser())
 async def open_settings_handler(
         callback: types.CallbackQuery | types.Message,
         repo: Repository,

@@ -28,7 +28,7 @@ async def main_menu_keyboard(
          "👩‍✈️Воспитатели"),
         (CallbackData.OPEN_CAFE_MENU_TODAY, CallbackData.OPEN_LESSONS_TODAY,
          CallbackData.OPEN_LAUNDRY, CallbackData.OPEN_ELECTIVES,
-         CallbackData.OPEN_EDUCATORS)
+         CallbackData.OPEN_EDUCATORS_TODAY)
 
     ):
         keyboard.add(

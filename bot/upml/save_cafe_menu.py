@@ -142,7 +142,7 @@ async def _process_pdf_menu(
             meals.append(_normalize_meal(meal))
             text_menu = text_menu[end:]
 
-        await repo.save_or_update_menu_in_db(
+        await repo.save_or_update_menu(
             menu_date,
             *meals
         )

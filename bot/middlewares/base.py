@@ -1,25 +1,14 @@
-from typing import Any, Awaitable, Callable
+from abc import ABC
 
 from aiogram import BaseMiddleware, types
 
 from bot.utils.funcs import extract_username
 
 
-class MyBaseMiddleware(BaseMiddleware):
+class MyBaseMiddleware(BaseMiddleware, ABC):
     """
     Базовый мидлварь. Он нужен, чтобы метод get_short_info был везде.
     """
-
-    async def __call__(
-            self,
-            handler: Callable[
-                [types.TelegramObject, dict[str, Any]],
-                Awaitable[Any]
-            ],
-            event: types.TelegramObject,
-            data: dict[str, Any],
-    ):
-        return await handler(event, data)
 
     @staticmethod
     async def get_short_info(message: types.Message | types.CallbackQuery):

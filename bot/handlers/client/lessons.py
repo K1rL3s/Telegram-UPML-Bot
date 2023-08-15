@@ -3,19 +3,22 @@ from aiogram.filters import Command
 from aiogram.methods import SendMediaGroup
 
 from bot.database.db_funcs import Repository
+from bot.filters import SaveUser
 from bot.funcs.lessons import get_lessons_text_and_image_id
 from bot.keyboards import lessons_keyboard
-from bot.utils.consts import CallbackData, Commands
+from bot.utils.consts import CallbackData, SlashCommands, TextCommands
 from bot.utils.datehelp import date_by_format
-from bot.utils.decorators import save_new_user
 
 
 router = Router(name=__name__)
 
 
-@router.message(Command(Commands.LESSONS))
-@router.callback_query(F.data.startswith(CallbackData.OPEN_LESSONS_ON_))
-@save_new_user
+@router.message(F.text == TextCommands.LESSONS, SaveUser())
+@router.message(Command(SlashCommands.LESSONS), SaveUser())
+@router.callback_query(
+    F.data.startswith(CallbackData.OPEN_LESSONS_ON_),
+    SaveUser(),
+)
 async def open_date_lessons_handler(
         callback: types.CallbackQuery | types.Message,
         repo: Repository,

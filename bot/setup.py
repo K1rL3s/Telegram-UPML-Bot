@@ -9,7 +9,7 @@ from sqlalchemy.orm import close_all_sessions
 from bot.handlers import include_routers
 from bot.middlewares import setup_middlewares
 from bot.config import Config
-from bot.utils.consts import bot_commands
+from bot.utils.consts import bot_slash_commands
 
 
 async def on_startup() -> None:
@@ -24,7 +24,7 @@ async def set_commands(bot: Bot) -> bool:
     return await bot.set_my_commands(
         [
             BotCommand(command=command, description=description)
-            for command, description in bot_commands.items()
+            for command, description in bot_slash_commands.items()
         ]
     )
 

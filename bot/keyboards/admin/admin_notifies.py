@@ -13,8 +13,8 @@ notify_panel_keyboard = InlineKeyboardMarkup(
         InlineKeyboardButton(text=for_who, callback_data=callback_data)
         for for_who, callback_data in zip(
             ('Всем', 'Поток', 'Класс'),
-            (CallbackData.FOR_ALL, CallbackData.FOR_GRADE,
-             CallbackData.FOR_CLASS)
+            (CallbackData.NOTIFY_FOR_ALL, CallbackData.NOTIFY_FOR_GRADE,
+             CallbackData.NOTIFY_FOR_CLASS)
         )
     ],
         [go_to_admin_panel_button]
@@ -53,7 +53,7 @@ notify_confirm_keyboard = InlineKeyboardMarkup(
         [
             InlineKeyboardButton(
                 text='✅Подтвердить',
-                callback_data=CallbackData.NOTIFY_CONFIRM
+                callback_data=CallbackData.CONFIRM
             )
         ],
         [cancel_state_button]
