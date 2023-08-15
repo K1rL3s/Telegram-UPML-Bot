@@ -28,3 +28,6 @@ jobs:
 
       - name: Build and run the Docker
         run: docker compose up -d --build
+
+      - name: Run migrations
+        run: docker compose exec upml-bot alembic upgrade head
