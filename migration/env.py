@@ -1,16 +1,13 @@
 import asyncio
-import os
 from logging.config import fileConfig
 
 from alembic import context
 from alembic.script import ScriptDirectory
-from dotenv import load_dotenv
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-
-load_dotenv()
+from bot.config import Config
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -20,19 +17,19 @@ config = context.config
 # fron the host env
 section = config.config_ini_section
 config.set_section_option(
-    section, "POSTGRES_HOST", os.environ["POSTGRES_HOST"]
+    section, "POSTGRES_HOST", Config.POSTGRES_HOST
 )
 config.set_section_option(
-    section, "POSTGRES_PORT", os.environ["POSTGRES_PORT"]
+    section, "POSTGRES_PORT", str(Config.POSTGRES_PORT)
 )
 config.set_section_option(
-    section, "POSTGRES_DB", os.environ["POSTGRES_DB"]
+    section, "POSTGRES_DB", Config.POSTGRES_DB
 )
 config.set_section_option(
-    section, "POSTGRES_USER", os.environ["POSTGRES_USER"]
+    section, "POSTGRES_USER", Config.POSTGRES_USER
 )
 config.set_section_option(
-    section, "POSTGRES_PASSWORD", os.environ["POSTGRES_PASSWORD"]
+    section, "POSTGRES_PASSWORD", Config.POSTGRES_PASSWORD
 )
 
 # Interpret the config file for Python logging.
