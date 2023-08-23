@@ -124,9 +124,7 @@ async def edit_educators_confirm_handler(
         edit_date, new_schedule, callback.from_user.id
     )
 
-    text = (
-        f"*Расписание воспитателей* на *{format_date(edit_date)}* успешно изменено!"
-    )
+    text = f"*Расписание воспитателей* на *{format_date(edit_date)}* успешно изменено!"
 
     await callback.message.edit_text(
         text=text, reply_markup=await admin_panel_keyboard(repo, callback.from_user.id)

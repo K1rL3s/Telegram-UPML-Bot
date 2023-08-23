@@ -24,7 +24,13 @@ async def start_handler(message: Message, repo: Repository) -> None:
     """
     Обработчик команды "/start".
     """
-    text = "Привет! Я - стартовое меню.\nИспользуй команду /menu"
+    text = """
+Привет! Я - стартовое меню.
+Используй команду /menu для навигации по кнопкам
+
+[Разработчик](https://hello.k1rles.ru/)
+[Бот](https://github.com/K1rL3s/Telegram-UPML-Bot)
+""".strip()
 
     await message.reply(
         text=text, reply_markup=await start_reply_keyboard(repo, message.from_user.id)

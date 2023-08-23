@@ -68,6 +68,4 @@ class User(UserRelatedModel):
     )
 
     def short_info(self) -> str:
-        return (
-            f"User(id={self.id}, user_id={self.user_id}, username={self.username})"
-        )
+        return f"User(id={self.id}, user_id={self.user_id}, username={self.username})"

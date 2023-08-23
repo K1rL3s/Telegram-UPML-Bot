@@ -53,7 +53,7 @@ py-version = 3.10.12
 limit-inference-results=100
 
 # Specify a score threshold to be exceeded before program exits with error.
-fail-under=9.0
+fail-under=9.5
 
 # Return non-zero exit code if any of these messages/categories are detected,
 # even if score is above --fail-under value. Syntax same as enable. Messages
