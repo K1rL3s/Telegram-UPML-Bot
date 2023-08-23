@@ -16,8 +16,7 @@ class RepositoryMiddleware(BaseMiddleware):
     def __init__(
         self,
         session_pool: Union[
-            async_sessionmaker[AsyncSession],
-            Callable[[], AsyncIterator[AsyncSession]]
+            async_sessionmaker[AsyncSession], Callable[[], AsyncIterator[AsyncSession]]
         ],
         session_key: str = SESSION_KEY,
         repo_key: str = REPOSITORY_KEY,
