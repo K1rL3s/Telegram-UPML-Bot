@@ -39,7 +39,7 @@ async def laundry_handler(
 
     laundry = await repo.laundry.get_laundry(callback.from_user.id)
 
-    if (minutes := await laundry_welcome_func(laundry)) is None:
+    if (minutes := await laundry_welcome_func(laundry)) is not None:
         text += f"Время до конца таймера: *{minutes}* минут\n"
 
     keyboard = await laundry_keyboard(laundry)

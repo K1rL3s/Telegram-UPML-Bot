@@ -105,7 +105,7 @@ async def edit_laundry_start_handler(
     await state.set_state(EditingSettings.writing)
     await state.update_data(start_id=callback.message.message_id, attr=attr)
 
-    text = f"🕛Введите `{LAUNDRY_ENG_TO_RU[attr]}` в минутах (целых)"
+    text = f"🕛Введите **{LAUNDRY_ENG_TO_RU[attr]}** в минутах (целых)"
     await callback.message.edit_text(text=text, reply_markup=cancel_state_keyboard)
 
 
