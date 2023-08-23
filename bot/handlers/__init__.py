@@ -14,10 +14,20 @@ from bot.handlers.admin import (
     admin_notifies,
 )
 from bot.handlers.client import (
-    start, settings, lessons, cafe_menu,
-    laundry, educators, electives,
+    start,
+    settings,
+    lessons,
+    cafe_menu,
+    laundry,
+    educators,
+    electives,
 )
 from bot.handlers import errors
+
+
+__all__ = [
+    "include_routers",
+]
 
 
 def include_routers(dp: Dispatcher) -> None:
@@ -36,6 +46,6 @@ def include_routers(dp: Dispatcher) -> None:
             admin_lessons.router,
             admin_manage.router,
             admin_notifies.router,
-            # errors_router,
+            errors.router,
         )
     )

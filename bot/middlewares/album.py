@@ -4,7 +4,8 @@ https://github.com/wakaree/simple_echo_bot
 """
 
 from asyncio import sleep
-from typing import Any, Callable, Awaitable, Final, MutableMapping, cast
+from collections.abc import Awaitable, Callable, MutableMapping
+from typing import Any, Final, cast
 
 from aiogram.types import Message, TelegramObject
 from cachetools import TTLCache
@@ -21,9 +22,10 @@ class AlbumMiddleware(MyBaseMiddleware):
     DEFAULT_TTL = 6
 
     def __init__(
-            self, album_key: str = ALBUM_KEY,
-            latency: float = DEFAULT_LATENCY,
-            ttl: float = DEFAULT_TTL,
+        self,
+        album_key: str = ALBUM_KEY,
+        latency: float = DEFAULT_LATENCY,
+        ttl: float = DEFAULT_TTL,
     ) -> None:
         self.album_key = album_key
         self.latency = latency
@@ -44,20 +46,14 @@ class AlbumMiddleware(MyBaseMiddleware):
         return None
 
     async def __call__(
-            self,
-            handler: Callable[
-                [TelegramObject, dict[str, Any]],
-                Awaitable[Any]
-            ],
-            event: TelegramObject,
-            data: dict[str, Any],
+        self,
+        handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
+        event: TelegramObject,
+        data: dict[str, Any],
     ) -> Any:
         if isinstance(event, Message) and event.media_group_id is not None:
             key = event.media_group_id
-            media, content_type = cast(
-                tuple[Media, str],
-                self.get_content(event)
-            )
+            media, content_type = cast(tuple[Media, str], self.get_content(event))
 
             if key in self.cache:
                 if content_type not in self.cache[key]:
@@ -76,8 +72,7 @@ class AlbumMiddleware(MyBaseMiddleware):
 
             await sleep(self.latency)
             data[self.album_key] = Album.model_validate(
-                self.cache[key],
-                context={"bot": data["bot"]}
+                self.cache[key], context={"bot": data["bot"]}
             )
 
         return await handler(event, data)

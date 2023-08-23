@@ -1,13 +1,11 @@
 from datetime import date
 
-from bot.database.db_funcs import Repository
+from bot.database.repository.repository import Repository
 from bot.utils.datehelp import format_date, weekday_by_date
 
 
 async def get_lessons_text_and_image_id(
-        repo: Repository,
-        user_id: int,
-        lesson_date: date = None
+    repo: Repository, user_id: int, lesson_date: date = None
 ) -> tuple[str, list[str] | None]:
     """
     Возвращает сообщение для пользователя и:
@@ -23,21 +21,20 @@ async def get_lessons_text_and_image_id(
     :return: Сообщение и список с двумя айди изображений.
     """
 
-    settings = await repo.get_settings(user_id)
+    settings = await repo.settings.get_settings(user_id)
 
     if settings.class_:
-        full_lessons = await repo.get_full_lessons(lesson_date, settings.grade)
-        class_lessons = await repo.get_class_lessons(
-            lesson_date,
-            settings.class_  # noqa
+        full_lessons = await repo.lessons.get_full_lessons(lesson_date, settings.grade)
+        class_lessons = await repo.lessons.get_class_lessons(
+            lesson_date, settings.class_  # noqa
         )
         images = [
             full_lessons.image if full_lessons else None,
             class_lessons.image if full_lessons else None,
         ]
     else:
-        full_10_lessons = await repo.get_full_lessons(lesson_date, "10")
-        full_11_lessons = await repo.get_full_lessons(lesson_date, "11")
+        full_10_lessons = await repo.lessons.get_full_lessons(lesson_date, "10")
+        full_11_lessons = await repo.lessons.get_full_lessons(lesson_date, "11")
         images = [
             full_10_lessons.image if full_10_lessons else None,
             full_11_lessons.image if full_11_lessons else None,
@@ -46,12 +43,16 @@ async def get_lessons_text_and_image_id(
     for_class = settings.class_ if settings.class_ else "❓"
 
     if any(images):
-        text = f'✏ Расписание на *{format_date(lesson_date)}* ' \
-               f'({weekday_by_date(lesson_date)}) для *{for_class}* класса.'
+        text = (
+            f"✏ Расписание на *{format_date(lesson_date)}* "
+            f"({weekday_by_date(lesson_date)}) для *{for_class}* класса."
+        )
     else:
         images = None
-        text = f'🛏 Расписание на *{format_date(lesson_date)}* ' \
-               f'({weekday_by_date(lesson_date)}) ' \
-               f'для *{for_class}* класса не найдено :(.'
+        text = (
+            f"🛏 Расписание на *{format_date(lesson_date)}* "
+            f"({weekday_by_date(lesson_date)}) "
+            f"для *{for_class}* класса не найдено :(."
+        )
 
     return text, images

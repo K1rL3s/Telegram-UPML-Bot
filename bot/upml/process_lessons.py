@@ -5,16 +5,14 @@ from PIL import Image
 from PIL.PyAccess import PyAccess
 import pytesseract
 
-from bot.config import Config
+from bot.settings import Settings
 from bot.utils.datehelp import date_today
 
 
-pytesseract.pytesseract.tesseract_cmd = Config.TESSERACT_PATH
+pytesseract.pytesseract.tesseract_cmd = Settings.TESSERACT_PATH
 
 
-def save_lessons(
-        image: BytesIO
-) -> tuple[date, str, BytesIO, list[BytesIO]]:
+def save_lessons(image: BytesIO) -> tuple[date, str, BytesIO, list[BytesIO]]:
     """
     Основная функция в файле, выполняет всю работу, вызывая другие функции.
 
@@ -31,10 +29,13 @@ def save_lessons(
     date_image, preffix_up_y, prefix_down_y = _get_date_image(
         lessons, prefix_end_x, first_line_y
     )
-    weekday, lessons_date = _get_date_from_image(date_image)
+    _, lessons_date = _get_date_from_image(date_image)
     classes = _combine_prefix_classes_date(
         _crop_lessons_by_class(lessons, prefix_end_x, first_line_y),
-        prefix_image, date_image, preffix_up_y, prefix_down_y
+        prefix_image,
+        date_image,
+        preffix_up_y,
+        prefix_down_y,
     )
 
     grade = _get_grade(lessons, prefix_end_x, first_line_y)
@@ -45,11 +46,11 @@ def save_lessons(
     # for class_ in classes:
     #     class_.show()
 
-    lessons.save(full_lessons := BytesIO(), format='PNG')
+    lessons.save(full_lessons := BytesIO(), format="PNG")
 
     bytesio_classes: list[BytesIO] = []
     for class_image in classes:
-        class_image.save(buffer := BytesIO(), format='PNG')
+        class_image.save(buffer := BytesIO(), format="PNG")
         bytesio_classes.append(buffer)
 
     return lessons_date, grade, full_lessons, bytesio_classes
@@ -105,9 +106,9 @@ def _x_prefix_for_lessons(image: Image.Image, y: int) -> int:
         if x >= width:
             break
         if (
-                x > 0
-                and _is_pixel_white(pixels[x, y])
-                and _is_pixel_black(pixels[x - 1, y])
+            x > 0
+            and _is_pixel_white(pixels[x, y])
+            and _is_pixel_black(pixels[x - 1, y])
         ):
             black_count += 1
 
@@ -129,11 +130,7 @@ def _get_prefix_image(image: Image.Image, x: int) -> Image:
     return image.crop((0, 0, x + 1, image.height))
 
 
-def _get_date_image(
-        image: Image.Image,
-        x: int,
-        y: int
-) -> tuple[Image, int, int]:
+def _get_date_image(image: Image.Image, x: int, y: int) -> tuple[Image, int, int]:
     """
     Вырезка дня недели и даты с серой полосы.
 
@@ -177,11 +174,11 @@ def _get_date_image(
                 break
 
     if (
-            left_x is None
-            or right_x is None
-            or abs(left_x - right_x) <= 1
-            or abs(right_x - down_y) <= 1
-            or abs(up_y - down_y) <= 1
+        left_x is None
+        or right_x is None
+        or abs(left_x - right_x) <= 1
+        or abs(right_x - down_y) <= 1
+        or abs(up_y - down_y) <= 1
     ):
         raise ValueError("Не удалось получить дату с расписания")
 
@@ -197,21 +194,18 @@ def _get_date_from_image(image: Image.Image) -> tuple[str, date]:
     :return: День недели и объект даты.
     """
 
-    weekday, dd_mm = pytesseract.image_to_string(
-        image, lang='rus',
-        config='--psm 13 --oem 3'
-    ).lower().split()
+    weekday, dd_mm = (
+        pytesseract.image_to_string(image, lang="rus", config="--psm 13 --oem 3")
+        .lower()
+        .split()
+    )
 
-    dd, mm = map(int, dd_mm.split('.'))
+    day, month = map(int, dd_mm.split("."))
 
-    return weekday, date(day=dd, month=mm, year=date_today().year)
+    return weekday, date(day=day, month=month, year=date_today().year)
 
 
-def _crop_lessons_by_class(
-        image: Image.Image,
-        x: int,
-        y: int
-) -> list[Image.Image]:
+def _crop_lessons_by_class(image: Image.Image, x: int, y: int) -> list[Image.Image]:
     """
     Вырезает из расписания каждый класс.
 
@@ -230,7 +224,7 @@ def _crop_lessons_by_class(
 
     images = []
 
-    for i in range(3):
+    for _ in range(3):
         while x < width and not _is_pixel_black(pixels[x, y]):
             x += 1
 
@@ -249,11 +243,11 @@ def _crop_lessons_by_class(
 
 
 def _combine_prefix_classes_date(
-        classes: list[Image.Image],
-        prefix: Image.Image,
-        date_im: Image.Image,
-        up_y: int,
-        down_y: int,
+    classes: list[Image.Image],
+    prefix: Image.Image,
+    date_im: Image.Image,
+    up_y: int,
+    down_y: int,
 ) -> list[Image.Image]:
     """
     Комбинация префикса расписания с урокам каждого класса и датой расписания.
@@ -269,10 +263,7 @@ def _combine_prefix_classes_date(
     new_classes = []
 
     for image in classes:
-        new_image = Image.new(
-            'RGB',
-            (image.width + prefix.width, image.height)
-        )
+        new_image = Image.new("RGB", (image.width + prefix.width, image.height))
         new_image.paste(prefix, (0, 0))
         new_image.paste(image, (prefix.width, 0))
 
@@ -280,12 +271,9 @@ def _combine_prefix_classes_date(
         color = new_image.getpixel((date_x, up_y))
         new_image.paste(
             Image.new("RGB", (new_image.width // 2, down_y - up_y), color),
-            (new_image.width // 4, up_y)
+            (new_image.width // 4, up_y),
         )
-        new_image.paste(
-            date_im,
-            ((new_image.width - date_im.width) // 2, up_y)
-        )
+        new_image.paste(date_im, ((new_image.width - date_im.width) // 2, up_y))
         new_classes.append(new_image)
 
     return new_classes
@@ -320,6 +308,6 @@ def _get_grade(image: Image.Image, x: int, y: int) -> str:
 
     temp = image.crop((left_x, up_y, x, y))
     text = pytesseract.image_to_string(
-        temp, config='--psm 10 --oem 3 -c tessedit_char_whitelist=01'
+        temp, config="--psm 10 --oem 3 -c tessedit_char_whitelist=01"
     )
     return "10" if "10" in text else "11"  # XD

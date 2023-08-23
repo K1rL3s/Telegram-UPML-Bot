@@ -1,7 +1,7 @@
 from aiogram.filters import Filter
 from aiogram.types import Message, CallbackQuery
 
-from bot.database.db_funcs import Repository
+from bot.database.repository.repository import Repository
 from bot.database.db_session import get_session
 from bot.utils.consts import Roles
 
@@ -14,7 +14,7 @@ class RoleAccess(Filter):
     async def __call__(self, event: Message | CallbackQuery) -> bool:
         async with get_session() as session:
             repo = Repository(session)
-            result = await repo.is_has_any_role(event.from_user.id, self.roles)
+            result = await repo.user.is_has_any_role(event.from_user.id, self.roles)
         return result
 
 

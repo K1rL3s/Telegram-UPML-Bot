@@ -1,0 +1,34 @@
+[flake8]
+count=True
+statistics=True
+show-source=True
+
+max-line-length=88
+max-cognitive-complexity=10
+max-complexity=10
+
+import-order-style=smarkets
+docstring-convention=pep257
+
+exclude=
+    .idea,
+    .git,
+    venv,
+    __pycache__,
+
+ignore=
+    # D100 Missing docstring in public module
+    D100,
+    # D104 Missing docstring in public package
+    D104,
+    # D107 Missing docstring in __init__
+    D107,
+    # W503 Line break occurred before a binary operator
+    W503,
+    # W504 Line break after binary operator
+    W504,
+    # E203 Whitespace before ':' (for Black and slices)
+    E203,
+
+per-file-ignores=
+    migration/env.py:F401, F403,

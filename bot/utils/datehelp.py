@@ -1,62 +1,71 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
-from bot.config import Config
+from bot.settings import Settings
 
 
-def format_date(_date: date) -> str:
+def format_date(date_: date) -> str:
     """
     Формат объекта даты в вид "dd.MM.YYYY" с лидирующими нулями.
 
-    :param _date: Объект даты.
+    :param date_: Объект даты.
     :return: Отформатированная строка.
     """
 
-    return f'{_date.day:0>2}.{_date.month:0>2}.{_date.year}'
+    return f"{date_.day:0>2}.{date_.month:0>2}.{date_.year}"
 
 
-def format_datetime(_datetime: datetime) -> str:
+def format_datetime(datetime_: datetime) -> str:
     """
     Формат объекта даты и времени в вид "dd.MM.YYYY hh:mm:ss"
     с лидирующими нулями.
 
-    :param _datetime: Объект даты и времени.
+    :param datetime_: Объект даты и времени.
     :return: Отформатированная строка.
     """
 
-    return f'{_datetime.day:0>2}.{_datetime.month:0>2}.{_datetime.year} ' \
-           f'{_datetime.hour:0>2}:{_datetime.minute:0>2}:{_datetime.second:0>2}'  # noqa
+    return (
+        f"{datetime_.day:0>2}.{datetime_.month:0>2}.{datetime_.year} "
+        f"{datetime_.hour:0>2}:{datetime_.minute:0>2}:{datetime_.second:0>2}"
+    )
 
 
-def date_by_format(_date: str) -> date | bool:
+def date_by_format(date_: str) -> date | bool:
     """
     Конвертация отформатированной строки в дату.
 
-    :param _date: Дата в виде строки.
+    :param date_: Дата в виде строки.
     :return: Объект даты.
     """
 
-    if _date.lower() == 'today':
+    if date_.lower() == "today":
         return date_today()
 
-    _date = _date.replace('-', ' ').replace('.', ' ')
+    date_ = date_.replace("-", " ").replace(".", " ")
     try:
-        dd, mm, yyyy = map(int, _date.strip().split())
-        date_obj = date(year=yyyy, month=mm, day=dd)
+        day, month, year = map(int, date_.strip().split())
+        date_obj = date(day=day, month=month, year=year)
     except ValueError:
         return False
     return date_obj
 
 
-def weekday_by_date(_date: date) -> str:
+def weekday_by_date(date_: date) -> str:
     """
     День недели по дате.
 
-    :param _date: Объект даты.
+    :param date_: Объект даты.
     :return: День недели в виде строки.
     """
 
-    return ('понедельник', 'вторник', 'среда', 'четверг',
-            'пятница', 'суббота', 'воскресенье')[_date.weekday()]
+    return (
+        "понедельник",
+        "вторник",
+        "среда",
+        "четверг",
+        "пятница",
+        "суббота",
+        "воскресенье",
+    )[date_.weekday()]
 
 
 def get_this_week_monday() -> date:
@@ -76,7 +85,9 @@ def datetime_now() -> datetime:
 
     :return: datetime.
     """
-    return datetime.now(tz=Config.TIMEZONE).replace(tzinfo=None)
+    return datetime.now(
+        tz=(timezone(offset=timedelta(hours=Settings.TIMEZONE_OFFSET)))
+    ).replace(tzinfo=None)
 
 
 def date_today() -> date:

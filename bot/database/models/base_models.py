@@ -8,15 +8,12 @@ class BaseModel(SqlAlchemyBase):
 
     def __repr__(self):
         return self._repr(
-            **{
-                c.name: getattr(self, c.name)
-                for c in self.__table__.columns  # noqa
-            }
+            **{c.name: getattr(self, c.name) for c in self.__table__.columns}  # noqa
         )
 
     def _repr(self, **fields) -> str:
         """
-        Помощник __repr__, взят с https://stackoverflow.com/questions/55713664/sqlalchemy-best-way-to-define-repr-for-large-tables  
+        Помощник __repr__, взят с https://stackoverflow.com/questions/55713664/sqlalchemy-best-way-to-define-repr-for-large-tables
         """  # noqa
 
         field_strings = []
@@ -24,9 +21,9 @@ class BaseModel(SqlAlchemyBase):
 
         for key, field in fields.items():
             try:
-                field_strings.append(f'{key}={field!r}')
+                field_strings.append(f"{key}={field!r}")
             except DetachedInstanceError:
-                field_strings.append(f'{key}=DetachedInstanceError')
+                field_strings.append(f"{key}=DetachedInstanceError")
             else:
                 at_least_one_attached_attribute = True
 

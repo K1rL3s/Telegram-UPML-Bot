@@ -13,6 +13,11 @@ from .logging import LoggingMiddleware
 from .callbacks_answer import CallbackAnswerMiddleware
 
 
+__all__ = [
+    "setup_middlewares",
+]
+
+
 def setup_middlewares(bot: Bot, dp: Dispatcher) -> None:
     bot.session.middleware(RetryRequestMiddleware())
 

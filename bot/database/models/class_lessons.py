@@ -7,12 +7,14 @@ from bot.database.models.base_models import BaseModel
 
 
 class ClassLessons(BaseModel):
-    __tablename__ = 'class_lessons'
+    __tablename__ = "class_lessons"
 
     id: Mapped[int] = mapped_column(
         Integer,
-        primary_key=True, autoincrement=True,
-        unique=True, nullable=False,
+        primary_key=True,
+        autoincrement=True,
+        unique=True,
+        nullable=False,
     )
 
     date: Mapped[datetime.date] = mapped_column(Date, nullable=False)

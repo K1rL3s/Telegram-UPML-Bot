@@ -16,11 +16,15 @@ class MyBaseMiddleware(BaseMiddleware, ABC):
         username = extract_username(message)
 
         if isinstance(message, Message):
-            return f'id={message.from_user.id}, ' \
-                   f'chat={message.chat.id}, ' \
-                   f'username={username}'
+            return (
+                f"id={message.from_user.id}, "
+                f"chat={message.chat.id}, "
+                f"username={username}"
+            )
 
-        elif isinstance(message, CallbackQuery):
-            return f'id={message.from_user.id}, ' \
-                   f'chat={message.message.chat.id}, ' \
-                   f'username={username}'
+        if isinstance(message, CallbackQuery):
+            return (
+                f"id={message.from_user.id}, "
+                f"chat={message.message.chat.id}, "
+                f"username={username}"
+            )

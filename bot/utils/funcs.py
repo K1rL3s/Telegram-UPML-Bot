@@ -4,20 +4,22 @@ from uuid import uuid1
 from aiocache import cached
 from aiogram import Bot
 from aiogram.types import (
-    BufferedInputFile, CallbackQuery,
-    InlineKeyboardMarkup, Message,
+    BufferedInputFile,
+    CallbackQuery,
+    InlineKeyboardMarkup,
+    Message,
 )
 from aiogram.exceptions import TelegramUnauthorizedError
 from loguru import logger
 
-from bot.database import User
-from bot.database.db_funcs import Repository
+from bot.database.models import User
+from bot.database.repository.repository import Repository
 
 
 async def bytes_io_to_image_id(
-        chat_id: int,
-        image: BytesIO,
-        bot: Bot,
+    chat_id: int,
+    image: BytesIO,
+    bot: Bot,
 ) -> str:
     """
     Отправляет изображение в телеграм, сохраняет его уникальный айди
@@ -62,9 +64,9 @@ def extract_username(message: CallbackQuery | Message) -> str | None:
     """
 
     return (
-            message.from_user.username or
-            message.from_user.first_name or
-            message.from_user.last_name
+        message.from_user.username
+        or message.from_user.first_name
+        or message.from_user.last_name
     )  # XD
 
 
@@ -75,29 +77,24 @@ def name_link(username: str, user_id: int) -> str:
     :param username: Отображаемое имя.
     :param user_id: ТГ Айди.
     """
-    return f'[{username}](tg://user?id={user_id})'
+    return f"[{username}](tg://user?id={user_id})"
 
 
 def limit_min_max(
-        value: int | float,
-        minimum: int | float,
-        maximum: int | float
+    value: int | float, minimum: int | float, maximum: int | float
 ) -> int | float:
     """
     Лимит числового значения по минмуму и максимум.
     """
-    return max(
-        min(value, maximum),
-        minimum
-    )
+    return max(min(value, maximum), minimum)
 
 
 async def one_notify(
-        bot: Bot,
-        repo: Repository,
-        user: User,
-        text: str,
-        keyboard: InlineKeyboardMarkup = None
+    bot: Bot,
+    repo: Repository,
+    user: User,
+    text: str,
+    keyboard: InlineKeyboardMarkup = None,
 ) -> bool:
     """
     Делатель одного уведомления.
@@ -109,19 +106,16 @@ async def one_notify(
     :param keyboard: Клавиатура на сообщении с уведомлением.
     """
     try:
-        await bot.send_message(
-            text=text,
-            chat_id=user.user_id,
-            reply_markup=keyboard
-        )
+        await bot.send_message(text=text, chat_id=user.user_id, reply_markup=keyboard)
         logger.debug(
             f'Уведомление "{" ".join(text.split())}" '
-            f'успешно для {user.short_info()}'
+            f"успешно для {user.short_info()}"
         )
         return True
     except TelegramUnauthorizedError:
-        await repo.update_user(user.user_id, is_active=0)
+        await repo.user.update_user(user.user_id, is_active=0)
         return True
+    # noinspection PyBroadException
     except Exception as e:
-        logger.warning(f'Ошибка при уведомлении: {e}')
+        logger.warning(f"Ошибка при уведомлении: {e}")
         return False

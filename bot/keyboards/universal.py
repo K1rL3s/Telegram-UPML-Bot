@@ -1,46 +1,40 @@
 from datetime import date, timedelta
 
 from aiogram.utils.keyboard import (
-    InlineKeyboardBuilder, InlineKeyboardButton,
+    InlineKeyboardBuilder,
+    InlineKeyboardButton,
     InlineKeyboardMarkup,
 )
 
-from bot.utils.consts import CallbackData, TextCommands
+from bot.utils.consts import UserCallback, AdminCallback, TextCommands
 from bot.utils.datehelp import format_date, date_today
 
 
 go_to_main_menu_button = InlineKeyboardButton(
-    text="🏠Главное меню",
-    callback_data=CallbackData.OPEN_MAIN_MENU
+    text="🏠Главное меню", callback_data=UserCallback.OPEN_MAIN_MENU
 )
 
 go_to_settings_button = InlineKeyboardButton(
-    text=TextCommands.SETTINGS,
-    callback_data=CallbackData.OPEN_SETTINGS
+    text=TextCommands.SETTINGS, callback_data=UserCallback.OPEN_SETTINGS
 )
 
 go_to_admin_panel_button = InlineKeyboardButton(
-    text=TextCommands.ADMIN_PANEL,
-    callback_data=CallbackData.OPEN_ADMIN_PANEL
+    text=TextCommands.ADMIN_PANEL, callback_data=AdminCallback.OPEN_ADMIN_PANEL
 )
 
 cancel_state_button = InlineKeyboardButton(
-    text='❌Отмена',
-    callback_data=CallbackData.CANCEL_STATE
+    text="❌Отмена", callback_data=UserCallback.CANCEL_STATE
 )
 
-cancel_state_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[[cancel_state_button]]
-)
+cancel_state_keyboard = InlineKeyboardMarkup(inline_keyboard=[[cancel_state_button]])
 
 
-def _get_keyboard_for_left_right_menu(
-        open_smt_on_callback: str,
-        open_smt_today_callback: str,
-        today_smile: str,
-        curr_date: date = None,
+def _keyboard_for_left_right_menu(
+    open_smt_on_callback: str,
+    open_smt_today_callback: str,
+    today_smile: str,
+    curr_date: date = None,
 ) -> InlineKeyboardMarkup:
-
     today = date_today()
 
     if curr_date is None:
@@ -56,23 +50,22 @@ def _get_keyboard_for_left_right_menu(
     if abs((today - yesterday).days) < 7:
         keyboard.add(
             InlineKeyboardButton(
-                text=f'⬅️{yesterday_str}',
-                callback_data=open_smt_on_callback + yesterday_str
+                text=f"⬅️{yesterday_str}",
+                callback_data=open_smt_on_callback + yesterday_str,
             )
         )
 
     keyboard.add(
         InlineKeyboardButton(
-            text=f'{today_smile}Сегодня',
-            callback_data=open_smt_today_callback
+            text=f"{today_smile}Сегодня", callback_data=open_smt_today_callback
         )
     )
 
     if abs((today - tomorrow).days) < 7:
         keyboard.add(
             InlineKeyboardButton(
-                text=f'➡️{tomorrow_str}',
-                callback_data=open_smt_on_callback + tomorrow_str
+                text=f"➡️{tomorrow_str}",
+                callback_data=open_smt_on_callback + tomorrow_str,
             )
         )
 

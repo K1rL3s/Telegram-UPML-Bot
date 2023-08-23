@@ -1,4 +1,5 @@
-from typing import Any, Awaitable, Callable
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 from aiogram.types import CallbackQuery
 
@@ -11,13 +12,10 @@ class CallbackAnswerMiddleware(MyBaseMiddleware):
     """
 
     async def __call__(
-            self,
-            handler: Callable[
-                [CallbackQuery, dict[str, Any]],
-                Awaitable[Any]
-            ],
-            event: CallbackQuery,
-            data: dict[str, Any],
+        self,
+        handler: Callable[[CallbackQuery, dict[str, Any]], Awaitable[Any]],
+        event: CallbackQuery,
+        data: dict[str, Any],
     ):
         try:
             return await handler(event, data)

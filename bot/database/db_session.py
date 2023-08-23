@@ -1,16 +1,17 @@
 import contextlib
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 from loguru import logger
 from sqlalchemy import MetaData, URL
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import (
-    AsyncSession, async_sessionmaker,
+    AsyncSession,
+    async_sessionmaker,
     create_async_engine,
 )
 from sqlalchemy.orm import DeclarativeBase
 
-from bot.config import Config
+from bot.settings import DBSettings
 
 
 class SqlAlchemyBase(DeclarativeBase):
@@ -38,16 +39,16 @@ async def database_init() -> None:
     if __factory:
         return
 
-    DATABASE_URL = URL.create(
+    database_url = URL.create(
         drivername="postgresql+asyncpg",
-        username=Config.POSTGRES_USER,
-        password=Config.POSTGRES_PASSWORD,
-        host=Config.POSTGRES_HOST,
-        port=Config.POSTGRES_PORT,
-        database=Config.POSTGRES_DB,
+        username=DBSettings.POSTGRES_USER,
+        password=DBSettings.POSTGRES_PASSWORD,
+        host=DBSettings.POSTGRES_HOST,
+        port=DBSettings.POSTGRES_PORT,
+        database=DBSettings.POSTGRES_DB,
     )
 
-    async_engine = create_async_engine(DATABASE_URL)
+    async_engine = create_async_engine(database_url)
     __factory = async_sessionmaker(
         bind=async_engine,
         autoflush=False,

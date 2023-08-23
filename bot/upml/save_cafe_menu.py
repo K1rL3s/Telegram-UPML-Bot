@@ -1,11 +1,12 @@
 from io import BytesIO
 from datetime import date, timedelta
 
+from httpx import AsyncClient
 from loguru import logger
 from pypdf import PdfReader
 
-from bot.config import Config
-from bot.database.db_funcs import Repository
+from bot.settings import Settings
+from bot.database.repository.repository import Repository
 from bot.utils.datehelp import format_date, get_this_week_monday
 
 
@@ -17,23 +18,23 @@ async def save_cafe_menu(repo: Repository) -> tuple[bool, str]:
     """
 
     if (pdf_reader := await _get_pdf_menu()) is None:
-        logger.warning(text := 'Не удалось найти PDF с меню')
+        logger.warning(text := "Не удалось найти PDF с меню")
         return False, text
 
     menu_date = get_this_week_monday()
     add_counter = 0
 
-    menu = ' '.join(pdf_reader.pages[0].extract_text().split())
+    menu = " ".join(pdf_reader.pages[0].extract_text().split())
     while add_counter < 7 and format_date(menu_date) not in menu:
         menu_date += timedelta(days=1)
         add_counter += 1
 
     if add_counter >= 7:
-        logger.warning(text := 'Не удалось сравнять дату PDF и текущей недели')
+        logger.warning(text := "Не удалось сравнять дату PDF и текущей недели")
         return False, text
 
     await _process_pdf_menu(repo, pdf_reader, menu_date)
-    return True, 'Расписание еды обновлено!'
+    return True, "Расписание еды обновлено!"
 
 
 def _get_meal(menu: str, start_sub: str, end_sub: str) -> tuple[str, int, int]:
@@ -64,25 +65,25 @@ def _normalize_meal(meal: str) -> str:
     :return: Читаемый вид этой строки
     """
 
-    meal = ' '.join(meal.replace(',', '').strip().split())
+    meal = " ".join(meal.replace(",", "").strip().split())
 
     dishes = []
     dish = ""
-    for i, ch in enumerate(meal):
-        if ch.isdigit():
+    for i, char in enumerate(meal):
+        if char.isdigit():
             if len(set(dish)) > 2:
-                dish = dish.strip('[].I/, \t\n')
-                if dish.startswith('Д '):
+                dish = dish.strip("[].I/, \t\n")
+                if dish.startswith("Д "):
                     dish = dish[2:]
                 dishes.append(dish)
                 dish = ""
-        elif ch == ' ':
+        elif char == " ":
             if not meal[i - 1].isdigit():
-                dish += ch
+                dish += char
         else:
-            dish += ch
+            dish += char
 
-    return '\n'.join(dishes)
+    return "\n".join(dishes)
 
 
 async def _get_pdf_menu() -> None | PdfReader:
@@ -95,18 +96,21 @@ async def _get_pdf_menu() -> None | PdfReader:
 
     # Передавать число, месяц, год
     # print(pdf_url(2, 5, 2023))
-    pdf_url = 'https://ugrafmsh.ru/wp-content/uploads/' \
-              '{2}/{1:0>2}/menyu-{0:0>2}-{1:0>2}-{2}-krugl.pdf'.format
+    pdf_url = (
+        "https://ugrafmsh.ru/wp-content/uploads/{2}/{1:0>2}"
+        "/menyu-{0:0>2}-{1:0>2}-{2}-krugl.pdf"
+    )
 
     menu_date = get_this_week_monday() - timedelta(days=1)
 
     # Ищем в воскресенье, понедельник, вторник и среду.
     # Число и месяц изменяются сами, поэтому ссылка будет корректной.
-    for i in range(4):
-        response = await Config.async_session.get(
-            pdf_url(menu_date.day, menu_date.month, menu_date.year)
+    async_session = AsyncClient(timeout=Settings.TIMEOUT)
+    for _ in range(4):
+        response = await async_session.get(
+            pdf_url.format(menu_date.day, menu_date.month, menu_date.year)
         )
-        if response.headers.get('content-type') == 'application/pdf':
+        if response.headers.get("content-type") == "application/pdf":
             return PdfReader(BytesIO(response.content))
 
         menu_date += timedelta(days=1)
@@ -115,36 +119,34 @@ async def _get_pdf_menu() -> None | PdfReader:
 
 
 async def _process_pdf_menu(
-        repo: Repository,
-        pdf_reader: PdfReader,
-        menu_date: date,
+    repo: Repository,
+    pdf_reader: PdfReader,
+    menu_date: date,
 ) -> None:
     """
     Идёт по PDF недельного распсания и добавляет меню каждого дня в бд.
 
+    :param repo: Доступ к базе данных.
     :param pdf_reader: PDF файл.
     :param menu_date: Дата, с которой начинается расписание в файле.
     """
 
     for page in pdf_reader.pages:
-        text_menu = ' '.join(page.extract_text().split())
+        text_menu = " ".join(page.extract_text().split())
         food_times = [
-            ('автрак', 'автрак'),
-            ('автрак', 'обед'),
-            ('обед', 'полдник'),
-            ('полдник', 'ужин'),
-            ('ужин', 'итого'),
+            ("автрак", "автрак"),
+            ("автрак", "обед"),
+            ("обед", "полдник"),
+            ("полдник", "ужин"),
+            ("ужин", "итого"),
         ]
 
         meals = []
         for start_sub, end_sub in food_times:
-            meal, start, end = _get_meal(text_menu, start_sub, end_sub)
+            meal, _, end = _get_meal(text_menu, start_sub, end_sub)
             meals.append(_normalize_meal(meal))
             text_menu = text_menu[end:]
 
-        await repo.save_or_update_menu(
-            menu_date,
-            *meals
-        )
+        await repo.menu.save_or_update_menu(menu_date, *meals)
 
         menu_date += timedelta(days=1)

@@ -2,10 +2,10 @@
 Source:
 https://github.com/wakaree/simple_echo_bot
 """
+from collections.abc import Awaitable, Callable
+from typing import Any
 
-from typing import Any, Awaitable, Callable
-
-from aiogram.types import Message, CallbackQuery, User
+from aiogram.types import Message, CallbackQuery
 from cachetools import TTLCache
 from loguru import logger
 
@@ -19,17 +19,12 @@ class ThrottlingMiddleware(MyBaseMiddleware):
         self.cache = TTLCache(maxsize=10_000, ttl=rate_limit)
 
     async def __call__(
-            self,
-            handler: Callable[
-                [Message | CallbackQuery, dict[str, Any]],
-                Awaitable[Any]
-            ],
-            event: Message | CallbackQuery,
-            data: dict[str, Any],
+        self,
+        handler: Callable[[Message | CallbackQuery, dict[str, Any]], Awaitable[Any]],
+        event: Message | CallbackQuery,
+        data: dict[str, Any],
     ) -> Any:
-        user: User | None = data.get("event_from_user")
-
-        if user is not None:
+        if (user := data.get("event_from_user")) is not None:
             if user.id in self.cache:
                 return await self.message_throtled(event)
 
@@ -38,4 +33,4 @@ class ThrottlingMiddleware(MyBaseMiddleware):
         return await handler(event, data)
 
     async def message_throtled(self, message: Message | CallbackQuery) -> None:
-        logger.debug(f'Тротлинг [{await self.get_short_info(message)}]')
+        logger.debug(f"Тротлинг [{await self.get_short_info(message)}]")
