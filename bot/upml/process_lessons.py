@@ -157,21 +157,21 @@ def _get_date_image(image: Image.Image, x: int, y: int) -> tuple[Image, int, int
 
     left_x, right_x = None, None
 
-    for x in range(width // 3, width // 3 * 2 + 1):
-        if left_x:
-            break
-        for y in range(up_y, down_y + 1):
-            if _is_pixel_black(pixels[x, y]):
-                left_x = x
+    start_x = width // 3
+    while left_x is None and start_x < width // 3 * 2 + 1:
+        for height_y in range(up_y, down_y + 1):
+            if _is_pixel_black(pixels[start_x, height_y]):
+                left_x = start_x
                 break
+        start_x += 1
 
-    for x in range(width // 3 * 2, left_x - 1, -1):
-        if right_x:
-            break
-        for y in range(up_y, down_y + 1):
-            if _is_pixel_black(pixels[x, y]):
-                right_x = x
+    end_x = width // 3 * 2
+    while right_x is None and end_x > left_x - 1:
+        for height_y in range(up_y, down_y + 1):
+            if _is_pixel_black(pixels[end_x, height_y]):
+                right_x = end_x
                 break
+        end_x -= 1
 
     if (
         left_x is None

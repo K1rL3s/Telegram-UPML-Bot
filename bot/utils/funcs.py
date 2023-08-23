@@ -115,7 +115,6 @@ async def one_notify(
     except TelegramUnauthorizedError:
         await repo.user.update_user(user.user_id, is_active=0)
         return True
-    # noinspection PyBroadException
     except Exception as e:
         logger.warning(f"Ошибка при уведомлении: {e}")
         return False
