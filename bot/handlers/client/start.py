@@ -95,7 +95,7 @@ async def cancel_state(
     """
     Обработчик кнопок с отменой состояний и команд "/cancel", "/stop".
     """
-    if state.get_state() is None:
+    if await state.get_state() is None:
         return
 
     await state.clear()

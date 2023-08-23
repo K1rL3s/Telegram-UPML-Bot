@@ -118,7 +118,7 @@ async def admin_check_handler(callback: CallbackQuery) -> None:
     )
 
     username = await username_by_user_id(callback.bot, user_id)
-    text = "Телеграм - " f"{name_link(username, user_id)}"
+    text = f'Телеграм - "{name_link(username, user_id)}'
     keyboard = check_admin_keyboard(user_id, page, sure=False)
 
     await callback.message.edit_text(text=text, reply_markup=keyboard)

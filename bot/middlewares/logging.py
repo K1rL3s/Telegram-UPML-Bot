@@ -47,7 +47,7 @@ class LoggingMiddleware(MyBaseMiddleware):
             )
         elif message.photo:
             logger.debug(
-                f"Получено изображение " f"[{await self.get_short_info(message)}]"
+                f"Получено изображение [{await self.get_short_info(message)}]"
             )
 
     async def end_message(self, message: Message):
@@ -58,5 +58,5 @@ class LoggingMiddleware(MyBaseMiddleware):
             )
         elif message.photo:
             logger.debug(
-                f"Отработано изображение " f"[{await self.get_short_info(message)}]"
+                f"Отработано изображение [{await self.get_short_info(message)}]"
             )

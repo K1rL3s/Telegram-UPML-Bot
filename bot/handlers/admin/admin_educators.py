@@ -125,7 +125,7 @@ async def edit_educators_confirm_handler(
     )
 
     text = (
-        f"*Расписание воспитателей* на " f"*{format_date(edit_date)}* успешно изменено!"
+        f"*Расписание воспитателей* на *{format_date(edit_date)}* успешно изменено!"
     )
 
     await callback.message.edit_text(
