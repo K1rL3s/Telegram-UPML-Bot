@@ -28,8 +28,8 @@ async def start_handler(message: Message, repo: Repository) -> None:
 Привет! Я - стартовое меню.
 Используй команду /menu для навигации по кнопкам
 
-[Разработчик](https://hello.k1rles.ru/)
-[Бот](https://github.com/K1rL3s/Telegram-UPML-Bot)
+📞 [Связь с разработчиком](https://hello.k1rles.ru/)
+🐍 [Код бота](https://github.com/K1rL3s/Telegram-UPML-Bot)
 """.strip()
 
     await message.reply(
