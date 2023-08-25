@@ -1,29 +1,35 @@
+from typing import TYPE_CHECKING
+
 from aiogram.utils.keyboard import (
     InlineKeyboardBuilder,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
+    KeyboardButton,
     ReplyKeyboardBuilder,
     ReplyKeyboardMarkup,
-    KeyboardButton,
 )
 
-from bot.database.repository.repository import Repository
 from bot.keyboards.universal import (
     go_to_admin_panel_button,
     go_to_main_menu_button,
     go_to_settings_button,
 )
-from bot.utils.consts import UserCallback, Roles, TextCommands
+from bot.utils.consts import Roles, TextCommands, UserCallback
+
+if TYPE_CHECKING:
+    from bot.database.repository.repository import Repository
 
 
 go_to_main_menu_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[[go_to_main_menu_button]]
+    inline_keyboard=[[go_to_main_menu_button]],
 )
 
 
 async def main_menu_inline_keyboard(
-    repo: Repository, user_id: int
-) -> InlineKeyboardMarkup:
+    repo: "Repository",
+    user_id: int,
+) -> "InlineKeyboardMarkup":
+    """Клавиатура главного меню."""
     keyboard = InlineKeyboardBuilder()
 
     for button_text, callback_data in zip(
@@ -43,7 +49,7 @@ async def main_menu_inline_keyboard(
         ),
     ):
         keyboard.add(
-            InlineKeyboardButton(text=button_text, callback_data=callback_data)
+            InlineKeyboardButton(text=button_text, callback_data=callback_data),
         )
 
     keyboard.add(go_to_settings_button)
@@ -56,7 +62,11 @@ async def main_menu_inline_keyboard(
     return keyboard.as_markup()
 
 
-async def start_reply_keyboard(repo: Repository, user_id: int) -> ReplyKeyboardMarkup:
+async def start_reply_keyboard(
+    repo: "Repository",
+    user_id: int,
+) -> "ReplyKeyboardMarkup":
+    """Клавиатура с текстовыми кнопками после команды /start."""
     inline_keyboard = await main_menu_inline_keyboard(repo, user_id)
     reply_keyboard = ReplyKeyboardBuilder()
 

@@ -1,9 +1,6 @@
-"""
-Модуль, отвечающий за приём сообщений из телеги,
-передачи их в функцию-обработчик и возврат ответа.
-"""
+"""View-часть, передающая события в logic-часть."""
 
-from aiogram import Dispatcher
+from typing import TYPE_CHECKING
 
 from bot.handlers.admin import (
     admin_cafe_menu,
@@ -14,15 +11,18 @@ from bot.handlers.admin import (
     admin_notifies,
 )
 from bot.handlers.client import (
-    start,
-    settings,
-    lessons,
     cafe_menu,
-    laundry,
     educators,
     electives,
+    laundry,
+    lessons,
+    settings,
+    start,
 )
 from bot.handlers import errors
+
+if TYPE_CHECKING:
+    from aiogram import Dispatcher
 
 
 __all__ = [
@@ -30,22 +30,21 @@ __all__ = [
 ]
 
 
-def include_routers(dp: Dispatcher) -> None:
+def include_routers(dp: "Dispatcher") -> None:
+    """Включение роутов в главный dispatcher."""
     dp.include_routers(
-        *(
-            start.router,
-            settings.router,
-            lessons.router,
-            cafe_menu.router,
-            laundry.router,
-            educators.router,
-            electives.router,
-            admin_cafe_menu.router,
-            admin_educators.router,
-            admin_electives.router,
-            admin_lessons.router,
-            admin_manage.router,
-            admin_notifies.router,
-            errors.router,
-        )
+        start.router,
+        settings.router,
+        lessons.router,
+        cafe_menu.router,
+        laundry.router,
+        educators.router,
+        electives.router,
+        admin_cafe_menu.router,
+        admin_educators.router,
+        admin_electives.router,
+        admin_lessons.router,
+        admin_manage.router,
+        admin_notifies.router,
+        errors.router,
     )

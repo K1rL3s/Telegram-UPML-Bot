@@ -1,20 +1,26 @@
-from datetime import date
+from typing import Any, TYPE_CHECKING
 
-import sqlalchemy as sa
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from bot.database.models.menus import Menu
 from bot.database.repository.base_repo import BaseRepository
 from bot.utils.consts import CAFE_MENU_ENG_TO_RU
 
+if TYPE_CHECKING:
+    import datetime as dt
+
+    from sqlalchemy.ext.asyncio import AsyncSession
+
 
 class MenuRepository(BaseRepository):
-    def __init__(self, session: AsyncSession) -> None:
+    """Класс для работы с расписаниями столовой в базе данных."""
+
+    def __init__(self, session: "AsyncSession") -> None:
         self.session = session
 
-    async def get_menu_by_date(
+    async def get(
         self,
-        menu_date: date,
+        menu_date: "dt.date",
     ) -> Menu | None:
         """
         Возвращает меню на день по дате.
@@ -22,41 +28,24 @@ class MenuRepository(BaseRepository):
         :param menu_date: Дата запрашеваемого меню.
         :return: Модель Menu.
         """
-
-        query = sa.select(Menu).where(Menu.date == menu_date)
+        query = select(Menu).where(Menu.date == menu_date)
         return await self.session.scalar(query)
 
-    async def save_or_update_menu(
+    async def save_or_update_to_db(
         self,
-        menu_date: date,
-        breakfast: str | None = None,
-        lunch: str | None = None,
-        dinner: str | None = None,
-        snack: str | None = None,
-        supper: str | None = None,
+        menu_date: "dt.date",
         edit_by: int = 0,
+        **fields: Any,
     ) -> None:
         """
         Сохраняет или обновляет меню для определённой даты.
 
         :param menu_date: Дата меня.
-        :param breakfast: Завтрак.
-        :param lunch: Второй завтрак.
-        :param dinner: Обед.
-        :param snack: Полдник.
-        :param supper: Ужин.
         :param edit_by: Кем редактируется, ТГ Айди, 0 - автоматически.
+        :param fields: Ключ - колонка, значение - новое значение.
         """
-        meals = {
-            "breakfast": breakfast,
-            "lunch": lunch,
-            "dinner": dinner,
-            "snack": snack,
-            "supper": supper,
-        }
-
-        if menu := await self.get_menu_by_date(menu_date):
-            for k, v in meals.items():
+        if menu := await self.get(menu_date):
+            for k, v in fields.items():
                 # Если редактируется вручную или информации о еде нет:
                 if edit_by or not getattr(menu, k, None):
                     setattr(menu, k, v)
@@ -64,7 +53,7 @@ class MenuRepository(BaseRepository):
                 menu.edit_by = edit_by
         else:
             menu = Menu(
-                **meals,
+                **fields,
                 edit_by=edit_by,
                 date=menu_date,
             )
@@ -72,11 +61,11 @@ class MenuRepository(BaseRepository):
 
         await self.session.commit()
 
-    async def edit_menu_by_date(
+    async def update(
         self,
         meal: str,
         new_menu: str,
-        menu_date: date,
+        menu_date: "dt.date",
         edit_by: int,
     ) -> None:
         """
@@ -87,9 +76,8 @@ class MenuRepository(BaseRepository):
         :param menu_date: Дата.
         :param edit_by: ТГ Айди того, кто меняет.
         """
-
-        menu = await self.get_menu_by_date(menu_date)
+        menu = await self.get(menu_date)
         meals = {meal: getattr(menu, meal, None) for meal in CAFE_MENU_ENG_TO_RU}
         meals[meal] = new_menu
 
-        await self.save_or_update_menu(menu_date=menu_date, edit_by=edit_by, **meals)
+        await self.save_or_update_to_db(menu_date=menu_date, edit_by=edit_by, **meals)

@@ -22,6 +22,8 @@ LAUNDRY_ENG_TO_RU: Final[dict[str, str]] = {
 
 
 class SlashCommands(str, Enum):
+    """Слэш команды бота."""
+
     START: str = "start"
     HELP: str = "help"
     SETTINGS: str = "settings"
@@ -36,6 +38,8 @@ class SlashCommands(str, Enum):
 
 
 class TextCommands(str, Enum):
+    """Текстовые команды бота."""
+
     START: str = "Старт"
     HELP: str = "Помощь"
     SETTINGS: str = "⚙️Настройки"
@@ -51,6 +55,8 @@ class TextCommands(str, Enum):
 
 
 class UserCallback(str, Enum):
+    """Callback дата, которую используют все пользователей."""
+
     OPEN_MAIN_MENU = "open_main_menu"
     OPEN_SETTINGS = "open_settings"
     OPEN_LAUNDRY = "open_laundry"
@@ -80,6 +86,8 @@ class UserCallback(str, Enum):
 
 
 class AdminCallback(str, Enum):
+    """Callback дата, которую используют админы."""
+
     OPEN_ADMIN_PANEL = "open_admin_panel"
 
     AUTO_UPDATE_CAFE_MENU = "auto_update_cafe_menu"
@@ -109,14 +117,16 @@ class AdminCallback(str, Enum):
 
 
 class Roles(str, Enum):
+    """Роли (права доступа) пользователей."""
+
     SUPERADMIN: str = "superadmin"
     ADMIN: str = "admin"
 
 
 GRADES: Final[tuple[str, ...]] = tuple(
-    f"{grade}{letter}" for grade in (range(10, 11 + 1)) for letter in "АБВ"
+    f"{grade}{letter}" for grade in range(10, 11 + 1) for letter in "АБВ"
 )
-LAUNDRY_REPEAT: Final[int] = 30  # Повтор таймера прачки через 30 минут
+LAUNDRY_REPEAT: Final[int] = 30  # Повтор таймера прачечной через 30 минут
 NO_DATA: Final[str] = "Н/д"
 
 SLASH_COMMANDS: Final[dict[str, str]] = {

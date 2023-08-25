@@ -1,12 +1,14 @@
-import datetime
+import datetime as dt
 
 from sqlalchemy import Date, Integer, String
-from sqlalchemy.orm import Mapped, column_property, mapped_column
+from sqlalchemy.orm import column_property, Mapped, mapped_column
 
 from bot.database.models.base_models import BaseModel
 
 
 class ClassLessons(BaseModel):
+    """Модель для хранения расписания уроков для конкретного класса."""
+
     __tablename__ = "class_lessons"
 
     id: Mapped[int] = mapped_column(
@@ -17,7 +19,7 @@ class ClassLessons(BaseModel):
         nullable=False,
     )
 
-    date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
+    date: Mapped[dt.date] = mapped_column(Date, nullable=False)
 
     grade: Mapped[str] = mapped_column(String(2), nullable=False)  # 10 или 11
     letter: Mapped[str] = mapped_column(String(1), nullable=False)  # А, Б, В

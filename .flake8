@@ -6,13 +6,18 @@ show-source=True
 max-line-length=88
 max-cognitive-complexity=10
 max-complexity=10
+max-expression-complexity=8
+max-returns-amount=5
+min-python-version=3.10
 
 import-order-style=smarkets
 docstring-convention=pep257
+dictionaries=en_US,python,technical
 
 exclude=
     .idea,
     .git,
+    migration,
     venv,
     __pycache__,
 
@@ -29,6 +34,35 @@ ignore=
     W504,
     # E203 Whitespace before ':' (for Black and slices)
     E203,
+    # I100 Import statements are in the wrong order (works bad)
+    I100,
+    # I202 Additional newline in a group of imports (works bad)
+    I202,
+    # ANN101 Missing type annotation for self in method
+    ANN101,
+    # ANN102 Missing type annotation for cls in classmethod
+    ANN102,
+    # TRY003 Avoid specifying long messages outside the exception class
+    TRY003,
+    # ANN401 Dynamically typed expressions (typing.Any) are disallowed
+    ANN401,
+    # FNE005 Return type of the function is bool-like, but the name doesn't show it (works on __call__)
+    FNE005,
+    # R502 Do not implicitly return None in function able to return non-None value. (works on "return" with "-> Any:")
+    R502,
+    # TAE002 Too complex annotation
+    TAE002,
+    # TRY400 Use logging.exception instead of logging.error
+    TRY400,
 
 per-file-ignores=
     migration/env.py:F401, F403,
+    bot/database/**:A003,
+    bot/database/models/**:TC003,A003,
+    bot/filters/**:D102,
+    bot/middlewares/**:D102,
+    bot/middlewares/repository.py:D102,NU001,
+    bot/middlewares/logging.py:D102,R504,
+    bot/upml/**:CCR001,
+    bot/utils/funcs.py:R504,B902,
+

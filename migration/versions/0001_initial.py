@@ -69,7 +69,9 @@ def upgrade() -> None:
         sa.Column("rings", sa.Integer(), nullable=True),
         sa.Column("is_active", sa.Boolean(), nullable=True),
         sa.ForeignKeyConstraint(
-            ["user_id"], ["users.user_id"], name=op.f("fk_laundries_user_id_users")
+            ["user_id"],
+            ["users.user_id"],
+            name=op.f("fk_laundries_user_id_users"),
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_laundries")),
         sa.UniqueConstraint("id", name=op.f("uq_laundries_id")),
@@ -86,7 +88,9 @@ def upgrade() -> None:
         sa.Column("snack", sa.String(), nullable=True),
         sa.Column("supper", sa.String(), nullable=True),
         sa.ForeignKeyConstraint(
-            ["edit_by"], ["users.user_id"], name=op.f("fk_menus_edit_by_users")
+            ["edit_by"],
+            ["users.user_id"],
+            name=op.f("fk_menus_edit_by_users"),
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_menus")),
         sa.UniqueConstraint("id", name=op.f("uq_menus_id")),
@@ -103,7 +107,9 @@ def upgrade() -> None:
         sa.Column("washing_time", sa.Integer(), nullable=False),
         sa.Column("drying_time", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
-            ["user_id"], ["users.user_id"], name=op.f("fk_settings_user_id_users")
+            ["user_id"],
+            ["users.user_id"],
+            name=op.f("fk_settings_user_id_users"),
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_settings")),
         sa.UniqueConstraint("id", name=op.f("uq_settings_id")),
@@ -114,10 +120,14 @@ def upgrade() -> None:
         sa.Column("user_id", sa.BigInteger(), nullable=False),
         sa.Column("role_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
-            ["role_id"], ["roles.id"], name=op.f("fk_users_to_roles_role_id_roles")
+            ["role_id"],
+            ["roles.id"],
+            name=op.f("fk_users_to_roles_role_id_roles"),
         ),
         sa.ForeignKeyConstraint(
-            ["user_id"], ["users.user_id"], name=op.f("fk_users_to_roles_user_id_users")
+            ["user_id"],
+            ["users.user_id"],
+            name=op.f("fk_users_to_roles_user_id_users"),
         ),
         sa.PrimaryKeyConstraint("user_id", "role_id", name=op.f("pk_users_to_roles")),
     )

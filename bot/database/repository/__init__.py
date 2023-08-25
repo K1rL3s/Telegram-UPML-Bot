@@ -1,10 +1,10 @@
-from .educators_schedules import EducatorsScheduleRepository
-from .laundries import LaundryRepository
-from .lessons import LessonsRepository
-from .menus import MenuRepository
-from .roles import RoleRepository
-from .settings import SettingsRepository
-from .users import UserRepository
+from bot.database.repository.educators_schedules import EducatorsScheduleRepository
+from bot.database.repository.laundries import LaundryRepository
+from bot.database.repository.lessons import LessonsRepository
+from bot.database.repository.menus import MenuRepository
+from bot.database.repository.roles import RoleRepository
+from bot.database.repository.settings import SettingsRepository
+from bot.database.repository.users import UserRepository
 
 
 __all__ = [

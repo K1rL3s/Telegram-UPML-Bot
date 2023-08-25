@@ -1,21 +1,20 @@
+from typing import TYPE_CHECKING, Union
+
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
-from bot.database.repository.repository import Repository
 from bot.funcs.laundry import (
     laundry_cancel_timer_func,
-    laundry_welcome_func,
     laundry_start_timer_func,
+    laundry_welcome_func,
 )
 from bot.keyboards import go_to_main_menu_keyboard, laundry_keyboard
-from bot.utils.consts import (
-    UserCallback,
-    SlashCommands,
-    TextCommands,
-    LAUNDRY_REPEAT,
-)
+from bot.utils.consts import LAUNDRY_REPEAT, SlashCommands, TextCommands, UserCallback
 from bot.utils.datehelp import format_datetime
+
+if TYPE_CHECKING:
+    from bot.database.repository.repository import Repository
 
 
 router = Router(name=__name__)
@@ -25,19 +24,17 @@ router = Router(name=__name__)
 @router.message(Command(SlashCommands.LAUNDRY))
 @router.callback_query(F.data == UserCallback.OPEN_LAUNDRY)
 async def laundry_handler(
-    callback: CallbackQuery | Message,
-    repo: Repository,
+    callback: "Union[CallbackQuery, Message]",
+    repo: "Repository",
 ) -> None:
-    """
-    Обработчик кнопки "Прачечная".
-    """
+    """Обработчик кнопки "Прачечная"."""
     text = (
-        "Привет! Я - таймер для прачки.\n"
+        "Привет! Я - таймер для прачечной.\n"
         "После конца таймер запустится ещё три раза "
         f"на *{LAUNDRY_REPEAT}* минут.\n\n"
     )
 
-    laundry = await repo.laundry.get_laundry(callback.from_user.id)
+    laundry = await repo.laundry.get(callback.from_user.id)
 
     if (minutes := await laundry_welcome_func(laundry)) is not None:
         text += f"Время до конца таймера: *{minutes}* минут\n"
@@ -51,14 +48,14 @@ async def laundry_handler(
 
 @router.callback_query(F.data.startswith(UserCallback.START_LAUNDRY_PREFIX))
 async def laundry_start_timer_handler(
-    callback: CallbackQuery,
-    repo: Repository,
+    callback: "CallbackQuery",
+    repo: "Repository",
 ) -> None:
-    """
-    Обработчик кнопок "Запустить стирку", "Запустить сушку".
-    """
+    """Обработчик кнопок "Запустить стирку", "Запустить сушку"."""
     minutes, end_time = await laundry_start_timer_func(
-        repo, callback.from_user.id, callback.data
+        repo,
+        callback.from_user.id,
+        callback.data,
     )
 
     text = (
@@ -73,12 +70,10 @@ async def laundry_start_timer_handler(
 
 @router.callback_query(F.data == UserCallback.CANCEL_LAUNDRY_TIMER)
 async def laundry_cancel_timer_handler(
-    callback: CallbackQuery,
-    repo: Repository,
+    callback: "CallbackQuery",
+    repo: "Repository",
 ) -> None:
-    """
-    Обработчик кнопки "Отменить таймер".
-    """
+    """Обработчик кнопки "Отменить таймер"."""
     await laundry_cancel_timer_func(repo, callback.from_user.id)
     text = "Таймер отменён."
     keyboard = go_to_main_menu_keyboard

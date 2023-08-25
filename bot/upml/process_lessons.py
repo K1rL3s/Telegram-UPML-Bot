@@ -1,35 +1,41 @@
-from datetime import date
+import datetime as dt
 from io import BytesIO
+from typing import TYPE_CHECKING
 
 from PIL import Image
-from PIL.PyAccess import PyAccess
 import pytesseract
 
 from bot.settings import Settings
 from bot.utils.datehelp import date_today
 
+if TYPE_CHECKING:
+    from PIL.PyAccess import PyAccess
+
 
 pytesseract.pytesseract.tesseract_cmd = Settings.TESSERACT_PATH
 
 
-def save_lessons(image: BytesIO) -> tuple[date, str, BytesIO, list[BytesIO]]:
+def process_one_lessons_file(
+    image: "BytesIO",
+) -> tuple[dt.date, str, "BytesIO", list["BytesIO"]]:
     """
     Основная функция в файле, выполняет всю работу, вызывая другие функции.
 
     :param image: Исходник расписания.
     :return: Дата, класс, полное расписание, расписания по классам.
     """
-
     lessons = Image.open(image)
 
     first_line_y = _y_first_horizontal_line(lessons)
     prefix_end_x = _x_prefix_for_lessons(lessons, first_line_y + 2)
 
-    prefix_image = _get_prefix_image(lessons, prefix_end_x)
-    date_image, preffix_up_y, prefix_down_y = _get_date_image(
-        lessons, prefix_end_x, first_line_y
+    prefix_image = _get_prefix(lessons, prefix_end_x)
+    date_image, preffix_up_y, prefix_down_y = _crop_date(
+        lessons,
+        prefix_end_x,
+        first_line_y,
     )
-    _, lessons_date = _get_date_from_image(date_image)
+    _, lessons_date = _get_date(date_image)
     classes = _combine_prefix_classes_date(
         _crop_lessons_by_class(lessons, prefix_end_x, first_line_y),
         prefix_image,
@@ -39,12 +45,6 @@ def save_lessons(image: BytesIO) -> tuple[date, str, BytesIO, list[BytesIO]]:
     )
 
     grade = _get_grade(lessons, prefix_end_x, first_line_y)
-
-    # print(weekday, lessons_date)
-    # prefix_image.show()
-    # date_image.show()
-    # for class_ in classes:
-    #     class_.show()
 
     lessons.save(full_lessons := BytesIO(), format="PNG")
 
@@ -58,22 +58,19 @@ def save_lessons(image: BytesIO) -> tuple[date, str, BytesIO, list[BytesIO]]:
 
 def _is_pixel_black(pixel: tuple[int, int, int]) -> bool:
     return all(color <= 80 for color in pixel)
-    # return sum(pixel) <= 80 * 3
 
 
 def _is_pixel_white(pixel: tuple[int, int, int]) -> bool:
     return all(color >= 200 for color in pixel)
-    # return sum(pixel) >= 220 * 3
 
 
-def _y_first_horizontal_line(image: Image.Image) -> int:
+def _y_first_horizontal_line(image: "Image.Image") -> int:
     """
     Поиск первой горизонтальной чёрной полосы.
 
     :param image: Исходник расписания уроков.
     :return: Высота первой чёрной полосы.
     """
-
     width, height = image.size
     pixels: PyAccess | None = image.load()
 
@@ -87,10 +84,9 @@ def _y_first_horizontal_line(image: Image.Image) -> int:
     return y
 
 
-def _x_prefix_for_lessons(image: Image.Image, y: int) -> int:
+def _x_prefix_for_lessons(image: "Image.Image", y: int) -> int:
     """
-    Поиск конца "префиксной части" расписания.
-    Та, которая "Пара Урок Время" слева.
+    Поиск конца "префиксной части" расписания (та, которая "Пара Урок Время" слева).
 
     :param image: Исходник расписания уроков.
     :param y: На какой высоте считать черные вертикальные линии.
@@ -118,10 +114,9 @@ def _x_prefix_for_lessons(image: Image.Image, y: int) -> int:
     return x - 1
 
 
-def _get_prefix_image(image: Image.Image, x: int) -> Image:
+def _get_prefix(image: "Image.Image", x: int) -> Image:
     """
-    Вырезка "префиксной части" слева.
-    Та, которая "Пара Урок Время".
+    Вырезка "префиксной части" слева (та, которая "Пара Урок Время").
 
     :param image: Исходник расписания.
     :param x: X конца префиксной части расписания.
@@ -130,7 +125,7 @@ def _get_prefix_image(image: Image.Image, x: int) -> Image:
     return image.crop((0, 0, x + 1, image.height))
 
 
-def _get_date_image(image: Image.Image, x: int, y: int) -> tuple[Image, int, int]:
+def _crop_date(image: "Image.Image", x: int, y: int) -> tuple["Image", int, int]:
     """
     Вырезка дня недели и даты с серой полосы.
 
@@ -185,15 +180,13 @@ def _get_date_image(image: Image.Image, x: int, y: int) -> tuple[Image, int, int
     return image.crop((left_x, up_y, right_x + 2, down_y + 1)), up_y, down_y
 
 
-def _get_date_from_image(image: Image.Image) -> tuple[str, date]:
+def _get_date(image: "Image.Image") -> tuple[str, dt.date]:
     """
-    Преобразование изображение из ``def _get_date_image``
-    в день недели и объект даты.
+    Преобразование изображение из ``def _crop_date`` в день недели и объект даты.
 
     :param image: Картинка с текстом.
     :return: День недели и объект даты.
     """
-
     weekday, dd_mm = (
         pytesseract.image_to_string(image, lang="rus", config="--psm 13 --oem 3")
         .lower()
@@ -202,10 +195,10 @@ def _get_date_from_image(image: Image.Image) -> tuple[str, date]:
 
     day, month = map(int, dd_mm.split("."))
 
-    return weekday, date(day=day, month=month, year=date_today().year)
+    return weekday, dt.date(day=day, month=month, year=date_today().year)
 
 
-def _crop_lessons_by_class(image: Image.Image, x: int, y: int) -> list[Image.Image]:
+def _crop_lessons_by_class(image: "Image.Image", x: int, y: int) -> list["Image.Image"]:
     """
     Вырезает из расписания каждый класс.
 
@@ -214,7 +207,6 @@ def _crop_lessons_by_class(image: Image.Image, x: int, y: int) -> list[Image.Ima
     :param y: Y первой горизонтальной линии.
     :return: Список с тремя картинками.
     """
-
     y += 2
     x += 1
 
@@ -243,12 +235,12 @@ def _crop_lessons_by_class(image: Image.Image, x: int, y: int) -> list[Image.Ima
 
 
 def _combine_prefix_classes_date(
-    classes: list[Image.Image],
-    prefix: Image.Image,
-    date_im: Image.Image,
+    classes: list["Image.Image"],
+    prefix: "Image.Image",
+    date_im: "Image.Image",
     up_y: int,
     down_y: int,
-) -> list[Image.Image]:
+) -> list["Image.Image"]:
     """
     Комбинация префикса расписания с урокам каждого класса и датой расписания.
 
@@ -259,7 +251,6 @@ def _combine_prefix_classes_date(
     :param down_y: Нижняя граница серой полосы.
     :return: Уроки каждого класса с префиксом слева.
     """
-
     new_classes = []
 
     for image in classes:
@@ -279,7 +270,7 @@ def _combine_prefix_classes_date(
     return new_classes
 
 
-def _get_grade(image: Image.Image, x: int, y: int) -> str:
+def _get_grade(image: "Image.Image", x: int, y: int) -> str:
     """
     Ищет, расписание для 10 или 11 классов.
 
@@ -288,7 +279,6 @@ def _get_grade(image: Image.Image, x: int, y: int) -> str:
     :param y: Y первой горизонтальной линии.
     :return: 10 или 11
     """
-
     x += 1
     y += 2
     width, height = image.size
@@ -308,6 +298,7 @@ def _get_grade(image: Image.Image, x: int, y: int) -> str:
 
     temp = image.crop((left_x, up_y, x, y))
     text = pytesseract.image_to_string(
-        temp, config="--psm 10 --oem 3 -c tessedit_char_whitelist=01"
+        temp,
+        config="--psm 10 --oem 3 -c tessedit_char_whitelist=01",
     )
     return "10" if "10" in text else "11"  # XD

@@ -22,7 +22,7 @@ notify_panel_keyboard = InlineKeyboardMarkup(
             )
         ],
         [go_to_admin_panel_button],
-    ]
+    ],
 )
 
 notify_for_grade_keyboard = InlineKeyboardMarkup(
@@ -38,20 +38,20 @@ notify_for_grade_keyboard = InlineKeyboardMarkup(
             ),
         ],
         [go_to_admin_panel_button],  # сделать переход в панель уведомлений?
-    ]
+    ],
 )
 
 notify_for_class_keyboard = (
     InlineKeyboardBuilder()
     .add(
-        *[
+        *(
             InlineKeyboardButton(
                 text=grade_letter,
                 callback_data=AdminCallback.DO_A_NOTIFY_FOR_ + grade_letter,
             )
             for grade_letter in GRADES
-        ],
-        go_to_admin_panel_button
+        ),
+        go_to_admin_panel_button,
     )
     .adjust(3, 3, 1)
     .as_markup()
@@ -61,9 +61,10 @@ notify_confirm_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [
             InlineKeyboardButton(
-                text="✅Подтвердить", callback_data=AdminCallback.CONFIRM
-            )
+                text="✅Подтвердить",
+                callback_data=AdminCallback.CONFIRM,
+            ),
         ],
         [cancel_state_button],
-    ]
+    ],
 )

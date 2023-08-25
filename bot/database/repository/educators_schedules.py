@@ -1,19 +1,25 @@
-from datetime import date
+from typing import TYPE_CHECKING
 
-import sqlalchemy as sa
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from bot.database.models.educators_schedules import EducatorsSchedule
 from bot.database.repository.base_repo import BaseRepository
 
+if TYPE_CHECKING:
+    import datetime as dt
+
+    from sqlalchemy.ext.asyncio import AsyncSession
+
 
 class EducatorsScheduleRepository(BaseRepository):
-    def __init__(self, session: AsyncSession) -> None:
+    """Класс для работы с расписаниями воспитателей в базе данных."""
+
+    def __init__(self, session: "AsyncSession") -> None:
         self.session = session
 
-    async def get_educators_schedule_by_date(
+    async def get(
         self,
-        schedule_date: date,
+        schedule_date: "dt.date",
     ) -> EducatorsSchedule | None:
         """
         Возвращает расписание воспитателей на день по дате.
@@ -21,14 +27,12 @@ class EducatorsScheduleRepository(BaseRepository):
         :param schedule_date: Дата запрашеваемого меню.
         :return: Модель EducatorsSchedule.
         """
-        query = sa.select(EducatorsSchedule).where(
-            EducatorsSchedule.date == schedule_date
-        )
+        query = select(EducatorsSchedule).where(EducatorsSchedule.date == schedule_date)
         return await self.session.scalar(query)
 
-    async def save_or_update_educators_schedule(
+    async def save_or_update_to_db(
         self,
-        schedule_date: date,
+        schedule_date: "dt.date",
         schedule_text: str,
         edit_by: int = 0,
     ) -> None:
@@ -39,8 +43,7 @@ class EducatorsScheduleRepository(BaseRepository):
         :param schedule_text: Текст расписания.
         :param edit_by: Кем редактируется.
         """
-
-        if schedule := await self.get_educators_schedule_by_date(schedule_date):
+        if schedule := await self.get(schedule_date):
             schedule.schedule = schedule_text
             schedule.edit_by = edit_by
         else:

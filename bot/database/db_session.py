@@ -1,20 +1,25 @@
 import contextlib
-from collections.abc import AsyncIterator
+from typing import Optional, TYPE_CHECKING
 
 from loguru import logger
 from sqlalchemy import MetaData, URL
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import (
-    AsyncSession,
     async_sessionmaker,
+    AsyncSession,
     create_async_engine,
 )
 from sqlalchemy.orm import DeclarativeBase
 
 from bot.settings import DBSettings
 
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
+
 
 class SqlAlchemyBase(DeclarativeBase):
+    """Декларативная база для моделей Алхимии."""
+
     metadata = MetaData(
         naming_convention={
             "ix": "ix_%(column_0_label)s",
@@ -22,18 +27,15 @@ class SqlAlchemyBase(DeclarativeBase):
             "ck": "ck_%(table_name)s_%(constraint_name)s",
             "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
             "pk": "pk_%(table_name)s",
-        }
+        },
     )
 
 
-__factory: async_sessionmaker[AsyncSession] | None = None
+__factory: "Optional[async_sessionmaker[AsyncSession]]" = None
 
 
 async def database_init() -> None:
-    """
-    Иницализация подключения к базе данных.
-    """
-
+    """Иницализация подключения к базе данных."""
     global __factory
 
     if __factory:
@@ -58,7 +60,7 @@ async def database_init() -> None:
 
 
 @contextlib.asynccontextmanager
-async def get_session() -> AsyncIterator[AsyncSession]:
+async def get_session() -> "AsyncIterator[AsyncSession]":
     """
     Создатель сессии для работы с базой данных.
 
@@ -70,6 +72,6 @@ async def get_session() -> AsyncIterator[AsyncSession]:
     try:
         async with __factory() as session:
             yield session
-    except SQLAlchemyError as e:
-        logger.exception(e)
-        raise e
+    except SQLAlchemyError:
+        logger.exception("Исключение при использовании сессии")
+        raise

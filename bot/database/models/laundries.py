@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -7,6 +7,8 @@ from bot.database.models.base_models import UserRelatedModel
 
 
 class Laundry(UserRelatedModel):
+    """Модель для хранения таймера прачечной одного пользователя."""
+
     __tablename__ = "laundries"
 
     id: Mapped[int] = mapped_column(
@@ -23,12 +25,12 @@ class Laundry(UserRelatedModel):
     )
 
     # Когда был запущен таймер
-    start_time: Mapped[datetime.datetime] = mapped_column(
+    start_time: Mapped[dt.datetime] = mapped_column(
         DateTime,
         nullable=True,
     )
     # Когда он должен закончится
-    end_time: Mapped[datetime.datetime] = mapped_column(
+    end_time: Mapped[dt.datetime] = mapped_column(
         DateTime,
         nullable=True,
     )

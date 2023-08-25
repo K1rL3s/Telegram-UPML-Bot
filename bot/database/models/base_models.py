@@ -1,21 +1,25 @@
+from typing import Any
+
 from sqlalchemy.orm.exc import DetachedInstanceError
 
 from bot.database.db_session import SqlAlchemyBase
 
 
 class BaseModel(SqlAlchemyBase):
+    """Базовый класс для моделей Алхимии. Реализует удобный вывод для дебага."""
+
     __abstract__ = True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """Вывод информации о моделе в человекочитаемом виде."""
         return self._repr(
             **{c.name: getattr(self, c.name) for c in self.__table__.columns}  # noqa
         )
 
-    def _repr(self, **fields) -> str:
-        """
-        Помощник __repr__, взят с https://stackoverflow.com/questions/55713664/sqlalchemy-best-way-to-define-repr-for-large-tables
+    def _repr(self, **fields: Any) -> str:
+        """Помощник __repr__.
+        Взят с https://stackoverflow.com/questions/55713664/sqlalchemy-best-way-to-define-repr-for-large-tables
         """  # noqa
-
         field_strings = []
         at_least_one_attached_attribute = False
 
@@ -33,6 +37,8 @@ class BaseModel(SqlAlchemyBase):
 
 
 class UserRelatedModel(BaseModel):
+    """Родительский класс для моделей, связанных с моделю User."""
+
     __abstract__ = True
 
     user_id: int

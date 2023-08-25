@@ -1,20 +1,26 @@
 from enum import Enum
+from typing import TYPE_CHECKING, Union
 
-import sqlalchemy as sa
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from bot.database.models.roles import Role
 from bot.database.repository.base_repo import BaseRepository
-from bot.utils.consts import Roles
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    from bot.utils.consts import Roles
 
 
 class RoleRepository(BaseRepository):
-    def __init__(self, session: AsyncSession) -> None:
+    """Класс для работы с ролями в базе данных."""
+
+    def __init__(self, session: "AsyncSession") -> None:
         self.session = session
 
-    async def get_role(
+    async def get(
         self,
-        role: Roles | str,
+        role: "Union[Roles | str]",
     ) -> Role | None:
         """
         Возвращает модель Role по названию роли.
@@ -22,9 +28,8 @@ class RoleRepository(BaseRepository):
         :param role: Название роли.
         :return: Модель Role.
         """
-
         if isinstance(role, Enum):
             role = role.value
 
-        role_query = sa.select(Role).where(Role.role == role)
+        role_query = select(Role).where(Role.role == role)
         return await self.session.scalar(role_query)

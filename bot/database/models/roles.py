@@ -5,6 +5,8 @@ from bot.database.models.base_models import BaseModel
 
 
 class Role(BaseModel):
+    """Модель, представляющая роль - уровень доступа пользователя."""
+
     __tablename__ = "roles"
 
     id: Mapped[int] = mapped_column(

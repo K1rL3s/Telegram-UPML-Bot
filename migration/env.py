@@ -12,12 +12,8 @@ from bot.database.models import *  # noqa
 from bot.database.db_session import SqlAlchemyBase
 
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
 config = context.config
 
-# here we allow ourselves to pass interpolation vars to alembic.ini
-# fron the host env
 section = config.config_ini_section
 config.set_section_option(section, "POSTGRES_HOST", DBSettings.POSTGRES_HOST)
 config.set_section_option(section, "POSTGRES_PORT", str(DBSettings.POSTGRES_PORT))
@@ -25,15 +21,8 @@ config.set_section_option(section, "POSTGRES_DB", DBSettings.POSTGRES_DB)
 config.set_section_option(section, "POSTGRES_USER", DBSettings.POSTGRES_USER)
 config.set_section_option(section, "POSTGRES_PASSWORD", DBSettings.POSTGRES_PASSWORD)
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
-
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
 
 target_metadata = SqlAlchemyBase.metadata
 
@@ -48,12 +37,6 @@ def process_revision_directives(context, revision, directives):
         last_rev_id = int(head_revision.lstrip("0"))
         new_rev_id = last_rev_id + 1
     migration_script.rev_id = "{0:04}".format(new_rev_id)
-
-
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
 
 
 def run_migrations_offline() -> None:

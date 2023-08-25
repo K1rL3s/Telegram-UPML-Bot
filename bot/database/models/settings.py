@@ -1,10 +1,12 @@
 from sqlalchemy import Boolean, ForeignKey, Integer, String
-from sqlalchemy.orm import Mapped, column_property, mapped_column, relationship
+from sqlalchemy.orm import column_property, Mapped, mapped_column, relationship
 
 from bot.database.models.base_models import UserRelatedModel
 
 
 class Settings(UserRelatedModel):
+    """Модель для хранения настроек одного пользователя."""
+
     __tablename__ = "settings"
 
     id: Mapped[int] = mapped_column(

@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from sqlalchemy import Date, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -7,6 +7,8 @@ from bot.database.models.base_models import BaseModel
 
 
 class EducatorsSchedule(BaseModel):
+    """Модель для хранения расписания воспитателей на определённую дату."""
+
     __tablename__ = "educators_schedules"
 
     id: Mapped[int] = mapped_column(
@@ -17,7 +19,7 @@ class EducatorsSchedule(BaseModel):
         nullable=False,
     )
 
-    date: Mapped[datetime.date] = mapped_column(
+    date: Mapped[dt.date] = mapped_column(
         Date,
         unique=True,
         nullable=False,

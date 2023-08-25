@@ -1,12 +1,16 @@
+from typing import TYPE_CHECKING, Union
+
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
-from bot.database.repository.repository import Repository
 from bot.funcs.cafe_menu import get_format_menu_by_date
 from bot.keyboards import cafe_menu_keyboard
-from bot.utils.consts import UserCallback, SlashCommands, TextCommands
+from bot.utils.consts import SlashCommands, TextCommands, UserCallback
 from bot.utils.datehelp import date_by_format
+
+if TYPE_CHECKING:
+    from bot.database.repository.repository import Repository
 
 
 router = Router(name=__name__)
@@ -16,13 +20,10 @@ router = Router(name=__name__)
 @router.message(Command(SlashCommands.CAFE))
 @router.callback_query(F.data.startswith(UserCallback.OPEN_CAFE_MENU_ON_))
 async def open_date_cafe_menu(
-    callback: CallbackQuery | Message,
-    repo: Repository,
+    callback: "Union[CallbackQuery, Message]",
+    repo: "Repository",
 ) -> None:
-    """
-    Обработчик команды "/cafe" и кнопки "Меню",
-    открывает расписание еды на текущий день.
-    """
+    """Обработчик команды "/cafe" и кнопки "Меню", открывает расписание еды."""
     if isinstance(callback, CallbackQuery):
         date_ = callback.data.replace(UserCallback.OPEN_CAFE_MENU_ON_, "")
     else:
@@ -33,7 +34,8 @@ async def open_date_cafe_menu(
 
     if isinstance(callback, CallbackQuery):
         await callback.message.edit_text(
-            text=text, reply_markup=cafe_menu_keyboard(menu_date)
+            text=text,
+            reply_markup=cafe_menu_keyboard(menu_date),
         )
     else:
         await callback.answer(text=text, reply_markup=cafe_menu_keyboard(menu_date))

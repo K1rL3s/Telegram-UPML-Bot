@@ -1,14 +1,19 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Any, Optional, TYPE_CHECKING
 
 from bot.database.models.settings import Settings
 from bot.database.repository.base_repo import BaseRepository
 
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
 
 class SettingsRepository(BaseRepository):
-    def __init__(self, session: AsyncSession) -> None:
+    """Класс для работы с настройками пользователей в базе данных."""
+
+    def __init__(self, session: "AsyncSession") -> None:
         self.session = session
 
-    async def get_settings(self, user_id: int) -> Settings | None:
+    async def get(self, user_id: int) -> "Optional[Settings]":
         """
         Возвращает Settings пользователя.
 
@@ -17,19 +22,18 @@ class SettingsRepository(BaseRepository):
         """
         return await self._get_user_related_model(Settings, user_id)
 
-    async def save_or_update_settings(
+    async def save_or_update_to_db(
         self,
         user_id: int,
-        **fields,
+        **fields: Any,
     ) -> None:
         """
-        Создаёт или обнолвяет настройки пользователя.
+        Создаёт или обновляет настройки пользователя.
 
         :param user_id: ТГ Айди.
-        :param fields: Поле таблицы=значение.
+        :param fields: Ключ - колонка, значение - новое значение.
         """
-
-        if settings := await self.get_settings(user_id):
+        if settings := await self.get(user_id):
             for k, v in fields.items():
                 setattr(settings, k, v)
         else:

@@ -1,9 +1,10 @@
+from typing import TYPE_CHECKING, Union
+
 from aiogram import F, Router
 from aiogram.filters import Command, StateFilter
-from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
-from bot.database.repository.repository import Repository
+
 from bot.filters import SaveUser
 from bot.funcs.settings import (
     edit_bool_settings_func,
@@ -12,16 +13,22 @@ from bot.funcs.settings import (
 )
 from bot.keyboards import (
     cancel_state_keyboard,
-    settings_keyboard,
     choose_grade_keyboard,
+    settings_keyboard,
 )
 from bot.utils.consts import (
-    UserCallback,
+    LAUNDRY_ENG_TO_RU,
     SlashCommands,
     TextCommands,
-    LAUNDRY_ENG_TO_RU,
+    UserCallback,
 )
 from bot.utils.states import EditingSettings
+
+
+if TYPE_CHECKING:
+    from aiogram.fsm.context import FSMContext
+
+    from bot.database.repository.repository import Repository
 
 
 router = Router(name=__name__)
@@ -41,18 +48,17 @@ SETTINGS_WELCOME_TEXT = """
 @router.message(Command(SlashCommands.SETTINGS), SaveUser())
 @router.callback_query(F.data == UserCallback.OPEN_SETTINGS, SaveUser())
 async def open_settings_handler(
-    callback: CallbackQuery | Message,
-    repo: Repository,
+    callback: "Union[CallbackQuery, Message]",
+    repo: "Repository",
 ) -> None:
-    """
-    Обработчик кнопки "Настройки".
-    """
-    settings = await repo.settings.get_settings(callback.from_user.id)
+    """Обработчик кнопки "Настройки"."""
+    settings = await repo.settings.get(callback.from_user.id)
     keyboard = await settings_keyboard(settings)
 
     if isinstance(callback, CallbackQuery):
         await callback.message.edit_text(
-            text=SETTINGS_WELCOME_TEXT, reply_markup=keyboard
+            text=SETTINGS_WELCOME_TEXT,
+            reply_markup=keyboard,
         )
     else:
         await callback.answer(text=SETTINGS_WELCOME_TEXT, reply_markup=keyboard)
@@ -60,15 +66,13 @@ async def open_settings_handler(
 
 @router.callback_query(F.data.startswith(UserCallback.PREFIX_SWITCH))
 async def edit_bool_settings_handler(
-    callback: CallbackQuery,
-    repo: Repository,
+    callback: "CallbackQuery",
+    repo: "Repository",
 ) -> None:
-    """
-    Обработчик кнопок уведомлений "Уроки" и "Новости".
-    """
+    """Обработчик кнопок уведомлений "Уроки" и "Новости"."""
     await edit_bool_settings_func(repo, callback.from_user.id, callback.data)
 
-    settings = await repo.settings.get_settings(callback.from_user.id)
+    settings = await repo.settings.get(callback.from_user.id)
     keyboard = await settings_keyboard(settings)
 
     await callback.message.edit_text(text=SETTINGS_WELCOME_TEXT, reply_markup=keyboard)
@@ -76,30 +80,27 @@ async def edit_bool_settings_handler(
 
 @router.callback_query(F.data.startswith(UserCallback.CHANGE_GRADE_TO_))
 async def edit_grade_settings_handler(
-    callback: CallbackQuery,
-    repo: Repository,
+    callback: "CallbackQuery",
+    repo: "Repository",
 ) -> None:
-    """
-    Обработчик кнопок изменения класса.
-    """
+    """Обработчик кнопок изменения (выбора) класса."""
     change = await edit_grade_setting_func(repo, callback.from_user.id, callback.data)
 
     if change:
         await open_settings_handler(callback, repo)
     else:
         await callback.message.edit_text(
-            text=SETTINGS_WELCOME_TEXT, reply_markup=choose_grade_keyboard
+            text=SETTINGS_WELCOME_TEXT,
+            reply_markup=choose_grade_keyboard,
         )
 
 
 @router.callback_query(F.data.startswith(UserCallback.EDIT_SETTINGS_PREFIX))
 async def edit_laundry_start_handler(
-    callback: CallbackQuery,
-    state: FSMContext,
+    callback: "CallbackQuery",
+    state: "FSMContext",
 ) -> None:
-    """
-    Обработчик кнопок изменения времени таймера прачки.
-    """
+    """Обработчик кнопок изменения времени таймера прачечной."""
     attr = callback.data.replace(UserCallback.EDIT_SETTINGS_PREFIX, "")
 
     await state.set_state(EditingSettings.writing)
@@ -111,27 +112,28 @@ async def edit_laundry_start_handler(
 
 @router.message(StateFilter(EditingSettings.writing))
 async def edit_laundry_time_handler(
-    message: Message,
-    state: FSMContext,
-    repo: Repository,
+    message: "Message",
+    state: "FSMContext",
+    repo: "Repository",
 ) -> None:
-    """
-    Обработчик сообщения с минутами для изменения таймера прачки.
-    """
+    """Обработчик сообщения с минутами для изменения таймера прачечной."""
     data = await state.get_data()
     start_id = data["start_id"]
     attr = data["attr"]
 
-    result = await edit_laundry_time_func(
-        repo, message.from_user.id, attr, message.text
+    minutes = await edit_laundry_time_func(
+        repo,
+        message.from_user.id,
+        attr,
+        message.text,
     )
 
-    if result:
+    if minutes:
         text = (
             f"✅`{LAUNDRY_ENG_TO_RU[attr].capitalize()}` "
-            f"установлено на `{result}` минут."
+            f"установлено на `{minutes}` минут."
         )
-        settings = await repo.settings.get_settings(message.from_user.id)
+        settings = await repo.settings.get(message.from_user.id)
         keyboard = await settings_keyboard(settings)
         await state.clear()
     else:
@@ -139,6 +141,9 @@ async def edit_laundry_time_handler(
         keyboard = cancel_state_keyboard
 
     await message.bot.edit_message_text(
-        text=text, reply_markup=keyboard, message_id=start_id, chat_id=message.chat.id
+        text=text,
+        reply_markup=keyboard,
+        message_id=start_id,
+        chat_id=message.chat.id,
     )
     await message.delete()

@@ -1,10 +1,14 @@
-from bot.database.repository.repository import Repository
+from typing import Literal, TYPE_CHECKING
+
 from bot.utils.consts import UserCallback
 from bot.utils.funcs import limit_min_max
 
+if TYPE_CHECKING:
+    from bot.database.repository.repository import Repository
+
 
 async def edit_bool_settings_func(
-    repo: Repository,
+    repo: "Repository",
     user_id: int,
     callback_data: str,
 ) -> None:
@@ -15,16 +19,16 @@ async def edit_bool_settings_func(
     :param user_id: Айди юзера.
     :param callback_data: Строка из callback'а (нажатая кнопка).
     """
-
     attr = callback_data.replace(UserCallback.PREFIX_SWITCH, "")
-    settings = await repo.settings.get_settings(user_id)
-    await repo.settings.save_or_update_settings(
-        user_id, **{attr: not getattr(settings, attr)}
+    settings = await repo.settings.get(user_id)
+    await repo.settings.save_or_update_to_db(
+        user_id,
+        **{attr: not getattr(settings, attr)},
     )
 
 
 async def edit_grade_setting_func(
-    repo: Repository,
+    repo: "Repository",
     user_id: int,
     callback_data: str,
 ) -> bool:
@@ -36,7 +40,6 @@ async def edit_grade_setting_func(
     :param callback_data: Строка из callback'а (нажатая кнопка).
     :return: Случилось ли изменение класса.
     """
-
     if not (grade := callback_data.replace(UserCallback.CHANGE_GRADE_TO_, "")):
         return False
 
@@ -45,16 +48,28 @@ async def edit_grade_setting_func(
     else:
         grade, letter = grade[:2], grade[-1:]
 
-    await repo.settings.save_or_update_settings(user_id, grade=grade, letter=letter)
+    await repo.settings.save_or_update_to_db(user_id, grade=grade, letter=letter)
     return True
 
 
 async def edit_laundry_time_func(
-    repo: Repository, user_id: int, attr: str, text: str
+    repo: "Repository",
+    user_id: int,
+    attr: Literal["washing_time", "drying_time"],
+    text: str,
 ) -> int:
+    """
+    Логика обработчика ввода минут для смены таймера прачечной.
+
+    :param repo: Доступ к базе данных.
+    :param user_id: ТГ Айди.
+    :param attr: Время стирки или время сушки.
+    :param text: Сообщение пользователя.
+    """
     try:
         minutes = limit_min_max(int(float(text)), 1, 2 * 24 * 60)  # двое суток
-        await repo.settings.save_or_update_settings(user_id, **{attr: minutes})
-        return minutes
+        await repo.settings.save_or_update_to_db(user_id, **{attr: minutes})
     except ValueError:
         return 0
+
+    return minutes

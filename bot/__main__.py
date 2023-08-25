@@ -6,15 +6,16 @@ from bot.database.db_session import database_init
 from bot.middlewares import setup_middlewares
 from bot.setup import make_bot, make_dispatcher, setup_logs
 from bot.schedule import run_schedule_jobs
-from bot.settings import Settings
+from bot.settings import BotSettings, Settings
 
 
-async def main():
+async def main() -> None:
+    """И поехали! :)."""
     setup_logs()
 
     await database_init()
 
-    bot = await make_bot()
+    bot = await make_bot(BotSettings.BOT_TOKEN)
     dp = make_dispatcher()
 
     setup_middlewares(bot, dp)
