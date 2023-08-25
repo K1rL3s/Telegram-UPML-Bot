@@ -133,7 +133,7 @@ def upgrade() -> None:
     )
 
     for role in Roles:
-        op.execute(f"INSERT INTO roles (role) VALUES ('{role.value}')")
+        op.execute(f"INSERT INTO roles (role) VALUES ('{role}')")
 
     op.create_unique_constraint(op.f("uq_class_lessons_id"), "class_lessons", ["id"])
     op.create_unique_constraint(op.f("uq_full_lessons_id"), "full_lessons", ["id"])
