@@ -1,10 +1,7 @@
-"""
-Source:
-https://github.com/wakaree/simple_echo_bot
-"""
+"""Source: https://github.com/wakaree/simple_echo_bot."""
 
 from asyncio import sleep
-from typing import Any, Callable, Awaitable, Final, MutableMapping, cast
+from typing import Any, Final, TYPE_CHECKING
 
 from aiogram.types import Message, TelegramObject
 from cachetools import TTLCache
@@ -12,27 +9,34 @@ from cachetools import TTLCache
 from bot.custom_types import Album, Media
 from bot.middlewares.base import MyBaseMiddleware
 
+if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable, MutableMapping
+
 
 ALBUM_KEY: Final[str] = "album"
 
 
 class AlbumMiddleware(MyBaseMiddleware):
+    """Мидлварь для обработки группы сообщений с файлами (альбомом)."""
+
     DEFAULT_LATENCY = 2
-    DEFAULT_TTL = 6
+    DEFAULT_TTL = 4
 
     def __init__(
-            self, album_key: str = ALBUM_KEY,
-            latency: float = DEFAULT_LATENCY,
-            ttl: float = DEFAULT_TTL,
+        self,
+        album_key: str = ALBUM_KEY,
+        latency: float = DEFAULT_LATENCY,
+        ttl: float = DEFAULT_TTL,
     ) -> None:
         self.album_key = album_key
         self.latency = latency
         self.cache: MutableMapping[str, dict[str, Any]] = TTLCache(
-            maxsize=10_000, ttl=ttl
+            maxsize=10_000,
+            ttl=ttl,
         )
 
     @staticmethod
-    def get_content(message: Message) -> tuple[Media, str] | None:
+    def get_content(message: Message) -> tuple["Media", str]:
         if message.photo:
             return message.photo[-1], "photo"
         if message.video:
@@ -41,23 +45,17 @@ class AlbumMiddleware(MyBaseMiddleware):
             return message.audio, "audio"
         if message.document:
             return message.document, "document"
-        return None
+        raise RuntimeError("Update middleware before using. Unknown file type found.")
 
     async def __call__(
-            self,
-            handler: Callable[
-                [TelegramObject, dict[str, Any]],
-                Awaitable[Any]
-            ],
-            event: TelegramObject,
-            data: dict[str, Any],
+        self,
+        handler: "Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]]",
+        event: "TelegramObject",
+        data: dict[str, Any],
     ) -> Any:
         if isinstance(event, Message) and event.media_group_id is not None:
             key = event.media_group_id
-            media, content_type = cast(
-                tuple[Media, str],
-                self.get_content(event)
-            )
+            media, content_type = self.get_content(event)
 
             if key in self.cache:
                 if content_type not in self.cache[key]:
@@ -77,7 +75,7 @@ class AlbumMiddleware(MyBaseMiddleware):
             await sleep(self.latency)
             data[self.album_key] = Album.model_validate(
                 self.cache[key],
-                context={"bot": data["bot"]}
+                context={"bot": data["bot"]},
             )
 
         return await handler(event, data)

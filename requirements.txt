@@ -1,8 +1,9 @@
-SQLALchemy==2.0.19
+SQLALchemy==2.0.20
 asyncpg==0.28.0
-alembic==1.11.2
-aiogram==3.0.0rc1
-pydantic==2.1.1
+alembic==1.11.3
+aiogram==3.0.0rc2
+pydantic==2.3.0
+pydantic-settings==2.0.3
 httpx==0.24.1
 aiocache==0.12.2
 aioschedule==0.5.2
@@ -11,6 +12,6 @@ cachetools==5.3.1
 loguru==0.6.0
 pathlib==1.0.1
 python-dotenv==1.0.0
-pypdf==3.15.0
+pypdf==3.15.3
 Pillow==10.0.0
 pytesseract==0.3.10

@@ -1,48 +1,60 @@
+from typing import TYPE_CHECKING
+
 from aiogram.utils.keyboard import (
-    InlineKeyboardBuilder, InlineKeyboardButton,
-    InlineKeyboardMarkup, ReplyKeyboardBuilder,
-    ReplyKeyboardMarkup, KeyboardButton,
+    InlineKeyboardBuilder,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    KeyboardButton,
+    ReplyKeyboardBuilder,
+    ReplyKeyboardMarkup,
 )
 
-from bot.database.db_funcs import Repository
 from bot.keyboards.universal import (
     go_to_admin_panel_button,
-    go_to_main_menu_button, go_to_settings_button,
+    go_to_main_menu_button,
+    go_to_settings_button,
 )
-from bot.utils.consts import CallbackData, Roles, TextCommands
+from bot.utils.consts import Roles, TextCommands, UserCallback
+
+if TYPE_CHECKING:
+    from bot.database.repository.repository import Repository
 
 
 go_to_main_menu_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[[go_to_main_menu_button]]
+    inline_keyboard=[[go_to_main_menu_button]],
 )
 
 
 async def main_menu_inline_keyboard(
-        repo: Repository,
-        user_id: int
-) -> InlineKeyboardMarkup:
+    repo: "Repository",
+    user_id: int,
+) -> "InlineKeyboardMarkup":
+    """Клавиатура главного меню."""
     keyboard = InlineKeyboardBuilder()
 
     for button_text, callback_data in zip(
-        (TextCommands.CAFE, TextCommands.LESSONS,
-         TextCommands.LAUNDRY, TextCommands.ELECTIVES,
-         TextCommands.EDUCATORS),
-        (CallbackData.OPEN_CAFE_MENU_TODAY,
-         CallbackData.OPEN_LESSONS_TODAY,
-         CallbackData.OPEN_LAUNDRY, CallbackData.OPEN_ELECTIVES,
-         CallbackData.OPEN_EDUCATORS_TODAY)
-
+        (
+            TextCommands.CAFE,
+            TextCommands.LESSONS,
+            TextCommands.LAUNDRY,
+            TextCommands.ELECTIVES,
+            TextCommands.EDUCATORS,
+        ),
+        (
+            UserCallback.OPEN_CAFE_MENU_TODAY,
+            UserCallback.OPEN_LESSONS_TODAY,
+            UserCallback.OPEN_LAUNDRY,
+            UserCallback.OPEN_ELECTIVES,
+            UserCallback.OPEN_EDUCATORS_TODAY,
+        ),
     ):
         keyboard.add(
-            InlineKeyboardButton(
-                text=button_text,
-                callback_data=callback_data
-            )
+            InlineKeyboardButton(text=button_text, callback_data=callback_data),
         )
 
     keyboard.add(go_to_settings_button)
 
-    if await repo.is_has_any_role(user_id, [Roles.SUPERADMIN, Roles.ADMIN]):
+    if await repo.user.is_has_any_role(user_id, [Roles.SUPERADMIN, Roles.ADMIN]):
         keyboard.add(go_to_admin_panel_button)
 
     keyboard.adjust(2, repeat=True)
@@ -51,9 +63,10 @@ async def main_menu_inline_keyboard(
 
 
 async def start_reply_keyboard(
-        repo: Repository,
-        user_id: int
-) -> ReplyKeyboardMarkup:
+    repo: "Repository",
+    user_id: int,
+) -> "ReplyKeyboardMarkup":
+    """Клавиатура с текстовыми кнопками после команды /start."""
     inline_keyboard = await main_menu_inline_keyboard(repo, user_id)
     reply_keyboard = ReplyKeyboardBuilder()
 

@@ -1,19 +1,25 @@
 import contextlib
-from typing import AsyncIterator
+from typing import Optional, TYPE_CHECKING
 
 from loguru import logger
 from sqlalchemy import MetaData, URL
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import (
-    AsyncSession, async_sessionmaker,
+    async_sessionmaker,
+    AsyncSession,
     create_async_engine,
 )
 from sqlalchemy.orm import DeclarativeBase
 
-from bot.config import Config
+from bot.settings import DBSettings
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
 
 
 class SqlAlchemyBase(DeclarativeBase):
+    """Декларативная база для моделей Алхимии."""
+
     metadata = MetaData(
         naming_convention={
             "ix": "ix_%(column_0_label)s",
@@ -21,33 +27,30 @@ class SqlAlchemyBase(DeclarativeBase):
             "ck": "ck_%(table_name)s_%(constraint_name)s",
             "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
             "pk": "pk_%(table_name)s",
-        }
+        },
     )
 
 
-__factory: async_sessionmaker[AsyncSession] | None = None
+__factory: "Optional[async_sessionmaker[AsyncSession]]" = None
 
 
 async def database_init() -> None:
-    """
-    Иницализация подключения к базе данных.
-    """
-
+    """Иницализация подключения к базе данных."""
     global __factory
 
     if __factory:
         return
 
-    DATABASE_URL = URL.create(
+    database_url = URL.create(
         drivername="postgresql+asyncpg",
-        username=Config.POSTGRES_USER,
-        password=Config.POSTGRES_PASSWORD,
-        host=Config.POSTGRES_HOST,
-        port=Config.POSTGRES_PORT,
-        database=Config.POSTGRES_DB,
+        username=DBSettings.POSTGRES_USER,
+        password=DBSettings.POSTGRES_PASSWORD,
+        host=DBSettings.POSTGRES_HOST,
+        port=DBSettings.POSTGRES_PORT,
+        database=DBSettings.POSTGRES_DB,
     )
 
-    async_engine = create_async_engine(DATABASE_URL)
+    async_engine = create_async_engine(database_url)
     __factory = async_sessionmaker(
         bind=async_engine,
         autoflush=False,
@@ -57,7 +60,7 @@ async def database_init() -> None:
 
 
 @contextlib.asynccontextmanager
-async def get_session() -> AsyncIterator[AsyncSession]:
+async def get_session() -> "AsyncIterator[AsyncSession]":
     """
     Создатель сессии для работы с базой данных.
 
@@ -69,6 +72,6 @@ async def get_session() -> AsyncIterator[AsyncSession]:
     try:
         async with __factory() as session:
             yield session
-    except SQLAlchemyError as e:
-        logger.exception(e)
-        raise e
+    except SQLAlchemyError:
+        logger.exception("Исключение при использовании сессии")
+        raise

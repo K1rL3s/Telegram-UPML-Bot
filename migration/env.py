@@ -7,65 +7,36 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from bot.config import Config
-
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
-config = context.config
-
-# here we allow ourselves to pass interpolation vars to alembic.ini
-# fron the host env
-section = config.config_ini_section
-config.set_section_option(
-    section, "POSTGRES_HOST", Config.POSTGRES_HOST
-)
-config.set_section_option(
-    section, "POSTGRES_PORT", str(Config.POSTGRES_PORT)
-)
-config.set_section_option(
-    section, "POSTGRES_DB", Config.POSTGRES_DB
-)
-config.set_section_option(
-    section, "POSTGRES_USER", Config.POSTGRES_USER
-)
-config.set_section_option(
-    section, "POSTGRES_PASSWORD", Config.POSTGRES_PASSWORD
-)
-
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
-if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
-
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-from bot.database import *
+from bot.settings import DBSettings
+from bot.database.models import *  # noqa
 from bot.database.db_session import SqlAlchemyBase
 
+
+config = context.config
+
+section = config.config_ini_section
+config.set_section_option(section, "POSTGRES_HOST", DBSettings.POSTGRES_HOST)
+config.set_section_option(section, "POSTGRES_PORT", str(DBSettings.POSTGRES_PORT))
+config.set_section_option(section, "POSTGRES_DB", DBSettings.POSTGRES_DB)
+config.set_section_option(section, "POSTGRES_USER", DBSettings.POSTGRES_USER)
+config.set_section_option(section, "POSTGRES_PASSWORD", DBSettings.POSTGRES_PASSWORD)
+
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
 
 target_metadata = SqlAlchemyBase.metadata
 
 
 def process_revision_directives(context, revision, directives):
     migration_script = directives[0]
-    head_revision = ScriptDirectory.from_config(
-        context.config
-    ).get_current_head()
+    head_revision = ScriptDirectory.from_config(context.config).get_current_head()
 
     if head_revision is None:
         new_rev_id = 1
     else:
-        last_rev_id = int(head_revision.lstrip('0'))
+        last_rev_id = int(head_revision.lstrip("0"))
         new_rev_id = last_rev_id + 1
-    migration_script.rev_id = '{0:04}'.format(new_rev_id)
-
-
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+    migration_script.rev_id = "{0:04}".format(new_rev_id)
 
 
 def run_migrations_offline() -> None:

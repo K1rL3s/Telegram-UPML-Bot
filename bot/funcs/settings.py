@@ -1,12 +1,16 @@
-from bot.database.db_funcs import Repository
-from bot.utils.consts import CallbackData
+from typing import Literal, TYPE_CHECKING
+
+from bot.utils.consts import UserCallback
 from bot.utils.funcs import limit_min_max
+
+if TYPE_CHECKING:
+    from bot.database.repository.repository import Repository
 
 
 async def edit_bool_settings_func(
-        repo: Repository,
-        user_id: int,
-        callback_data: str,
+    repo: "Repository",
+    user_id: int,
+    callback_data: str,
 ) -> None:
     """
     Обработчик нажатия кнопки булевского типа.
@@ -14,23 +18,19 @@ async def edit_bool_settings_func(
     :param repo: Доступ к базе данных.
     :param user_id: Айди юзера.
     :param callback_data: Строка из callback'а (нажатая кнопка).
-    :return: Параметры для клавиатуры.
     """
-
-    attr = callback_data.replace(CallbackData.PREFIX_SWITCH, '')
-    settings = await repo.get_settings(user_id)
-    await repo.save_or_update_settings(
+    attr = callback_data.replace(UserCallback.PREFIX_SWITCH, "")
+    settings = await repo.settings.get(user_id)
+    await repo.settings.save_or_update_to_db(
         user_id,
-        **{attr: not getattr(settings, attr)}
+        **{attr: not getattr(settings, attr)},
     )
-
-    # return get_settings(user_id)
 
 
 async def edit_grade_setting_func(
-        repo: Repository,
-        user_id: int,
-        callback_data: str,
+    repo: "Repository",
+    user_id: int,
+    callback_data: str,
 ) -> bool:
     """
     Обработчик нажатия кнопки смены класса (выбор класса).
@@ -40,30 +40,36 @@ async def edit_grade_setting_func(
     :param callback_data: Строка из callback'а (нажатая кнопка).
     :return: Случилось ли изменение класса.
     """
-
-    grade = callback_data.replace(CallbackData.CHANGE_GRADE_TO_, '')
-
-    if not grade:
+    if not (grade := callback_data.replace(UserCallback.CHANGE_GRADE_TO_, "")):
         return False
 
-    if grade.lower() == 'none':
+    if grade.lower() == "none":
         grade = letter = None
     else:
         grade, letter = grade[:2], grade[-1:]
 
-    await repo.save_or_update_settings(user_id, grade=grade, letter=letter)
+    await repo.settings.save_or_update_to_db(user_id, grade=grade, letter=letter)
     return True
 
 
 async def edit_laundry_time_func(
-        repo: Repository,
-        user_id: int,
-        attr: str,
-        text: str
+    repo: "Repository",
+    user_id: int,
+    attr: Literal["washing_time", "drying_time"],
+    text: str,
 ) -> int:
+    """
+    Логика обработчика ввода минут для смены таймера прачечной.
+
+    :param repo: Доступ к базе данных.
+    :param user_id: ТГ Айди.
+    :param attr: Время стирки или время сушки.
+    :param text: Сообщение пользователя.
+    """
     try:
         minutes = limit_min_max(int(float(text)), 1, 2 * 24 * 60)  # двое суток
-        await repo.save_or_update_settings(user_id, **{attr: minutes})
-        return minutes
+        await repo.settings.save_or_update_to_db(user_id, **{attr: minutes})
     except ValueError:
         return 0
+
+    return minutes

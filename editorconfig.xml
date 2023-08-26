@@ -1,0 +1,43 @@
+<code_scheme name="Default" version="173">
+    <option name="RIGHT_MARGIN" value="200"/>
+    <option name="DO_NOT_FORMAT">
+        <list>
+            <fileSet type="globPattern" pattern="*.md"/>
+        </list>
+    </option>
+    <Markdown>
+        <option name="WRAP_TEXT_IF_LONG" value="false"/>
+        <option name="KEEP_LINE_BREAKS_INSIDE_TEXT_BLOCKS" value="false"/>
+        <option name="WRAP_TEXT_INSIDE_BLOCKQUOTES" value="false"/>
+    </Markdown>
+    <Python>
+        <option name="NEW_LINE_AFTER_COLON" value="true"/>
+        <option name="DICT_NEW_LINE_AFTER_LEFT_BRACE" value="true"/>
+        <option name="DICT_NEW_LINE_BEFORE_RIGHT_BRACE" value="true"/>
+        <option name="OPTIMIZE_IMPORTS_SORT_NAMES_IN_FROM_IMPORTS" value="true"/>
+        <option name="OPTIMIZE_IMPORTS_CASE_INSENSITIVE_ORDER" value="true"/>
+        <option name="FROM_IMPORT_NEW_LINE_AFTER_LEFT_PARENTHESIS" value="true"/>
+        <option name="FROM_IMPORT_NEW_LINE_BEFORE_RIGHT_PARENTHESIS" value="true"/>
+        <option name="FROM_IMPORT_PARENTHESES_FORCE_IF_MULTILINE" value="true"/>
+        <option name="FROM_IMPORT_TRAILING_COMMA_IF_MULTILINE" value="true"/>
+    </Python>
+    <codeStyleSettings language="JSON">
+        <indentOptions>
+            <option name="INDENT_SIZE" value="4"/>
+        </indentOptions>
+    </codeStyleSettings>
+    <codeStyleSettings language="Markdown">
+        <option name="RIGHT_MARGIN" value="200"/>
+    </codeStyleSettings>
+    <codeStyleSettings language="Python">
+        <option name="RIGHT_MARGIN" value="88"/>
+        <option name="BLANK_LINES_AFTER_IMPORTS" value="2"/>
+        <option name="CALL_PARAMETERS_LPAREN_ON_NEXT_LINE" value="true"/>
+        <option name="CALL_PARAMETERS_RPAREN_ON_NEXT_LINE" value="true"/>
+        <option name="METHOD_PARAMETERS_LPAREN_ON_NEXT_LINE" value="true"/>
+        <option name="METHOD_PARAMETERS_RPAREN_ON_NEXT_LINE" value="true"/>
+        <indentOptions>
+            <option name="CONTINUATION_INDENT_SIZE" value="4"/>
+        </indentOptions>
+    </codeStyleSettings>
+</code_scheme>

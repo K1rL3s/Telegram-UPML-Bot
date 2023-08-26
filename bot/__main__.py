@@ -6,32 +6,33 @@ from bot.database.db_session import database_init
 from bot.middlewares import setup_middlewares
 from bot.setup import make_bot, make_dispatcher, setup_logs
 from bot.schedule import run_schedule_jobs
-from bot.config import Config
+from bot.settings import BotSettings, Settings
 
 
-async def main():
+async def main() -> None:
+    """И поехали! :)."""
     setup_logs()
 
     await database_init()
 
-    bot = await make_bot()
+    bot = await make_bot(BotSettings.BOT_TOKEN)
     dp = make_dispatcher()
 
     setup_middlewares(bot, dp)
 
     asyncio.create_task(run_schedule_jobs(bot))
 
-    logger.info('Запуск пулинга...')
+    logger.info("Запуск пулинга...")
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(
         bot,
-        polling_timeout=Config.TIMEOUT,
-        allowed_updates=dp.resolve_used_update_types()
+        polling_timeout=Settings.TIMEOUT,
+        allowed_updates=dp.resolve_used_update_types(),
     )
 
-    logger.info('Бот выключен')
+    logger.info("Бот выключен")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

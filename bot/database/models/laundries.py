@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -7,37 +7,44 @@ from bot.database.models.base_models import UserRelatedModel
 
 
 class Laundry(UserRelatedModel):
-    __tablename__ = 'laundries'
+    """Модель для хранения таймера прачечной одного пользователя."""
+
+    __tablename__ = "laundries"
 
     id: Mapped[int] = mapped_column(
         Integer,
-        primary_key=True, autoincrement=True,
-        unique=True, nullable=False,
+        primary_key=True,
+        autoincrement=True,
+        unique=True,
+        nullable=False,
     )
     user_id: Mapped[int] = mapped_column(
-        ForeignKey('users.user_id'),
-        unique=True, nullable=False,
+        ForeignKey("users.user_id"),
+        unique=True,
+        nullable=False,
     )
 
     # Когда был запущен таймер
-    start_time: Mapped[datetime.datetime] = mapped_column(
+    start_time: Mapped[dt.datetime] = mapped_column(
         DateTime,
         nullable=True,
     )
     # Когда он должен закончится
-    end_time: Mapped[datetime.datetime] = mapped_column(
+    end_time: Mapped[dt.datetime] = mapped_column(
         DateTime,
         nullable=True,
     )
     # Сколько раз было уведомление
     rings: Mapped[int] = mapped_column(
         Integer,
-        nullable=True, default=0,
+        nullable=True,
+        default=0,
     )
     # Активен ли таймер
     is_active: Mapped[bool] = mapped_column(
         Boolean,
-        nullable=True, default=False,
+        nullable=True,
+        default=False,
     )
 
-    user = relationship('User', back_populates='laundry', lazy='selectin')
+    user = relationship("User", back_populates="laundry", lazy="selectin")
