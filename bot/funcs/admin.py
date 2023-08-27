@@ -29,6 +29,7 @@ if TYPE_CHECKING:
 async def process_album_lessons_func(
     chat_id: int,
     album: "Album",
+    tesseract_path: str,
     bot: "Bot",
     repo: "Repository",
 ) -> str:
@@ -37,6 +38,7 @@ async def process_album_lessons_func(
 
     :param album: Альбом с фотографиями расписаний.
     :param chat_id: Откуда пришёл альбом с расписаниями.
+    :param tesseract_path: Путь до exeшника тессеракта.
     :param bot: Текущий ТГ Бот.
     :param repo: Доступ к базе данных.
     :return: Склейка итогов обработки расписаний.
@@ -47,7 +49,13 @@ async def process_album_lessons_func(
         photo = await bot.get_file(photo_id)
         await bot.download_file(photo.file_path, image := BytesIO())
 
-        process_result = await process_one_lessons_func(chat_id, image, bot, repo)
+        process_result = await process_one_lessons_func(
+            chat_id,
+            image,
+            tesseract_path,
+            bot,
+            repo,
+        )
         proccess_results.append(process_result)
 
     results: list[str] = []
@@ -67,6 +75,7 @@ async def process_album_lessons_func(
 async def process_one_lessons_func(
     chat_id: int,
     image: "BytesIO",
+    tesseract_path: str,
     bot: "Bot",
     repo: "Repository",
 ) -> tuple[str, "dt.date"] | str:
@@ -75,6 +84,7 @@ async def process_one_lessons_func(
 
     :param chat_id: Айди чата, откуда пришло изображение с расписанием.
     :param image: Изображение с расписанием.
+    :param tesseract_path: Путь до exeшника тессеракта.
     :param bot: ТГ Бот.
     :param repo: Доступ к базе данных.
     :return: Паралелль и дата, если окей, иначе текст ошибки.
@@ -82,6 +92,7 @@ async def process_one_lessons_func(
     try:
         lessons_date, grade, full_lessons, class_lessons = process_one_lessons_file(
             image,
+            tesseract_path,
         )
     except ValueError as e:
         logger.warning(text := f"Ошибка при загрузке расписания: {repr(e)}")

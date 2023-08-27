@@ -15,12 +15,11 @@
     ```
     BOT_TOKEN=<token>
     TESSERACT_PATH=<path>
-    TIMEZONE=<int>
+    TIMEZONE_OFFSET=<int>
     
     POSTGRES_HOST=<ip>
     POSTGRES_HOST_PORT=<int>
     POSTGRES_OUTSIDE_PORT=<int>
-    POSTGRES_DOCKER_PORT=5432
     POSTGRES_DB=<str>
     POSTGRES_USER=<str>
     POSTGRES_PASSWORD=<str>

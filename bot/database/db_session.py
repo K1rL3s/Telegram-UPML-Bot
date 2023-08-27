@@ -11,10 +11,10 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase
 
-from bot.settings import DBSettings
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
+    from bot.settings import DBSettings
 
 
 class SqlAlchemyBase(DeclarativeBase):
@@ -34,7 +34,7 @@ class SqlAlchemyBase(DeclarativeBase):
 __factory: "Optional[async_sessionmaker[AsyncSession]]" = None
 
 
-async def database_init() -> None:
+async def database_init(db_settings: "DBSettings") -> None:
     """Иницализация подключения к базе данных."""
     global __factory
 
@@ -43,11 +43,11 @@ async def database_init() -> None:
 
     database_url = URL.create(
         drivername="postgresql+asyncpg",
-        username=DBSettings.POSTGRES_USER,
-        password=DBSettings.POSTGRES_PASSWORD,
-        host=DBSettings.POSTGRES_HOST,
-        port=DBSettings.POSTGRES_PORT,
-        database=DBSettings.POSTGRES_DB,
+        username=db_settings.POSTGRES_USER,
+        password=db_settings.POSTGRES_PASSWORD,
+        host=db_settings.POSTGRES_HOST,
+        port=db_settings.POSTGRES_HOST_PORT,
+        database=db_settings.POSTGRES_DB,
     )
 
     async_engine = create_async_engine(database_url)

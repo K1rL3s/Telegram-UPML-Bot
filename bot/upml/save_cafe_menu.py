@@ -5,22 +5,21 @@ from typing import Optional, TYPE_CHECKING
 from httpx import AsyncClient
 from loguru import logger
 from pypdf import PdfReader
-
-from bot.settings import Settings
 from bot.utils.datehelp import format_date, get_this_week_monday
 
 if TYPE_CHECKING:
     from bot.database.repository.repository import Repository
 
 
-async def process_cafe_menu(repo: "Repository") -> tuple[bool, str]:
+async def process_cafe_menu(repo: "Repository", timeout: int) -> tuple[bool, str]:
     """
     Основная функция в файле, выполняет всю работу, вызывая другие функции.
 
     :param repo: Доступ к базе данных.
+    :param timeout: Таймаут для запроса на сайт лицея.
     :return: Сохранилось/Обновилось ли меню.
     """
-    if (pdf_reader := await _get_pdf_menu()) is None:
+    if (pdf_reader := await _get_pdf_menu(timeout)) is None:
         logger.warning(text := "Не удалось найти PDF с меню")
         return False, text
 
@@ -88,7 +87,7 @@ def _normalize_meal(one_meal: str) -> str:
     return "\n".join(dishes)
 
 
-async def _get_pdf_menu() -> "Optional[PdfReader]":
+async def _get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
     """
     Ищет и возвращает файл с недельным расписанием питания с сайта лицея.
 
@@ -104,7 +103,7 @@ async def _get_pdf_menu() -> "Optional[PdfReader]":
 
     # Ищем в воскресенье, понедельник, вторник и среду.
     # Число и месяц изменяются сами, поэтому ссылка будет корректной.
-    async_session = AsyncClient(timeout=Settings.TIMEOUT)
+    async_session = AsyncClient(timeout=timeout)
     for _ in range(4):
         response = await async_session.get(
             pdf_url.format(menu_date.day, menu_date.month, menu_date.year),

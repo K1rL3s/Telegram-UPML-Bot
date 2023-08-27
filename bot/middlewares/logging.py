@@ -14,18 +14,21 @@ class LoggingMiddleware(MyBaseMiddleware):
     """Мидлварь для логов."""
 
     async def start_callbackquery(self, callback: "CallbackQuery") -> None:
+        """Лог при старте обработки callback'а."""
         logger.debug(
             f'Вызван callback "{callback.data}" '
             f"[{await self.get_short_info(callback)}]",
         )
 
     async def end_callbackquery(self, callback: "CallbackQuery") -> None:
+        """Лог после обработки callback'а."""
         logger.debug(
             f'Отработан callback "{callback.data}" '
             f"[{await self.get_short_info(callback)}]",
         )
 
     async def start_message(self, message: "Message") -> None:
+        """Лог при старте обработки сообщения."""
         if message.text:
             logger.debug(
                 f'Получено сообщение "{" ".join(message.text.split())}" '
@@ -35,6 +38,7 @@ class LoggingMiddleware(MyBaseMiddleware):
             logger.debug(f"Получено изображение [{await self.get_short_info(message)}]")
 
     async def end_message(self, message: "Message") -> None:
+        """Лог после обработки сообщения."""
         if message.text:
             logger.debug(
                 f'Отработано сообщение "{" ".join(message.text.split())}" '

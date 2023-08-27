@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from aiogram import F, Router
+from aiogram import Dispatcher, F, Router
 from aiogram.filters import StateFilter
 
 from bot.filters import IsAdmin
@@ -28,13 +28,14 @@ router = Router(name=__name__)
 @router.callback_query(F.data == AdminCallback.AUTO_UPDATE_CAFE_MENU, IsAdmin())
 async def auto_update_cafe_menu_handler(
     callback: "CallbackQuery",
+    dispatcher: "Dispatcher",
     repo: "Repository",
 ) -> None:
     """Обработчик кнопки "Загрузить меню".
 
     Загружает и обрабатывает PDF расписание еды с сайта лицея.
     """
-    _, text = await process_cafe_menu(repo)
+    _, text = await process_cafe_menu(repo, dispatcher["settings"].other.TIMEOUT)
 
     await callback.message.edit_text(
         text=text,

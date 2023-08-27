@@ -36,7 +36,8 @@ class AlbumMiddleware(MyBaseMiddleware):
         )
 
     @staticmethod
-    def get_content(message: Message) -> tuple["Media", str]:
+    def _get_content(message: Message) -> tuple["Media", str]:
+        """Файл и тип медиа из сообщения."""
         if message.photo:
             return message.photo[-1], "photo"
         if message.video:
@@ -55,7 +56,7 @@ class AlbumMiddleware(MyBaseMiddleware):
     ) -> Any:
         if isinstance(event, Message) and event.media_group_id is not None:
             key = event.media_group_id
-            media, content_type = self.get_content(event)
+            media, content_type = self._get_content(event)
 
             if key in self.cache:
                 if content_type not in self.cache[key]:

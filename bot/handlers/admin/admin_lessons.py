@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from aiogram import F, Router
+from aiogram import Dispatcher, F, Router
 from aiogram.filters import StateFilter
 
 from bot.custom_types import Album
@@ -41,6 +41,7 @@ async def start_process_lessons_handler(
 async def process_lessons_handler(
     message: "Message",
     state: "FSMContext",
+    dispatcher: "Dispatcher",
     repo: "Repository",
 ) -> None:
     """Обработчки фотографий расписаний при только одной штуке."""
@@ -52,7 +53,7 @@ async def process_lessons_handler(
         },
         context={"bot": message.bot},
     )
-    await process_lessons_album_handler(message, state, repo, album)
+    await process_lessons_album_handler(message, state, dispatcher, repo, album)
 
 
 @router.message(
@@ -63,11 +64,18 @@ async def process_lessons_handler(
 async def process_lessons_album_handler(
     message: "Message",
     state: "FSMContext",
+    dispatcher: "Dispatcher",
     repo: "Repository",
     album: "Album",
 ) -> None:
     """Обработчки фотографий расписаний при нескольких штуках."""
-    text = await process_album_lessons_func(message.chat.id, album, message.bot, repo)
+    text = await process_album_lessons_func(
+        message.chat.id,
+        album,
+        dispatcher["settings"].other.TESSERACT_PATH,
+        message.bot,
+        repo,
+    )
 
     if state:
         await state.clear()
