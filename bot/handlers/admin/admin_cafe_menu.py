@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from aiogram import Dispatcher, F, Router
+from aiogram import F, Router
 from aiogram.filters import StateFilter
 
 from bot.filters import IsAdmin
@@ -11,7 +11,6 @@ from bot.keyboards import (
     choose_meal_keyboard,
     confirm_edit_keyboard,
 )
-from bot.settings import Settings
 from bot.upml.save_cafe_menu import process_cafe_menu
 from bot.utils.consts import AdminCallback, CAFE_MENU_ENG_TO_RU
 from bot.utils.datehelp import date_by_format, date_today, format_date
@@ -20,6 +19,8 @@ from bot.utils.states import EditingMenu
 if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
     from aiogram.types import CallbackQuery, Message
+
+    from bot.settings import Settings
     from bot.database.repository.repository import Repository
 
 

@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from aiogram import Dispatcher, F, Router
+from aiogram import F, Router
 from aiogram.filters import StateFilter
 
 from bot.custom_types import Album
@@ -8,7 +8,7 @@ from bot.custom_types import Album
 from bot.filters import IsAdmin
 from bot.funcs.admin import process_album_lessons_func
 from bot.keyboards import cancel_state_keyboard, go_to_main_menu_keyboard
-from bot.settings import Settings
+
 from bot.utils.consts import AdminCallback
 from bot.utils.states import LoadingLessons
 
@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
     from aiogram.types import CallbackQuery, Message
 
+    from bot.settings import Settings
     from bot.database.repository.repository import Repository
 
 
