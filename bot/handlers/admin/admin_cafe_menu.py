@@ -11,6 +11,7 @@ from bot.keyboards import (
     choose_meal_keyboard,
     confirm_edit_keyboard,
 )
+from bot.settings import Settings
 from bot.upml.save_cafe_menu import process_cafe_menu
 from bot.utils.consts import AdminCallback, CAFE_MENU_ENG_TO_RU
 from bot.utils.datehelp import date_by_format, date_today, format_date
@@ -28,14 +29,14 @@ router = Router(name=__name__)
 @router.callback_query(F.data == AdminCallback.AUTO_UPDATE_CAFE_MENU, IsAdmin())
 async def auto_update_cafe_menu_handler(
     callback: "CallbackQuery",
-    dispatcher: "Dispatcher",
+    settings: "Settings",
     repo: "Repository",
 ) -> None:
     """Обработчик кнопки "Загрузить меню".
 
     Загружает и обрабатывает PDF расписание еды с сайта лицея.
     """
-    _, text = await process_cafe_menu(repo, dispatcher["settings"].other.TIMEOUT)
+    _, text = await process_cafe_menu(repo, settings.other.TIMEOUT)
 
     await callback.message.edit_text(
         text=text,

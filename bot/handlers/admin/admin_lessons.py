@@ -8,6 +8,7 @@ from bot.custom_types import Album
 from bot.filters import IsAdmin
 from bot.funcs.admin import process_album_lessons_func
 from bot.keyboards import cancel_state_keyboard, go_to_main_menu_keyboard
+from bot.settings import Settings
 from bot.utils.consts import AdminCallback
 from bot.utils.states import LoadingLessons
 
@@ -35,13 +36,14 @@ async def start_process_lessons_handler(
 
 @router.message(
     StateFilter(LoadingLessons.image),
+    ~F.media_group_id,
     F.content_type.in_({"photo"}),
     IsAdmin(),
 )
 async def process_lessons_handler(
     message: "Message",
     state: "FSMContext",
-    dispatcher: "Dispatcher",
+    settings: "Settings",
     repo: "Repository",
 ) -> None:
     """Обработчки фотографий расписаний при только одной штуке."""
@@ -53,18 +55,19 @@ async def process_lessons_handler(
         },
         context={"bot": message.bot},
     )
-    await process_lessons_album_handler(message, state, dispatcher, repo, album)
+    await process_lessons_album_handler(message, state, settings, repo, album)
 
 
 @router.message(
     StateFilter(LoadingLessons.image),
     F.media_group_id,
+    F.content_type.in_({"photo"}),
     IsAdmin(),
 )
 async def process_lessons_album_handler(
     message: "Message",
     state: "FSMContext",
-    dispatcher: "Dispatcher",
+    settings: "Settings",
     repo: "Repository",
     album: "Album",
 ) -> None:
@@ -72,7 +75,7 @@ async def process_lessons_album_handler(
     text = await process_album_lessons_func(
         message.chat.id,
         album,
-        dispatcher["settings"].other.TESSERACT_PATH,
+        settings.other.TESSERACT_PATH,
         message.bot,
         repo,
     )
