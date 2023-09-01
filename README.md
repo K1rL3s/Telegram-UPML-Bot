@@ -1,5 +1,5 @@
 # Телеграм-бот для Югорского физико-математического лицея-интерната
-#### Индвидуальный проект [Лесового Кирилла](https://hello.k1rles.ru)
+### Индвидуальный проект [Лесового Кирилла](https://hello.k1rles.ru)
 
 ## Запуск
 
@@ -15,12 +15,12 @@
     ```
     BOT_TOKEN=<token>
     TESSERACT_PATH=<path>
-    TIMEZONE=<int>
+    TIMEZONE_OFFSET=<int>
+    TIMEOUT=<int>
     
     POSTGRES_HOST=<ip>
     POSTGRES_HOST_PORT=<int>
     POSTGRES_OUTSIDE_PORT=<int>
-    POSTGRES_DOCKER_PORT=5432
     POSTGRES_DB=<str>
     POSTGRES_USER=<str>
     POSTGRES_PASSWORD=<str>

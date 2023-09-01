@@ -1,6 +1,10 @@
 import datetime as dt
+from typing import Union
 
-from bot.settings import Settings
+from bot.settings import get_settings
+
+
+default_timezone_offset = get_settings().other.TIMEZONE_OFFSET
 
 
 def format_date(date_: "dt.date") -> str:
@@ -26,7 +30,7 @@ def format_datetime(datetime_: "dt.datetime") -> str:
     )
 
 
-def date_by_format(date_: str) -> "dt.date | bool":
+def date_by_format(date_: str) -> "Union[dt.date, bool]":
     """
     Конвертация отформатированной строки в дату.
 
@@ -73,14 +77,14 @@ def get_this_week_monday() -> "dt.date":
     return today - dt.timedelta(days=today.weekday())
 
 
-def datetime_now() -> "dt.datetime":
+def datetime_now(timezone_offset: int = default_timezone_offset) -> "dt.datetime":
     """
     Функция datetime.datetime.now, но в указанной в ``.env`` временной зоне.
 
     :return: datetime.
     """
     return dt.datetime.now(
-        tz=dt.timezone(offset=dt.timedelta(hours=Settings.TIMEZONE_OFFSET)),
+        tz=dt.timezone(offset=dt.timedelta(hours=timezone_offset)),
     ).replace(tzinfo=None)
 
 

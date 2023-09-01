@@ -39,6 +39,14 @@ def _keyboard_for_left_right_menu(
     today_smile: str,
     curr_date: "dt.date" = None,
 ) -> "InlineKeyboardMarkup":
+    """Клавиатура для меню с навигацией влево-вправо по датам.
+
+    :param open_smt_on_callback: Строка формата "open_{smt}_on_{date}".
+    :param open_smt_today_callback: Строка формата "open_{smt}_on_today".
+    :param today_smile: Смайлик на кнопке "Сегодня".
+    :param curr_date: Дата, на которой открыта навигация. None - сегодня.
+    :return: Клавиатура меню навигации влево-вправо.
+    """
     today = date_today()
 
     if curr_date is None:
@@ -69,7 +77,7 @@ def _keyboard_for_left_right_menu(
     if abs((today - tomorrow).days) < 7:
         keyboard.add(
             InlineKeyboardButton(
-                text=f"➡️{tomorrow_str}",
+                text=f"{tomorrow_str}➡️",
                 callback_data=open_smt_on_callback + tomorrow_str,
             ),
         )

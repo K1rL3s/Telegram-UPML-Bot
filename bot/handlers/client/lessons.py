@@ -1,6 +1,6 @@
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
-from aiogram import F, Router
+from aiogram import Bot, F, Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, InputMediaPhoto, Message
 
@@ -11,48 +11,91 @@ from bot.utils.consts import SlashCommands, TextCommands, UserCallback
 from bot.utils.datehelp import date_by_format
 
 if TYPE_CHECKING:
+    import datetime as dt
+
     from bot.database.repository.repository import Repository
 
 
 router = Router(name=__name__)
 
 
-@router.message(F.text == TextCommands.LESSONS, SaveUser())
-@router.message(Command(SlashCommands.LESSONS), SaveUser())
-@router.callback_query(
-    F.data.startswith(UserCallback.OPEN_LESSONS_ON_),
-    SaveUser(),
-)
-async def open_date_lessons_handler(
-    callback: "Union[CallbackQuery, Message]",
+async def send_lessons_images(
+    user_id: int,
+    chat_id: int,
+    lessons_date: "dt.date",
+    bot: "Bot",
     repo: "Repository",
-) -> None:
+) -> str | None:
     """
-    Обработчик кнопки "Уроки".
+    Общий код обработчиков просмотра уроков. Если имеется, отправляет фото расписания.
 
     Отправляет расписание уроков паралелли и класса, если выбран класс.
     Отправляет расписание двух паралеллей, если не выбран класс.
-    """
-    if isinstance(callback, CallbackQuery):
-        date_ = callback.data.replace(UserCallback.OPEN_LESSONS_ON_, "")
-    else:
-        date_ = "today"
-    lessons_date = date_by_format(date_)
 
-    text, images = await get_lessons_for_user(repo, callback.from_user.id, lessons_date)
+    :param user_id: ТГ Айди.
+    :param chat_id: Айди чата с пользователем.
+    :param lessons_date: Дата уроков.
+    :param bot: ТГ Бот.
+    :param repo: Доступ к базе данных.
+    :return: Сообщение для пользователя.
+    """
+    text, images = await get_lessons_for_user(repo, user_id, lessons_date)
 
     if any(images):
-        messages = await callback.bot.send_media_group(
-            chat_id=callback.message.chat.id,
+        messages = await bot.send_media_group(
+            chat_id=chat_id,
             media=[InputMediaPhoto(media=media_id) for media_id in images if media_id],
         )
         await messages[0].reply(text=text, reply_markup=lessons_keyboard(lessons_date))
         return
 
-    if isinstance(callback, CallbackQuery):
+    return text
+
+
+@router.callback_query(
+    F.data.startswith(UserCallback.OPEN_LESSONS_ON_),
+    SaveUser(),
+)
+async def date_lessons_callback_handler(
+    callback: "CallbackQuery",
+    repo: "Repository",
+) -> None:
+    """Обработчик кнопки "Уроки"."""
+    date_ = callback.data.replace(UserCallback.OPEN_LESSONS_ON_, "")
+    lessons_date = date_by_format(date_)
+
+    text = await send_lessons_images(
+        callback.from_user.id,
+        callback.message.chat.id,
+        lessons_date,
+        callback.bot,
+        repo,
+    )
+
+    if text:
         await callback.message.edit_text(
             text=text,
             reply_markup=lessons_keyboard(lessons_date),
         )
-    else:
-        await callback.answer(text=text, reply_markup=lessons_keyboard(lessons_date))
+
+
+@router.message(F.text == TextCommands.LESSONS, SaveUser())
+@router.message(Command(SlashCommands.LESSONS), SaveUser())
+async def date_lessons_message_handler(
+    message: "Message",
+    repo: "Repository",
+) -> None:
+    """Обработчик команды "Уроки"."""
+    date_ = "today"
+    lessons_date = date_by_format(date_)
+
+    text = await send_lessons_images(
+        message.from_user.id,
+        message.chat.id,
+        lessons_date,
+        message.bot,
+        repo,
+    )
+
+    if text:
+        await message.answer(text=text, reply_markup=lessons_keyboard(lessons_date))

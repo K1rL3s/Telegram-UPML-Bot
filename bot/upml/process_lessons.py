@@ -5,25 +5,25 @@ from typing import TYPE_CHECKING
 from PIL import Image
 import pytesseract
 
-from bot.settings import Settings
 from bot.utils.datehelp import date_today
 
 if TYPE_CHECKING:
     from PIL.PyAccess import PyAccess
 
 
-pytesseract.pytesseract.tesseract_cmd = Settings.TESSERACT_PATH
-
-
 def process_one_lessons_file(
     image: "BytesIO",
-) -> tuple[dt.date, str, "BytesIO", list["BytesIO"]]:
+    tesseract_path: str,
+) -> tuple["dt.date", str, "BytesIO", list["BytesIO"]]:
     """
     Основная функция в файле, выполняет всю работу, вызывая другие функции.
 
     :param image: Исходник расписания.
+    :param tesseract_path: Путь до exeшника тессеракта.
     :return: Дата, класс, полное расписание, расписания по классам.
     """
+    pytesseract.pytesseract.tesseract_cmd = tesseract_path
+
     lessons = Image.open(image)
 
     first_line_y = _y_first_horizontal_line(lessons)
@@ -44,6 +44,9 @@ def process_one_lessons_file(
         prefix_down_y,
     )
 
+    if len(classes) != 3:  # Три класса на одном расписании
+        raise ValueError("Не удалось разделить расписание по классам.")
+
     grade = _get_grade(lessons, prefix_end_x, first_line_y)
 
     lessons.save(full_lessons := BytesIO(), format="PNG")
@@ -57,10 +60,12 @@ def process_one_lessons_file(
 
 
 def _is_pixel_black(pixel: tuple[int, int, int]) -> bool:
+    """Чёрный ли пиксель. Граница подобрана опытным путём."""
     return all(color <= 80 for color in pixel)
 
 
 def _is_pixel_white(pixel: tuple[int, int, int]) -> bool:
+    """Белый ли пиксель. Граница подобрана опытным путём."""
     return all(color >= 200 for color in pixel)
 
 

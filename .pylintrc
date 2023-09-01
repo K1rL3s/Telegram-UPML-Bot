@@ -82,7 +82,7 @@ enable=
 # --disable=W"
 
 disable=
-    missing-docstring,
+    missing-module-docstring,
     too-few-public-methods,
     # handled by black
     format,
@@ -118,6 +118,7 @@ score=yes
 logging-modules=
    logging,
    loguru,
+   logger,
 
 # The type of string formatting that logging methods do. `old` means using %
 # formatting, `new` is for `{}` formatting.
@@ -133,7 +134,7 @@ notes=FIXME,TODO
 [SIMILARITIES]
 
 # Minimum lines number of a similarity.
-min-similarity-lines=6
+min-similarity-lines=4
 
 # Ignore comments when computing similarities.
 ignore-comments=yes

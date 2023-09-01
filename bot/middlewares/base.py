@@ -12,6 +12,7 @@ class MyBaseMiddleware(BaseMiddleware, ABC):
 
     @staticmethod
     async def get_short_info(message: "Union[Message, CallbackQuery]") -> str | None:
+        """Короткая информация о пользователе для логов."""
         username = extract_username(message)
 
         if isinstance(message, Message):

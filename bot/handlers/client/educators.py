@@ -2,7 +2,6 @@ from typing import TYPE_CHECKING
 
 from aiogram import F, Router
 from aiogram.filters import Command
-from aiogram.types import CallbackQuery
 
 from bot.funcs.educators import get_format_educators_by_date
 from bot.keyboards import educators_keyboard
@@ -10,36 +9,46 @@ from bot.utils.consts import SlashCommands, TextCommands, UserCallback
 from bot.utils.datehelp import date_by_format
 
 if TYPE_CHECKING:
+    from aiogram.types import CallbackQuery, Message
+
     from bot.database.repository.repository import Repository
+
 
 router = Router(name=__name__)
 
 
-@router.message(F.text == TextCommands.EDUCATORS)
-@router.message(Command(SlashCommands.EDUCATORS))
 @router.callback_query(F.data.startswith(UserCallback.OPEN_EDUCATORS_ON_))
-async def educators_handler(
+async def educators_callback_handler(
     callback: "CallbackQuery",
     repo: "Repository",
 ) -> None:
-    """Обработчик команды "/educators" и кнопки "Воспитатели"."""
-    if isinstance(callback, CallbackQuery):
-        date_ = callback.data.replace(UserCallback.OPEN_EDUCATORS_ON_, "")
-    else:
-        date_ = "today"
+    """Обработчик кнопки "Воспитатели"."""
+    date_ = callback.data.replace(UserCallback.OPEN_EDUCATORS_ON_, "")
     schedule_date = date_by_format(date_)
 
     text = await get_format_educators_by_date(repo, schedule_date)
 
-    if isinstance(callback, CallbackQuery):
-        await callback.message.edit_text(
-            text=text,
-            reply_markup=educators_keyboard(schedule_date),
-            parse_mode="html",
-        )
-    else:
-        await callback.answer(
-            text=text,
-            reply_markup=educators_keyboard(schedule_date),
-            parse_mode="html",
-        )
+    await callback.message.edit_text(
+        text=text,
+        reply_markup=educators_keyboard(schedule_date),
+        parse_mode="html",
+    )
+
+
+@router.message(F.text == TextCommands.EDUCATORS)
+@router.message(Command(SlashCommands.EDUCATORS))
+async def educators_message_handler(
+    message: "Message",
+    repo: "Repository",
+) -> None:
+    """Обработчик команды "/educators"."""
+    date_ = "today"
+    schedule_date = date_by_format(date_)
+
+    text = await get_format_educators_by_date(repo, schedule_date)
+
+    await message.answer(
+        text=text,
+        reply_markup=educators_keyboard(schedule_date),
+        parse_mode="html",
+    )

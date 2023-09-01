@@ -19,6 +19,8 @@ from bot.utils.states import EditingMenu
 if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
     from aiogram.types import CallbackQuery, Message
+
+    from bot.settings import Settings
     from bot.database.repository.repository import Repository
 
 
@@ -28,13 +30,14 @@ router = Router(name=__name__)
 @router.callback_query(F.data == AdminCallback.AUTO_UPDATE_CAFE_MENU, IsAdmin())
 async def auto_update_cafe_menu_handler(
     callback: "CallbackQuery",
+    settings: "Settings",
     repo: "Repository",
 ) -> None:
     """Обработчик кнопки "Загрузить меню".
 
     Загружает и обрабатывает PDF расписание еды с сайта лицея.
     """
-    _, text = await process_cafe_menu(repo)
+    _, text = await process_cafe_menu(repo, settings.other.TIMEOUT)
 
     await callback.message.edit_text(
         text=text,

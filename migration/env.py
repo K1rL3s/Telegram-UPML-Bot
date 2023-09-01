@@ -7,19 +7,24 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from bot.settings import DBSettings
+from bot.settings import get_settings
 from bot.database.models import *  # noqa
 from bot.database.db_session import SqlAlchemyBase
 
 
 config = context.config
+db_settings = get_settings().db
 
 section = config.config_ini_section
-config.set_section_option(section, "POSTGRES_HOST", DBSettings.POSTGRES_HOST)
-config.set_section_option(section, "POSTGRES_PORT", str(DBSettings.POSTGRES_PORT))
-config.set_section_option(section, "POSTGRES_DB", DBSettings.POSTGRES_DB)
-config.set_section_option(section, "POSTGRES_USER", DBSettings.POSTGRES_USER)
-config.set_section_option(section, "POSTGRES_PASSWORD", DBSettings.POSTGRES_PASSWORD)
+config.set_section_option(section, "POSTGRES_HOST", db_settings.POSTGRES_HOST)
+config.set_section_option(
+    section,
+    "POSTGRES_HOST_PORT",
+    str(db_settings.POSTGRES_HOST_PORT),
+)
+config.set_section_option(section, "POSTGRES_DB", db_settings.POSTGRES_DB)
+config.set_section_option(section, "POSTGRES_USER", db_settings.POSTGRES_USER)
+config.set_section_option(section, "POSTGRES_PASSWORD", db_settings.POSTGRES_PASSWORD)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

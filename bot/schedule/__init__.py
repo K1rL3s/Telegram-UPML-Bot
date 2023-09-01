@@ -19,10 +19,13 @@ __all__ = [
 ]
 
 
-async def run_schedule_jobs(bot: "Bot") -> None:
+async def run_schedule_jobs(bot: "Bot", timeout: int) -> None:
     """Регистратор и запускатор действий по расписанию."""
     for hour in range(7, 16 + 1):
-        aioschedule.every().day.at(f"{hour:0>2}:00").do(update_cafe_menu)
+        aioschedule.every().day.at(f"{hour:0>2}:00").do(
+            update_cafe_menu,
+            timeout=timeout,
+        )
     aioschedule.every().minute.do(check_laundry_timers, bot=bot)
 
     while True:
