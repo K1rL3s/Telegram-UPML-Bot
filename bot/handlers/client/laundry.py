@@ -1,8 +1,7 @@
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 from aiogram import F, Router
 from aiogram.filters import Command
-from aiogram.types import CallbackQuery, Message
 
 from bot.funcs.laundry import (
     laundry_cancel_timer_func,
@@ -14,36 +13,59 @@ from bot.utils.consts import LAUNDRY_REPEAT, SlashCommands, TextCommands, UserCa
 from bot.utils.datehelp import format_datetime
 
 if TYPE_CHECKING:
+    from aiogram.types import CallbackQuery, InlineKeyboardMarkup, Message
+
     from bot.database.repository.repository import Repository
 
 
 router = Router(name=__name__)
 
 
-@router.message(F.text == TextCommands.LAUNDRY)
-@router.message(Command(SlashCommands.LAUNDRY))
-@router.callback_query(F.data == UserCallback.OPEN_LAUNDRY)
 async def laundry_handler(
-    callback: "Union[CallbackQuery, Message]",
+    user_id: int,
+    repo: "Repository",
+) -> tuple[str, "InlineKeyboardMarkup"]:
+    """
+    Текст и клавиатура при переходе в таймеры для прачечной.
+
+    :param user_id: ТГ Айди.
+    :param repo: Доступ к базе данных.
+    :return: Сообщение пользователю и клавиатура.
+    """
+    text = f"""Привет! Я - таймер для прачечной.
+После конца таймер запустится ещё три раза на *{LAUNDRY_REPEAT}* минут."""
+
+    laundry = await repo.laundry.get(user_id)
+    keyboard = await laundry_keyboard(laundry)
+
+    if (minutes := await laundry_welcome_func(laundry)) is not None:
+        text += f"\n\nВремя до конца таймера: *{minutes}* минут"
+
+    return text, keyboard
+
+
+@router.callback_query(F.data == UserCallback.OPEN_LAUNDRY)
+async def laundry_callback_handler(
+    callback: "CallbackQuery",
     repo: "Repository",
 ) -> None:
     """Обработчик кнопки "Прачечная"."""
-    text = (
-        "Привет! Я - таймер для прачечной.\n"
-        "После конца таймер запустится ещё три раза "
-        f"на *{LAUNDRY_REPEAT}* минут.\n\n"
+    text, keyboard = await laundry_handler(callback.from_user.id, repo)
+    await callback.message.edit_text(
+        text=text,
+        reply_markup=keyboard,
     )
 
-    laundry = await repo.laundry.get(callback.from_user.id)
 
-    if (minutes := await laundry_welcome_func(laundry)) is not None:
-        text += f"Время до конца таймера: *{minutes}* минут\n"
-
-    keyboard = await laundry_keyboard(laundry)
-    if isinstance(callback, CallbackQuery):
-        await callback.message.edit_text(text=text.strip(), reply_markup=keyboard)
-    else:
-        await callback.answer(text=text.strip(), reply_markup=keyboard)
+@router.message(F.text == TextCommands.LAUNDRY)
+@router.message(Command(SlashCommands.LAUNDRY))
+async def laundry_message_handler(
+    message: "Message",
+    repo: "Repository",
+) -> None:
+    """Обработчик кнопки "Прачечная"."""
+    text, keyboard = await laundry_handler(message.from_user.id, repo)
+    await message.answer(text=text, reply_markup=keyboard)
 
 
 @router.callback_query(F.data.startswith(UserCallback.START_LAUNDRY_PREFIX))

@@ -44,6 +44,9 @@ def process_one_lessons_file(
         prefix_down_y,
     )
 
+    if len(classes) != 3:  # Три класса на одном расписании
+        raise ValueError("Не удалось разделить расписание по классам.")
+
     grade = _get_grade(lessons, prefix_end_x, first_line_y)
 
     lessons.save(full_lessons := BytesIO(), format="PNG")

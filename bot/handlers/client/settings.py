@@ -2,7 +2,6 @@ from typing import TYPE_CHECKING, Union
 
 from aiogram import F, Router
 from aiogram.filters import Command, StateFilter
-from aiogram.types import CallbackQuery, Message
 
 
 from bot.filters import SaveUser
@@ -27,6 +26,7 @@ from bot.utils.states import EditingSettings
 
 if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
+    from aiogram.types import CallbackQuery, Message
 
     from bot.database.repository.repository import Repository
 
@@ -44,10 +44,8 @@ SETTINGS_WELCOME_TEXT = """
 """.strip()
 
 
-@router.message(F.text == TextCommands.SETTINGS, SaveUser())
-@router.message(Command(SlashCommands.SETTINGS), SaveUser())
 @router.callback_query(F.data == UserCallback.OPEN_SETTINGS, SaveUser())
-async def open_settings_handler(
+async def settings_callback_handler(
     callback: "Union[CallbackQuery, Message]",
     repo: "Repository",
 ) -> None:
@@ -55,13 +53,23 @@ async def open_settings_handler(
     settings = await repo.settings.get(callback.from_user.id)
     keyboard = await settings_keyboard(settings)
 
-    if isinstance(callback, CallbackQuery):
-        await callback.message.edit_text(
-            text=SETTINGS_WELCOME_TEXT,
-            reply_markup=keyboard,
-        )
-    else:
-        await callback.answer(text=SETTINGS_WELCOME_TEXT, reply_markup=keyboard)
+    await callback.message.edit_text(
+        text=SETTINGS_WELCOME_TEXT,
+        reply_markup=keyboard,
+    )
+
+
+@router.message(F.text == TextCommands.SETTINGS, SaveUser())
+@router.message(Command(SlashCommands.SETTINGS), SaveUser())
+async def settings_message_handler(
+    message: "Message",
+    repo: "Repository",
+) -> None:
+    """Обработчик команды "/settings"."""
+    settings = await repo.settings.get(message.from_user.id)
+    keyboard = await settings_keyboard(settings)
+
+    await message.answer(text=SETTINGS_WELCOME_TEXT, reply_markup=keyboard)
 
 
 @router.callback_query(F.data.startswith(UserCallback.PREFIX_SWITCH))
@@ -87,7 +95,7 @@ async def edit_grade_settings_handler(
     change = await edit_grade_setting_func(repo, callback.from_user.id, callback.data)
 
     if change:
-        await open_settings_handler(callback, repo)
+        await settings_callback_handler(callback, repo)
     else:
         await callback.message.edit_text(
             text=SETTINGS_WELCOME_TEXT,

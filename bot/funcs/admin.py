@@ -43,23 +43,23 @@ async def process_album_lessons_func(
     :param repo: Доступ к базе данных.
     :return: Склейка итогов обработки расписаний.
     """
-    proccess_results: list[str | tuple[str, dt.date]] = []
+    save_results: list[str | tuple[str, dt.date]] = []
     for photo in album.photo:
         photo_id = photo.file_id
         photo = await bot.get_file(photo_id)
         await bot.download_file(photo.file_path, image := BytesIO())
 
-        process_result = await process_one_lessons_func(
+        save_result = await save_one_lessons_to_db(
             chat_id,
             image,
             tesseract_path,
             bot,
             repo,
         )
-        proccess_results.append(process_result)
+        save_results.append(save_result)
 
     results: list[str] = []
-    for result in proccess_results:
+    for result in save_results:
         if isinstance(result, tuple):
             grade, lessons_date = result
             results.append(
@@ -72,7 +72,7 @@ async def process_album_lessons_func(
     return "\n".join(results)
 
 
-async def process_one_lessons_func(
+async def save_one_lessons_to_db(
     chat_id: int,
     image: "BytesIO",
     tesseract_path: str,
