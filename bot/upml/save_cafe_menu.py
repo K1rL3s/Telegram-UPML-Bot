@@ -1,10 +1,12 @@
 from io import BytesIO
 import datetime as dt
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Union
 
 from httpx import AsyncClient
 from loguru import logger
 from pypdf import PdfReader
+
+from bot.utils.consts import CAFE_MENU_ENG_TO_RU
 from bot.utils.datehelp import format_date, get_this_week_monday
 
 if TYPE_CHECKING:
@@ -23,17 +25,12 @@ async def process_cafe_menu(repo: "Repository", timeout: int) -> tuple[bool, str
         logger.warning(text := "Не удалось найти PDF с меню")
         return False, text
 
-    menu_date = get_this_week_monday()
-    add_counter = 0
+    # Спасибо столовой моего лицея за то, что они могут опублиовать меню
+    # с датой вторника, а начинается с понедельника. :)
+    menu_date = _compare_pdf_date(pdf_reader)
 
-    menu = " ".join(pdf_reader.pages[0].extract_text().split())
-    while add_counter < 7 and format_date(menu_date) not in menu:
-        menu_date += dt.timedelta(days=1)
-        add_counter += 1
-
-    if add_counter >= 7:
-        logger.warning(text := "Не удалось сравнять дату PDF и текущей недели")
-        return False, text
+    if isinstance(menu_date, str):
+        return False, menu_date
 
     await _process_pdf_menu(repo, pdf_reader, menu_date)
     return True, "Расписание еды обновлено!"
@@ -95,8 +92,8 @@ async def _get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
     """
     # Передавать число, месяц, год - print(pdf_url(2, 5, 2023))
     pdf_url = (
-        "https://ugrafmsh.ru/wp-content/uploads/{2}/{1:0>2}"
-        "/menyu-{0:0>2}-{1:0>2}-{2}-krugl.pdf"
+        "https://yufmli.gosuslugi.ru/netcat_files/47/515/"
+        "Menyu_{0:0>2}_{1:0>2}_{2}_krugl.pdf"
     )
 
     menu_date = get_this_week_monday() - dt.timedelta(days=1)
@@ -104,7 +101,7 @@ async def _get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
     # Ищем в воскресенье, понедельник, вторник и среду.
     # Число и месяц изменяются сами, поэтому ссылка будет корректной.
     async_session = AsyncClient(timeout=timeout)
-    for _ in range(4):
+    for _ in range(7):  # С понедельника до воскресенья
         response = await async_session.get(
             pdf_url.format(menu_date.day, menu_date.month, menu_date.year),
         )
@@ -114,6 +111,28 @@ async def _get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
         menu_date += dt.timedelta(days=1)
 
     return None
+
+
+def _compare_pdf_date(pdf_reader: "PdfReader") -> "Union[dt.date, str]":
+    """
+    Возвращает дату, с которой начинается расписание еды в пдф файле.
+
+    :param pdf_reader: PDF файл.
+    :return: Дата начала расписания еды или текст ошибки.
+    """
+    menu_date = get_this_week_monday()
+    add_counter = 0
+
+    menu = " ".join(pdf_reader.pages[0].extract_text().split())
+    while add_counter < 7 and format_date(menu_date) not in menu:
+        menu_date += dt.timedelta(days=1)
+        add_counter += 1
+
+    if add_counter >= 7:
+        logger.warning(text := "Не удалось сравнять дату PDF и текущей недели")
+        return text
+
+    return menu_date
 
 
 async def _process_pdf_menu(
@@ -144,6 +163,7 @@ async def _process_pdf_menu(
             meals.append(_normalize_meal(meal))
             text_menu = text_menu[end:]
 
-        await repo.menu.save_or_update_to_db(menu_date, *meals)
+        fields = dict(zip(CAFE_MENU_ENG_TO_RU.keys(), meals))
+        await repo.menu.save_or_update_to_db(menu_date, **fields)
 
         menu_date += dt.timedelta(days=1)

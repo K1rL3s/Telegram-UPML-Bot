@@ -28,8 +28,7 @@ class Menu(BaseModel):
 
     edit_by: Mapped[int] = mapped_column(
         ForeignKey("users.user_id"),
-        default=0,
-        nullable=False,
+        nullable=True,
     )
 
     breakfast: Mapped[str] = mapped_column(String, nullable=True)

@@ -4,7 +4,8 @@ from aiogram import F, Router
 from aiogram.filters import StateFilter
 
 from bot.filters import IsAdmin
-from bot.funcs.admin import do_notifies, get_users_for_notify
+from bot.funcs.admin import get_users_for_notify
+from bot.utils.notify import do_admin_notifies
 from bot.keyboards import (
     admin_panel_keyboard,
     cancel_state_keyboard,
@@ -121,7 +122,7 @@ async def notify_confirm_handler(
     await state.clear()
 
     users = await get_users_for_notify(repo, notify_type, is_news=True)
-    await do_notifies(
+    await do_admin_notifies(
         callback.bot,
         repo,
         message_text,

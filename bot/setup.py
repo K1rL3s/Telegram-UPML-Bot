@@ -45,7 +45,11 @@ def make_dispatcher() -> "Dispatcher":
 
 async def make_bot(bot_token: str, parse_mode: str = "markdown") -> "Bot":
     """Создаёт бота и устанавливает ему команды."""
-    bot = Bot(token=bot_token, parse_mode=parse_mode)
+    bot = Bot(
+        token=bot_token,
+        parse_mode=parse_mode,
+        disable_web_page_preview=True,
+    )
     await set_commands(bot)
 
     return bot

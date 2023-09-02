@@ -1,25 +1,18 @@
-import asyncio
-import datetime as dt
 from io import BytesIO
 from typing import TYPE_CHECKING
 
-import aiojobs
 from loguru import logger
-
 
 from bot.database.models.settings import Settings
 from bot.database.models.users import User
 from bot.upml.process_lessons import process_one_lessons_file
 from bot.utils.consts import NO_DATA
 from bot.utils.datehelp import format_date
-from bot.utils.funcs import (
-    bytes_io_to_image_id,
-    name_link,
-    one_notify,
-    username_by_user_id,
-)
+from bot.utils.funcs import bytes_io_to_image_id
 
 if TYPE_CHECKING:
+    import datetime as dt
+
     from aiogram import Bot
 
     from bot.custom_types import Album
@@ -140,39 +133,6 @@ async def get_educators_schedule_by_date(
     """
     schedule = await repo.educators.get(schedule_date)
     return getattr(schedule, "schedule", None) or NO_DATA
-
-
-async def do_notifies(
-    bot: "Bot",
-    repo: "Repository",
-    text: str,
-    users: list["User"],
-    from_who: int = 0,
-    for_who: str = "",
-) -> None:
-    """
-    Делатель рассылки.
-
-    :param bot: ТГ Бот.
-    :param repo: Доступ к базе данных.
-    :param text: Сообщение.
-    :param users: Кому отправить сообщение.
-    :param from_who: ТГ Айди отправителя (админа)
-    :param for_who: Для кого рассылка.
-    """
-    username = await username_by_user_id(bot, from_who)
-    text = (
-        "🔔*Уведомление от администратора* "
-        f"{name_link(username, from_who)} *{for_who}*\n\n" + text
-    )
-
-    scheduler = aiojobs.Scheduler(limit=3)
-    for user in users:
-        await scheduler.spawn(one_notify(bot, repo, user, text))
-
-    while scheduler.active_count:
-        await asyncio.sleep(0.5)
-    await scheduler.close()
 
 
 # all, grade_10, grade_11, 10А, 10Б, 10В, 11А, 11Б, 11В

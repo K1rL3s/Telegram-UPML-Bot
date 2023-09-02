@@ -127,6 +127,7 @@ GRADES: Final[tuple[str, ...]] = tuple(
     f"{grade}{letter}" for grade in range(10, 11 + 1) for letter in "АБВ"
 )
 LAUNDRY_REPEAT: Final[int] = 30  # Повтор таймера прачечной через 30 минут
+NOTIFIES_PER_BATCH: Final[int] = 20  # Сообщений за раз в рассылке
 NO_DATA: Final[str] = "Н/д"
 
 SLASH_COMMANDS: Final[dict[str, str]] = {

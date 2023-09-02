@@ -34,7 +34,7 @@ class MenuRepository(BaseRepository):
     async def save_or_update_to_db(
         self,
         menu_date: "dt.date",
-        edit_by: int = 0,
+        edit_by: int | None = None,
         **fields: Any,
     ) -> None:
         """

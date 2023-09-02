@@ -2,21 +2,14 @@ from typing import TYPE_CHECKING, Union
 from uuid import uuid1
 
 from aiocache import cached
-from aiogram.types import (
-    BufferedInputFile,
-    InlineKeyboardMarkup,
-)
-from aiogram.exceptions import TelegramUnauthorizedError
-from loguru import logger
+from aiogram.types import BufferedInputFile
+
 
 if TYPE_CHECKING:
     from io import BytesIO
 
     from aiogram import Bot
     from aiogram.types import CallbackQuery, Message
-
-    from bot.database.models import User
-    from bot.database.repository.repository import Repository
 
 
 async def bytes_io_to_image_id(
@@ -87,35 +80,3 @@ def limit_min_max(
 ) -> int | float:
     """Лимит числового значения по минмуму и максимум."""
     return max(min(value, maximum), minimum)
-
-
-async def one_notify(
-    bot: "Bot",
-    repo: "Repository",
-    user: "User",
-    text: str,
-    keyboard: "InlineKeyboardMarkup" = None,
-) -> bool:
-    """
-    Делатель одного уведомления.
-
-    :param bot: ТГ Бот.
-    :param repo: Доступ к базе данных.
-    :param user: Информация о пользователе.
-    :param text: Сообщение в уведомлении.
-    :param keyboard: Клавиатура на сообщении с уведомлением.
-    """
-    try:
-        await bot.send_message(text=text, chat_id=user.user_id, reply_markup=keyboard)
-        logger.debug(
-            f'Уведомление "{" ".join(text.split())}" '
-            f"успешно для {user.short_info()}",
-        )
-    except TelegramUnauthorizedError:
-        await repo.user.update(user.user_id, is_active=0)
-        return True
-    except Exception as e:
-        logger.warning(f"Ошибка при уведомлении: {e}")
-        return False
-
-    return True

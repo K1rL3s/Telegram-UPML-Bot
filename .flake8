@@ -64,5 +64,6 @@ per-file-ignores=
     bot/middlewares/repository.py:D102,NU001,
     bot/middlewares/logging.py:D102,R504,
     bot/upml/**:CCR001,
-    bot/utils/funcs.py:R504,B902,
+    bot/utils/funcs.py:R504,
+    bot/utils/notify.py:B902,
 

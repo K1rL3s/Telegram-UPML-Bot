@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase
 
-
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
     from bot.settings import DBSettings
