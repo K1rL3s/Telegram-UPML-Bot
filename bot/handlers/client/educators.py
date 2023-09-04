@@ -5,7 +5,7 @@ from aiogram.filters import Command
 
 from bot.funcs.educators import get_format_educators_by_date
 from bot.keyboards import educators_keyboard
-from bot.utils.consts import SlashCommands, TextCommands, UserCallback
+from bot.utils.enums import SlashCommands, TextCommands, UserCallback
 from bot.utils.datehelp import date_by_format
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ async def educators_callback_handler(
     date_ = callback.data.replace(UserCallback.OPEN_EDUCATORS_ON_, "")
     schedule_date = date_by_format(date_)
 
-    text = await get_format_educators_by_date(repo, schedule_date)
+    text = await get_format_educators_by_date(repo.educators, schedule_date)
 
     await callback.message.edit_text(
         text=text,
@@ -45,7 +45,7 @@ async def educators_message_handler(
     date_ = "today"
     schedule_date = date_by_format(date_)
 
-    text = await get_format_educators_by_date(repo, schedule_date)
+    text = await get_format_educators_by_date(repo.educators, schedule_date)
 
     await message.answer(
         text=text,

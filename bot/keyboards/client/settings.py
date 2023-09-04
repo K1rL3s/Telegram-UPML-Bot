@@ -6,16 +6,22 @@ from aiogram.utils.keyboard import (
     InlineKeyboardMarkup,
 )
 
-
 from bot.keyboards.universal import go_to_main_menu_button
-from bot.utils.consts import GRADES, UserCallback
+from bot.utils.consts import GRADES
+from bot.utils.enums import UserCallback
+
 
 if TYPE_CHECKING:
-    from bot.database.models.settings import Settings
+    from bot.database.repository import SettingsRepository
 
 
-async def settings_keyboard(settings: "Settings") -> "InlineKeyboardMarkup":
+async def settings_keyboard(
+    repo: "SettingsRepository",
+    user_id: int,
+) -> "InlineKeyboardMarkup":
     """Клавиатура настроек, своя у каждого пользователя."""
+    settings = await repo.get(user_id)
+
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -52,7 +58,7 @@ choose_grade_keyboard = (
     .add(
         *(
             InlineKeyboardButton(
-                text=f"{grade_letter}",
+                text=grade_letter,
                 callback_data=UserCallback.CHANGE_GRADE_TO_ + grade_letter,
             )
             for grade_letter in GRADES

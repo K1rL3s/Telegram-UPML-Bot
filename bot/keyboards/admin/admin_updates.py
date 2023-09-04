@@ -4,7 +4,8 @@ from aiogram.utils.keyboard import (
     InlineKeyboardMarkup,
 )
 from bot.keyboards.universal import cancel_state_button
-from bot.utils.consts import AdminCallback
+from bot.utils.consts import BEAUTIFY_MEALS
+from bot.utils.enums import AdminCallback
 
 
 choose_meal_keyboard = (
@@ -13,7 +14,7 @@ choose_meal_keyboard = (
         *(
             InlineKeyboardButton(text=dish, callback_data=callback_data)
             for dish, callback_data in zip(
-                ("🕗Завтрак", "🕙Второй завтрак", "🕐Обед", "🕖Полдник", "🕖Ужин"),
+                BEAUTIFY_MEALS,
                 (
                     AdminCallback.EDIT_BREAKFAST,
                     AdminCallback.EDIT_LUNCH,

@@ -20,31 +20,31 @@ class MenuRepository(BaseRepository):
 
     async def get(
         self,
-        menu_date: "dt.date",
+        date: "dt.date",
     ) -> Menu | None:
         """
         Возвращает меню на день по дате.
 
-        :param menu_date: Дата запрашеваемого меню.
+        :param date: Дата запрашеваемого меню.
         :return: Модель Menu.
         """
-        query = select(Menu).where(Menu.date == menu_date)
+        query = select(Menu).where(Menu.date == date)
         return await self.session.scalar(query)
 
     async def save_or_update_to_db(
         self,
-        menu_date: "dt.date",
+        date: "dt.date",
         edit_by: int | None = None,
         **fields: Any,
     ) -> None:
         """
         Сохраняет или обновляет меню для определённой даты.
 
-        :param menu_date: Дата меня.
+        :param date: Дата меня.
         :param edit_by: Кем редактируется, ТГ Айди, 0 - автоматически.
         :param fields: Ключ - колонка, значение - новое значение.
         """
-        if menu := await self.get(menu_date):
+        if menu := await self.get(date):
             for k, v in fields.items():
                 # Если редактируется вручную или информации о еде нет:
                 if edit_by or not getattr(menu, k, None):
@@ -55,7 +55,7 @@ class MenuRepository(BaseRepository):
             menu = Menu(
                 **fields,
                 edit_by=edit_by,
-                date=menu_date,
+                date=date,
             )
             self.session.add(menu)
 
@@ -65,7 +65,7 @@ class MenuRepository(BaseRepository):
         self,
         meal: str,
         new_menu: str,
-        menu_date: "dt.date",
+        date: "dt.date",
         edit_by: int,
     ) -> None:
         """
@@ -73,11 +73,11 @@ class MenuRepository(BaseRepository):
 
         :param meal: Название приёма пищи на английском.
         :param new_menu: Новая версия.
-        :param menu_date: Дата.
+        :param date: Дата.
         :param edit_by: ТГ Айди того, кто меняет.
         """
-        menu = await self.get(menu_date)
+        menu = await self.get(date)
         meals = {meal: getattr(menu, meal, None) for meal in CAFE_MENU_ENG_TO_RU}
         meals[meal] = new_menu
 
-        await self.save_or_update_to_db(menu_date=menu_date, edit_by=edit_by, **meals)
+        await self.save_or_update_to_db(date=date, edit_by=edit_by, **meals)

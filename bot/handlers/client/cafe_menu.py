@@ -5,7 +5,7 @@ from aiogram.filters import Command
 
 from bot.funcs.cafe_menu import get_format_menu_by_date
 from bot.keyboards import cafe_menu_keyboard
-from bot.utils.consts import SlashCommands, TextCommands, UserCallback
+from bot.utils.enums import SlashCommands, TextCommands, UserCallback
 from bot.utils.datehelp import date_by_format
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ async def date_cafe_menu_callback_handler(
     date_ = callback.data.replace(UserCallback.OPEN_CAFE_MENU_ON_, "")
     menu_date = date_by_format(date_)
 
-    text = await get_format_menu_by_date(repo, menu_date)
+    text = await get_format_menu_by_date(repo.menu, menu_date)
 
     await callback.message.edit_text(
         text=text,
@@ -44,6 +44,6 @@ async def date_cafe_menu_message_handler(
     date_ = "today"
     menu_date = date_by_format(date_)
 
-    text = await get_format_menu_by_date(repo, menu_date)
+    text = await get_format_menu_by_date(repo.menu, menu_date)
 
     await message.answer(text=text, reply_markup=cafe_menu_keyboard(menu_date))

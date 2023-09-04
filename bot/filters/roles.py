@@ -4,7 +4,8 @@ from aiogram.filters import Filter
 
 from bot.database.repository.repository import Repository
 from bot.database.db_session import get_session
-from bot.utils.consts import Roles
+from bot.utils.enums import Roles
+
 
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message

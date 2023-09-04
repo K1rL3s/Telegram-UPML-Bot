@@ -5,10 +5,11 @@ from aiogram.filters import Command, StateFilter
 
 from aiogram.types import CallbackQuery, Message
 
-from bot.filters import IsAdmin, SaveUser
+from bot.filters import IsAdmin, SaveUpdateUser
 from bot.keyboards import admin_panel_keyboard, main_menu_inline_keyboard
 from bot.keyboards.client.start import start_reply_keyboard
-from bot.utils.consts import AdminCallback, SlashCommands, TextCommands, UserCallback
+from bot.utils.enums import AdminCallback, SlashCommands, TextCommands, UserCallback
+
 
 if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
@@ -18,8 +19,8 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.message(F.text == TextCommands.START, SaveUser())
-@router.message(Command(SlashCommands.START), SaveUser())
+@router.message(F.text == TextCommands.START, SaveUpdateUser())
+@router.message(Command(SlashCommands.START), SaveUpdateUser())
 async def start_handler(message: "Message", repo: "Repository") -> None:
     """Обработчик команды "/start"."""
     text = """
@@ -32,20 +33,20 @@ async def start_handler(message: "Message", repo: "Repository") -> None:
 
     await message.reply(
         text=text,
-        reply_markup=await start_reply_keyboard(repo, message.from_user.id),
+        reply_markup=await start_reply_keyboard(repo.user, message.from_user.id),
     )
 
 
-@router.message(F.text == TextCommands.MENU, SaveUser())
+@router.message(F.text == TextCommands.MENU, SaveUpdateUser())
 @router.message(Command(SlashCommands.MENU))
-@router.callback_query(F.data == UserCallback.OPEN_MAIN_MENU, SaveUser())
+@router.callback_query(F.data == UserCallback.OPEN_MAIN_MENU, SaveUpdateUser())
 async def main_menu_handler(
     message: "Union[Message, CallbackQuery]",
     repo: "Repository",
 ) -> None:
     """Обработчик команды "/menu" и кнопки "Главное меню"."""
     text = "Привет! Я - главное меню."
-    keyboard = await main_menu_inline_keyboard(repo, message.from_user.id)
+    keyboard = await main_menu_inline_keyboard(repo.user, message.from_user.id)
 
     if isinstance(message, CallbackQuery):
         await message.message.edit_text(text=text, reply_markup=keyboard)
@@ -53,8 +54,8 @@ async def main_menu_handler(
         await message.reply(text=text, reply_markup=keyboard)
 
 
-@router.message(F.text == TextCommands.HELP, SaveUser())
-@router.message(Command(SlashCommands.HELP), SaveUser())
+@router.message(F.text == TextCommands.HELP, SaveUpdateUser())
+@router.message(Command(SlashCommands.HELP), SaveUpdateUser())
 async def help_handler(message: "Message") -> None:
     """Обработчик команды "/help"."""
     await message.reply("Помощь!")
@@ -76,7 +77,7 @@ async def admin_panel_handler(
 *Уведомление* - сделать оповещение.
 *Изменить расписание воспитателей* - ручное изменение расписания воспитателей.
 """.strip()
-    keyboard = await admin_panel_keyboard(repo, callback.from_user.id)
+    keyboard = await admin_panel_keyboard(repo.user, callback.from_user.id)
 
     if isinstance(callback, CallbackQuery):
         await callback.message.edit_text(text=text, reply_markup=keyboard)

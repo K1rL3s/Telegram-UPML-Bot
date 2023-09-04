@@ -20,24 +20,24 @@ class LessonsRepository(BaseRepository):
 
     async def get(
         self,
-        lessons_date: "dt.date",
+        date: "dt.date",
         class_or_grade: str,
     ) -> "Union[ClassLessons, FullLessons, None]":
         """
         Возвращает модель с айди изображением уроков на дату.
 
-        :param lessons_date: Дата.
+        :param date: Дата.
         :param class_or_grade: Класс в формате "10Б" или только паралелль (10 или 11).
         :return: Модель ClassLessons или FullLessons.
         """
         if class_or_grade.isdigit():
-            return await self._get_full_lessons(lessons_date, class_or_grade)
-        return await self._get_class_lessons(lessons_date, class_or_grade)
+            return await self._get_full_lessons(date, class_or_grade)
+        return await self._get_class_lessons(date, class_or_grade)
 
     async def save_or_update_to_db(
         self,
         image: str,
-        lessons_date: "dt.date",
+        date: "dt.date",
         grade: str,
         letter: str = None,
     ) -> None:
@@ -45,14 +45,14 @@ class LessonsRepository(BaseRepository):
         Сохраняет или обновляет уроки для паралелли.
 
         :param image: Айди изображения.
-        :param lessons_date: Дата.
+        :param date: Дата.
         :param grade: 10 или 11.
         :param letter: А, Б, В
         """
         model = ClassLessons if letter else FullLessons
 
         find_query = select(model).where(
-            model.date == lessons_date,
+            model.date == date,
             model.grade == grade,
         )
 
@@ -63,7 +63,7 @@ class LessonsRepository(BaseRepository):
             lessons.image = image
         else:
             data = {
-                "date": lessons_date,
+                "date": date,
                 "grade": grade,
                 "image": image,
             }
@@ -76,36 +76,36 @@ class LessonsRepository(BaseRepository):
 
     async def _get_class_lessons(
         self,
-        lessons_date: "dt.date",
+        date: "dt.date",
         class_: str,
     ) -> "Optional[ClassLessons]":
         """
         Возвращает айди картинки расписания уроков для класса.
 
-        :param lessons_date: Дата.
+        :param date: Дата.
         :param class_: (10 или 11) + (А или Б или В) | (10А, 11Б, ...)
         :return: Айди картинки или None.
         """
         query = select(ClassLessons).where(
-            ClassLessons.date == lessons_date,
+            ClassLessons.date == date,
             ClassLessons.class_ == class_,
         )
         return await self.session.scalar(query)
 
     async def _get_full_lessons(
         self,
-        lessons_date: "dt.date",
+        date: "dt.date",
         grade: str,
     ) -> "Optional[FullLessons]":
         """
         Возвращает айди картинки расписания уроков для параллели.
 
-        :param lessons_date: Дата.
+        :param date: Дата.
         :param grade: 10 или 11.
         :return: Айди картинки или None.
         """
         query = select(FullLessons).where(
-            FullLessons.date == lessons_date,
+            FullLessons.date == date,
             FullLessons.grade == grade,
         )
         return await self.session.scalar(query)

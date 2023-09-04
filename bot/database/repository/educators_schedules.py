@@ -19,36 +19,36 @@ class EducatorsScheduleRepository(BaseRepository):
 
     async def get(
         self,
-        schedule_date: "dt.date",
+        date: "dt.date",
     ) -> EducatorsSchedule | None:
         """
         Возвращает расписание воспитателей на день по дате.
 
-        :param schedule_date: Дата запрашеваемого меню.
+        :param date: Дата запрашеваемого меню.
         :return: Модель EducatorsSchedule.
         """
-        query = select(EducatorsSchedule).where(EducatorsSchedule.date == schedule_date)
+        query = select(EducatorsSchedule).where(EducatorsSchedule.date == date)
         return await self.session.scalar(query)
 
     async def save_or_update_to_db(
         self,
-        schedule_date: "dt.date",
+        date: "dt.date",
         schedule_text: str,
         edit_by: int = 0,
     ) -> None:
         """
         Сохраняет или обновляет расписание воспитателей.
 
-        :param schedule_date: Дата расписания.
+        :param date: Дата расписания.
         :param schedule_text: Текст расписания.
         :param edit_by: Кем редактируется.
         """
-        if schedule := await self.get(schedule_date):
+        if schedule := await self.get(date):
             schedule.schedule = schedule_text
             schedule.edit_by = edit_by
         else:
             schedule = EducatorsSchedule(
-                date=schedule_date,
+                date=date,
                 schedule=schedule_text,
                 edit_by=edit_by,
             )

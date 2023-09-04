@@ -4,7 +4,8 @@ from aiogram import F, Router
 from aiogram.filters import Command
 
 from bot.keyboards import main_menu_inline_keyboard
-from bot.utils.consts import SlashCommands, TextCommands, UserCallback
+from bot.utils.enums import SlashCommands, TextCommands, UserCallback
+
 
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message
@@ -35,5 +36,5 @@ async def electives_message_handler(
     """Обработчик команды "/electives"."""
     await message.answer(
         text="🥲",
-        reply_markup=await main_menu_inline_keyboard(repo, message.from_user.id),
+        reply_markup=await main_menu_inline_keyboard(repo.user, message.from_user.id),
     )

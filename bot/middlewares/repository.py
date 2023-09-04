@@ -1,4 +1,4 @@
-from typing import Any, Final, TYPE_CHECKING, Union
+from typing import Any, Final, TYPE_CHECKING
 
 from aiogram import BaseMiddleware
 
@@ -20,7 +20,7 @@ class RepositoryMiddleware(BaseMiddleware):
 
     def __init__(
         self,
-        session_pool: "Union[Callable[[], AsyncIterator[AsyncSession]]]",
+        session_pool: "Callable[[], AsyncIterator[AsyncSession]]",
         session_key: str = SESSION_KEY,
         repo_key: str = REPOSITORY_KEY,
     ) -> None:

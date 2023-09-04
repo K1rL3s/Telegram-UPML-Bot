@@ -2,12 +2,12 @@ import datetime as dt
 from math import ceil
 from typing import TYPE_CHECKING
 
-from bot.utils.consts import UserCallback
+from bot.utils.enums import UserCallback
 from bot.utils.datehelp import datetime_now
 
 if TYPE_CHECKING:
-    from bot.database.repository.repository import Repository
     from bot.database.models.laundries import Laundry
+    from bot.database.repository import LaundryRepository, SettingsRepository
 
 
 async def laundry_welcome_func(laundry: "Laundry") -> int | None:
@@ -31,18 +31,20 @@ async def laundry_welcome_func(laundry: "Laundry") -> int | None:
 
 
 async def laundry_start_timer_func(
-    repo: "Repository",
+    settings_repo: "SettingsRepository",
+    laundry_repo: "LaundryRepository",
     user_id: int,
     callback_data: str,
 ) -> tuple[int, "dt.datetime"]:
     """
     Логика обработки кнопок "Запустить стирку" и "Запустить сушку".
 
-    :param repo: Доступ к базе данных.
+    :param settings_repo: Репозиторий настроек.
+    :param laundry_repo: Репозиторий таймеров прачечной.
     :param user_id: ТГ Айди.
     :param callback_data: Дата из кнопки для определения - стирка или сушка.
     """
-    settings = await repo.settings.get(user_id)
+    settings = await settings_repo.get(user_id)
 
     minutes = getattr(
         settings,
@@ -51,7 +53,7 @@ async def laundry_start_timer_func(
     start_time = datetime_now()
     end_time = start_time + dt.timedelta(minutes=minutes)
 
-    await repo.laundry.save_or_update_to_db(
+    await laundry_repo.save_or_update_to_db(
         user_id,
         start_time=start_time,
         end_time=end_time,
@@ -61,14 +63,14 @@ async def laundry_start_timer_func(
     return minutes, end_time
 
 
-async def laundry_cancel_timer_func(repo: "Repository", user_id: int) -> None:
+async def laundry_cancel_timer_func(repo: "LaundryRepository", user_id: int) -> None:
     """
     Логика обработчика кнопки "Отменить таймер".
 
-    :param repo: Доступ к базе данных.
+    :param repo: Репозиторий таймеров прачечной.
     :param user_id: ТГ Айди.
     """
-    await repo.laundry.save_or_update_to_db(
+    await repo.save_or_update_to_db(
         user_id,
         start_time=None,
         end_time=None,

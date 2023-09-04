@@ -8,14 +8,15 @@ from aiogram.utils.keyboard import (
 
 from bot.keyboards.admin.admin_manage import open_admins_list_button
 from bot.keyboards.universal import go_to_main_menu_button
-from bot.utils.consts import AdminCallback, Roles
+from bot.utils.enums import AdminCallback, Roles
+
 
 if TYPE_CHECKING:
-    from bot.database.repository.repository import Repository
+    from bot.database.repository import UserRepository
 
 
 async def admin_panel_keyboard(
-    repo: "Repository",
+    repo: "UserRepository",
     user_id: int,
 ) -> "InlineKeyboardMarkup":
     """Клавиатура в админ меню."""
@@ -41,7 +42,7 @@ async def admin_panel_keyboard(
             InlineKeyboardButton(text=button_text, callback_data=callback_data),
         )
 
-    if await repo.user.is_has_any_role(user_id, [Roles.SUPERADMIN]):
+    if await repo.is_has_any_role(user_id, [Roles.SUPERADMIN]):
         keyboard.add(open_admins_list_button)
 
     keyboard.add(go_to_main_menu_button)

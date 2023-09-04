@@ -2,7 +2,7 @@ from typing import Any, TYPE_CHECKING
 
 from loguru import logger
 
-from bot.middlewares.base import MyBaseMiddleware
+from bot.middlewares.base import BaseInfoMiddleware
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message, TelegramObject
 
 
-class LoggingMiddleware(MyBaseMiddleware):
+class LoggingMiddleware(BaseInfoMiddleware):
     """Мидлварь для логов."""
 
     async def start_callbackquery(self, callback: "CallbackQuery") -> None:

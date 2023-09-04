@@ -5,7 +5,8 @@ from bot.keyboards.universal import (
     cancel_state_button,
     go_to_admin_panel_button,
 )
-from bot.utils.consts import AdminCallback, GRADES
+from bot.utils.consts import GRADES
+from bot.utils.enums import AdminCallback, NotifyTypes
 
 
 notify_panel_keyboard = InlineKeyboardMarkup(
@@ -30,11 +31,11 @@ notify_for_grade_keyboard = InlineKeyboardMarkup(
         [
             InlineKeyboardButton(
                 text="10 классы",
-                callback_data=AdminCallback.DO_A_NOTIFY_FOR_ + "grade_10",
+                callback_data=AdminCallback.DO_A_NOTIFY_FOR_ + NotifyTypes.GRADE_10,
             ),
             InlineKeyboardButton(
                 text="11 классы",
-                callback_data=AdminCallback.DO_A_NOTIFY_FOR_ + "grade_11",
+                callback_data=AdminCallback.DO_A_NOTIFY_FOR_ + NotifyTypes.GRADE_11,
             ),
         ],
         [go_to_admin_panel_button],  # сделать переход в панель уведомлений?

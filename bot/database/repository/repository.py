@@ -1,7 +1,7 @@
 import contextlib
 from typing import TYPE_CHECKING, Union
 
-from bot.utils.consts import Roles
+from bot.utils.enums import Roles
 from bot.database.repository import (
     EducatorsScheduleRepository,
     LaundryRepository,
@@ -23,7 +23,7 @@ class Repository:
         self,
         session: "AsyncSession",
     ) -> None:
-        self.session = session
+        self._session = session
         self.user = UserRepository(session)
         self.settings = SettingsRepository(session)
         self.laundry = LaundryRepository(session)
@@ -67,7 +67,7 @@ class Repository:
         with contextlib.suppress(ValueError):
             user.roles.remove(role)
 
-        await self.session.commit()
+        await self._session.commit()
 
     async def add_role_to_user(
         self,
@@ -88,4 +88,4 @@ class Repository:
 
         user.roles.append(role)
 
-        await self.session.commit()
+        await self._session.commit()

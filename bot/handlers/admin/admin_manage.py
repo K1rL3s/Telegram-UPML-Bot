@@ -11,7 +11,7 @@ from bot.keyboards import (
     cancel_state_keyboard,
     check_admin_keyboard,
 )
-from bot.utils.consts import AdminCallback, Roles
+from bot.utils.enums import AdminCallback, Roles
 from bot.utils.funcs import name_link, username_by_user_id
 from bot.utils.states import AddingNewAdmin
 
@@ -67,7 +67,7 @@ async def admin_add_username_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик сообщения с юзернеймом админа, которого хотят добавить."""
-    username = message.text
+    username = message.text.split("/")[-1].lstrip("@")
 
     if (user_id := await repo.user.get_user_id_by_username(username)) is None:
         text = "Не могу найти у себя такого пользователя."
@@ -98,7 +98,7 @@ async def admin_add_confirm_handler(
     text = "Успешно!"
     await callback.message.edit_text(
         text=text,
-        reply_markup=await admin_panel_keyboard(repo, callback.from_user.id),
+        reply_markup=await admin_panel_keyboard(repo.user, callback.from_user.id),
     )
     await state.clear()
 

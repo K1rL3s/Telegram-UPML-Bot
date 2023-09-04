@@ -9,7 +9,7 @@ from bot.filters import IsAdmin
 from bot.funcs.admin import process_album_lessons_func
 from bot.keyboards import cancel_state_keyboard, go_to_main_menu_keyboard
 
-from bot.utils.consts import AdminCallback
+from bot.utils.enums import AdminCallback
 from bot.utils.states import LoadingLessons
 
 if TYPE_CHECKING:
@@ -78,7 +78,7 @@ async def process_lessons_album_handler(
         album,
         settings.other.TESSERACT_PATH,
         message.bot,
-        repo,
+        repo.lessons,
     )
 
     if state:

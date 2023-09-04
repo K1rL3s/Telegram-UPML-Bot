@@ -9,7 +9,7 @@ from bot.funcs.admin import get_educators_schedule_by_date
 from bot.keyboards import cancel_state_keyboard
 from bot.keyboards.admin.admin import admin_panel_keyboard
 from bot.keyboards.admin.admin_updates import confirm_edit_keyboard
-from bot.utils.consts import AdminCallback
+from bot.utils.enums import AdminCallback
 from bot.utils.datehelp import date_by_format, date_today, format_date
 from bot.utils.states import EditingEducators
 
@@ -50,7 +50,7 @@ async def edit_educators_date_handler(
     if not (edit_date := date_by_format(message.text)):  # is False
         text = f'Не удалось понять дату "`{message.text}`", попробуйте ещё раз'
     else:
-        schedule = await get_educators_schedule_by_date(repo, edit_date)
+        schedule = await get_educators_schedule_by_date(repo.educators, edit_date)
         text = (
             f"<b>Дата</b>: <code>{format_date(edit_date)}</code>\n"
             f"<b>Расписание</b>:\n{schedule}\n\n"
@@ -128,7 +128,7 @@ async def edit_educators_confirm_handler(
 
     await callback.message.edit_text(
         text=text,
-        reply_markup=await admin_panel_keyboard(repo, callback.from_user.id),
+        reply_markup=await admin_panel_keyboard(repo.user, callback.from_user.id),
     )
 
     for new_id in new_ids:

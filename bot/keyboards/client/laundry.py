@@ -9,7 +9,8 @@ from bot.keyboards.universal import (
     go_to_main_menu_button,
     go_to_settings_button,
 )
-from bot.utils.consts import UserCallback
+from bot.utils.enums import UserCallback
+
 
 if TYPE_CHECKING:
     from aiogram.utils.keyboard import InlineKeyboardMarkup

@@ -24,5 +24,6 @@ class ClassLessons(BaseModel):
     grade: Mapped[str] = mapped_column(String(2), nullable=False)  # 10 или 11
     letter: Mapped[str] = mapped_column(String(1), nullable=False)  # А, Б, В
     class_: Mapped[str] = column_property(grade + letter)
+
     # Айди изображения из тг
     image: Mapped[str] = mapped_column(String, nullable=False)

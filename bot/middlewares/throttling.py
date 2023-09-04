@@ -3,7 +3,7 @@ from typing import Any, TYPE_CHECKING
 
 from cachetools import TTLCache
 
-from bot.middlewares.base import MyBaseMiddleware
+from bot.middlewares.base import BaseInfoMiddleware
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message
 
 
-class ThrottlingMiddleware(MyBaseMiddleware):
+class ThrottlingMiddleware(BaseInfoMiddleware):
     """Мидлварь ограничения сообщений и нажатий кнопок в боте."""
 
     RATE_LIMIT = 0.5

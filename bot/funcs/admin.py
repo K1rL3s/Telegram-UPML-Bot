@@ -16,7 +16,12 @@ if TYPE_CHECKING:
     from aiogram import Bot
 
     from bot.custom_types import Album
-    from bot.database.repository.repository import Repository
+    from bot.database.repository import (
+        EducatorsScheduleRepository,
+        LessonsRepository,
+        MenuRepository,
+        UserRepository,
+    )
 
 
 async def process_album_lessons_func(
@@ -24,7 +29,7 @@ async def process_album_lessons_func(
     album: "Album",
     tesseract_path: str,
     bot: "Bot",
-    repo: "Repository",
+    repo: "LessonsRepository",
 ) -> str:
     """
     Приниматель альбома для поочерёдной обработки каждой фотографии расписания.
@@ -33,7 +38,7 @@ async def process_album_lessons_func(
     :param chat_id: Откуда пришёл альбом с расписаниями.
     :param tesseract_path: Путь до exeшника тессеракта.
     :param bot: Текущий ТГ Бот.
-    :param repo: Доступ к базе данных.
+    :param repo: Репозиторий расписаний уроков.
     :return: Склейка итогов обработки расписаний.
     """
     save_results: list[str | tuple[str, dt.date]] = []
@@ -70,7 +75,7 @@ async def save_one_lessons_to_db(
     image: "BytesIO",
     tesseract_path: str,
     bot: "Bot",
-    repo: "Repository",
+    repo: "LessonsRepository",
 ) -> tuple[str, "dt.date"] | str:
     """
     Передача расписания в обработчик и сохранение результата в базу данных.
@@ -79,11 +84,11 @@ async def save_one_lessons_to_db(
     :param image: Изображение с расписанием.
     :param tesseract_path: Путь до exeшника тессеракта.
     :param bot: ТГ Бот.
-    :param repo: Доступ к базе данных.
+    :param repo: Репозиторий расписаний уроков.
     :return: Паралелль и дата, если окей, иначе текст ошибки.
     """
     try:
-        lessons_date, grade, full_lessons, class_lessons = process_one_lessons_file(
+        date, grade, full_lessons, class_lessons = process_one_lessons_file(
             image,
             tesseract_path,
         )
@@ -92,53 +97,52 @@ async def save_one_lessons_to_db(
         return text
 
     lessons_id = await bytes_io_to_image_id(chat_id, full_lessons, bot)
-    class_ids = [
+    images_ids = [
         await bytes_io_to_image_id(chat_id, image, bot) for image in class_lessons
     ]
 
-    await repo.lessons.save_or_update_to_db(lessons_id, lessons_date, grade)
-    for image_id, letter in zip(class_ids, "АБВ"):
-        await repo.lessons.save_or_update_to_db(image_id, lessons_date, grade, letter)
+    await repo.save_or_update_to_db(lessons_id, date, grade)
+    for image_id, letter in zip(images_ids, "АБВ"):
+        await repo.save_or_update_to_db(image_id, date, grade, letter)
 
-    return grade, lessons_date
+    return grade, date
 
 
 async def get_meal_by_date(
-    repo: "Repository",
+    repo: "MenuRepository",
     meal: str,
-    menu_date: "dt.date",
+    date: "dt.date",
 ) -> str | None:
     """
     Возвращает приём пищи по названию и дате.
 
-    :param repo: Доступ к базе данных.
+    :param repo: Репозиторий расписаний столовой.
     :param meal: Название приёма пищи на английском.
-    :param menu_date: Дата.
+    :param date: Дата.
     :return: Приём пищи из бд.
     """
-    menu = await repo.menu.get(menu_date)
+    menu = await repo.get(date)
     return getattr(menu, meal, None) or NO_DATA
 
 
 async def get_educators_schedule_by_date(
-    repo: "Repository",
-    schedule_date: "dt.date",
+    repo: "EducatorsScheduleRepository",
+    date: "dt.date",
 ) -> str | None:
     """
-    Возвращает расписание.
+    Возвращает расписание воспитателей по дате.
 
-    :param repo: Доступ к базе данных.
-    :param schedule_date: Дата.
+    :param repo: Репозиторий расписаний воспитателей.
+    :param date: Дата.
     :return: Расписание воспитателей из бд.
     """
-    schedule = await repo.educators.get(schedule_date)
+    schedule = await repo.get(date)
     return getattr(schedule, "schedule", None) or NO_DATA
 
 
-# all, grade_10, grade_11, 10А, 10Б, 10В, 11А, 11Б, 11В
 async def get_users_for_notify(
-    repo: "Repository",
-    notify_type: str = "",
+    repo: "UserRepository",
+    notify_type: str,  # all, grade_10, grade_11, 10А, 10Б, 10В, 11А, 11Б, 11В
     is_lessons: bool = False,
     is_news: bool = False,
 ) -> list["User"]:
@@ -146,7 +150,7 @@ async def get_users_for_notify(
 
     Преобразует notify_type из `async def notify_for_who_handler` в условия для фильтра.
 
-    :param repo: Доступ к базе данных.
+    :param repo: Репозиторий пользователей.
     :param notify_type: Тип уведомления из функции.
     :param is_lessons: Уведомление об изменении расписания.
     :param is_news: Уведомление о новостях (ручная рассылка).
@@ -168,4 +172,4 @@ async def get_users_for_notify(
     ):  # XD
         conditions.append((Settings.class_, notify_type))
 
-    return await repo.user.get_by_conditions(conditions)
+    return await repo.get_by_conditions(conditions)

@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message
 
 
-class SaveUser(Filter):
+class SaveUpdateUser(Filter):
     """Смешной фильтр, который сохраняет или обновляет пользователей в бд."""
 
     async def __call__(self, event: "Union[Message, CallbackQuery]") -> bool:

@@ -1,6 +1,9 @@
+import contextlib
 from typing import Any, TYPE_CHECKING
 
-from bot.middlewares.base import MyBaseMiddleware
+from aiogram.exceptions import TelegramAPIError
+
+from bot.middlewares.base import BaseInfoMiddleware
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
@@ -8,7 +11,7 @@ if TYPE_CHECKING:
     from aiogram.types import CallbackQuery
 
 
-class CallbackAnswerMiddleware(MyBaseMiddleware):
+class CallbackAnswerMiddleware(BaseInfoMiddleware):
     """Мидлварь, который отвечает на callback query за меня."""
 
     async def __call__(
@@ -20,4 +23,5 @@ class CallbackAnswerMiddleware(MyBaseMiddleware):
         try:
             return await handler(event, data)
         finally:
-            await event.answer()
+            with contextlib.suppress(TelegramAPIError):
+                await event.answer()

@@ -1,3 +1,4 @@
+import asyncio
 from io import BytesIO
 import datetime as dt
 from typing import Optional, TYPE_CHECKING, Union
@@ -10,14 +11,14 @@ from bot.utils.consts import CAFE_MENU_ENG_TO_RU
 from bot.utils.datehelp import format_date, get_this_week_monday
 
 if TYPE_CHECKING:
-    from bot.database.repository.repository import Repository
+    from bot.database.repository import MenuRepository
 
 
-async def process_cafe_menu(repo: "Repository", timeout: int) -> tuple[bool, str]:
+async def process_cafe_menu(repo: "MenuRepository", timeout: int) -> tuple[bool, str]:
     """
     Основная функция в файле, выполняет всю работу, вызывая другие функции.
 
-    :param repo: Доступ к базе данных.
+    :param repo: Репозиторий расписаний столовой.
     :param timeout: Таймаут для запроса на сайт лицея.
     :return: Сохранилось/Обновилось ли меню.
     """
@@ -109,6 +110,7 @@ async def _get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
             return PdfReader(BytesIO(response.content))
 
         menu_date += dt.timedelta(days=1)
+        await asyncio.sleep(0.25)  # На случай, чтобы госуслуги не легли от нагрузки
 
     return None
 
@@ -136,16 +138,16 @@ def _compare_pdf_date(pdf_reader: "PdfReader") -> "Union[dt.date, str]":
 
 
 async def _process_pdf_menu(
-    repo: "Repository",
+    repo: "MenuRepository",
     pdf_reader: "PdfReader",
-    menu_date: "dt.date",
+    date: "dt.date",
 ) -> None:
     """
     Идёт по PDF недельного расписания меню и добавляет меню каждого дня в бд.
 
-    :param repo: Доступ к базе данных.
+    :param repo: Репозиторий расписаний столовой.
     :param pdf_reader: PDF файл.
-    :param menu_date: Дата, с которой начинается расписание в файле.
+    :param date: Дата, с которой начинается расписание в файле.
     """
     for page in pdf_reader.pages:
         text_menu = " ".join(page.extract_text().split())
@@ -164,6 +166,6 @@ async def _process_pdf_menu(
             text_menu = text_menu[end:]
 
         fields = dict(zip(CAFE_MENU_ENG_TO_RU.keys(), meals))
-        await repo.menu.save_or_update_to_db(menu_date, **fields)
+        await repo.save_or_update_to_db(date, **fields)
 
-        menu_date += dt.timedelta(days=1)
+        date += dt.timedelta(days=1)

@@ -9,7 +9,7 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 
-from bot.utils.consts import Roles
+from bot.utils.enums import Roles
 
 
 # revision identifiers, used by Alembic.

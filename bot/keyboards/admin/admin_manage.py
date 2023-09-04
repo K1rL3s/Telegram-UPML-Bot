@@ -8,7 +8,7 @@ from bot.keyboards.universal import (
     cancel_state_button,
     go_to_admin_panel_button,
 )
-from bot.utils.consts import AdminCallback
+from bot.utils.enums import AdminCallback
 
 
 open_admins_list_button = InlineKeyboardButton(

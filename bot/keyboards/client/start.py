@@ -14,10 +14,11 @@ from bot.keyboards.universal import (
     go_to_main_menu_button,
     go_to_settings_button,
 )
-from bot.utils.consts import Roles, TextCommands, UserCallback
+from bot.utils.enums import Roles, TextCommands, UserCallback
+
 
 if TYPE_CHECKING:
-    from bot.database.repository.repository import Repository
+    from bot.database.repository import UserRepository
 
 
 go_to_main_menu_keyboard = InlineKeyboardMarkup(
@@ -26,7 +27,7 @@ go_to_main_menu_keyboard = InlineKeyboardMarkup(
 
 
 async def main_menu_inline_keyboard(
-    repo: "Repository",
+    repo: "UserRepository",
     user_id: int,
 ) -> "InlineKeyboardMarkup":
     """Клавиатура главного меню."""
@@ -54,7 +55,7 @@ async def main_menu_inline_keyboard(
 
     keyboard.add(go_to_settings_button)
 
-    if await repo.user.is_has_any_role(user_id, [Roles.SUPERADMIN, Roles.ADMIN]):
+    if await repo.is_has_any_role(user_id, [Roles.SUPERADMIN, Roles.ADMIN]):
         keyboard.add(go_to_admin_panel_button)
 
     keyboard.adjust(2, repeat=True)
@@ -63,7 +64,7 @@ async def main_menu_inline_keyboard(
 
 
 async def start_reply_keyboard(
-    repo: "Repository",
+    repo: "UserRepository",
     user_id: int,
 ) -> "ReplyKeyboardMarkup":
     """Клавиатура с текстовыми кнопками после команды /start."""

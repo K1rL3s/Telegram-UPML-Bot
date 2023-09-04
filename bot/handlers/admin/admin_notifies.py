@@ -14,7 +14,8 @@ from bot.keyboards import (
     notify_for_grade_keyboard,
     notify_panel_keyboard,
 )
-from bot.utils.consts import AdminCallback, NOTIFIES_ENG_TO_RU
+from bot.utils.consts import NOTIFIES_ENG_TO_RU
+from bot.utils.enums import AdminCallback
 from bot.utils.states import DoNotify
 
 if TYPE_CHECKING:
@@ -121,10 +122,10 @@ async def notify_confirm_handler(
     messages_ids = data["messages_ids"]
     await state.clear()
 
-    users = await get_users_for_notify(repo, notify_type, is_news=True)
+    users = await get_users_for_notify(repo.user, notify_type, is_news=True)
     await do_admin_notifies(
         callback.bot,
-        repo,
+        repo.user,
         message_text,
         users,
         callback.from_user.id,
@@ -134,7 +135,7 @@ async def notify_confirm_handler(
     text = "Рассылка завершена!"
     await callback.message.edit_text(
         text=text,
-        reply_markup=await admin_panel_keyboard(repo, callback.from_user.id),
+        reply_markup=await admin_panel_keyboard(repo.user, callback.from_user.id),
     )
 
     for message_id in messages_ids:

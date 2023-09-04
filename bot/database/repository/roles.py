@@ -9,7 +9,7 @@ from bot.database.repository.base_repo import BaseRepository
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
-    from bot.utils.consts import Roles
+    from bot.utils.enums import Roles
 
 
 class RoleRepository(BaseRepository):

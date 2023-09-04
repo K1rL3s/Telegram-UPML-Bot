@@ -12,12 +12,12 @@ if TYPE_CHECKING:
     from aiogram.types import InlineKeyboardMarkup
 
     from bot.database.models import User
-    from bot.database.repository.repository import Repository
+    from bot.database.repository import UserRepository
 
 
 async def one_notify(
     bot: "Bot",
-    repo: "Repository",
+    repo: "UserRepository",
     user: "User",
     text: str,
     keyboard: "InlineKeyboardMarkup" = None,
@@ -27,7 +27,7 @@ async def one_notify(
     Делатель одного уведомления.
 
     :param bot: ТГ Бот.
-    :param repo: Доступ к базе данных.
+    :param repo: Репозиторий пользователей.
     :param user: Информация о пользователе.
     :param text: Сообщение в уведомлении.
     :param keyboard: Клавиатура на сообщении с уведомлением.
@@ -40,7 +40,7 @@ async def one_notify(
             f"успешно для {user.short_info()}",
         )
     except TelegramForbiddenError:
-        await repo.user.update(user.user_id, is_active=0)
+        await repo.update(user.user_id, is_active=0)
         return True
     except TelegramRetryAfter:
         await asyncio.sleep(try_count**2)
@@ -54,7 +54,7 @@ async def one_notify(
 
 async def do_admin_notifies(
     bot: "Bot",
-    repo: "Repository",
+    repo: "UserRepository",
     text: str,
     users: list["User"],
     from_who: int = 0,
@@ -64,7 +64,7 @@ async def do_admin_notifies(
     Делатель рассылки от администратора.
 
     :param bot: ТГ Бот.
-    :param repo: Доступ к базе данных.
+    :param repo: Репозиторий пользователей.
     :param text: Сообщение.
     :param users: Кому отправить сообщение.
     :param from_who: ТГ Айди отправителя (админа)

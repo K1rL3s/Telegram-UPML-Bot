@@ -12,7 +12,8 @@ from bot.keyboards import (
     confirm_edit_keyboard,
 )
 from bot.upml.save_cafe_menu import process_cafe_menu
-from bot.utils.consts import AdminCallback, CAFE_MENU_ENG_TO_RU
+from bot.utils.consts import CAFE_MENU_ENG_TO_RU
+from bot.utils.enums import AdminCallback
 from bot.utils.datehelp import date_by_format, date_today, format_date
 from bot.utils.states import EditingMenu
 
@@ -37,11 +38,11 @@ async def auto_update_cafe_menu_handler(
 
     Загружает и обрабатывает PDF расписание еды с сайта лицея.
     """
-    _, text = await process_cafe_menu(repo, settings.other.TIMEOUT)
+    _, text = await process_cafe_menu(repo.menu, settings.other.TIMEOUT)
 
     await callback.message.edit_text(
         text=text,
-        reply_markup=await admin_panel_keyboard(repo, callback.from_user.id),
+        reply_markup=await admin_panel_keyboard(repo.user, callback.from_user.id),
     )
 
 
@@ -65,17 +66,17 @@ async def edit_cafe_menu_start_handler(
 @router.message(StateFilter(EditingMenu.choose_date), IsAdmin())
 async def edit_cafe_menu_date_handler(message: "Message", state: "FSMContext") -> None:
     """Обработчик ввода доты для изменения меню."""
-    if not (edit_menu_date := date_by_format(message.text)):  # is False
+    if not (edit_date := date_by_format(message.text)):  # is False
         text = f'Не удалось понять дату "`{message.text}`", попробуйте ещё раз'
         keyboard = cancel_state_keyboard
     else:
         text = (
-            f"*Дата*: `{format_date(edit_menu_date)}`\n"
+            f"*Дата*: `{format_date(edit_date)}`\n"
             f"Какой приём пищи вы хотите изменить?"
         )
         keyboard = choose_meal_keyboard
         await state.set_state(EditingMenu.choose_meal)
-        await state.update_data(edit_menu_date=edit_menu_date)
+        await state.update_data(edit_date=edit_date)
 
     start_id = (await state.get_data())["start_id"]
 
@@ -97,12 +98,12 @@ async def edit_cafe_menu_meal_handler(
 ) -> None:
     """Обработчик кнопки с выбором приёма пищи для изменения."""
     edit_meal = callback.data.split("_")[-1]
-    edit_menu_date = (await state.get_data())["edit_menu_date"]
+    edit_date = (await state.get_data())["edit_date"]
     await state.update_data(edit_meal=edit_meal)
 
-    meal_date = format_date(edit_menu_date)
+    meal_date = format_date(edit_date)
     meal = CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()
-    menu = await get_meal_by_date(repo, edit_meal, edit_menu_date)
+    menu = await get_meal_by_date(repo.menu, edit_meal, edit_date)
     text = (
         f"*Дата*: `{meal_date}`\n"
         f"*Приём пищи*: `{meal}`\n"
@@ -124,7 +125,7 @@ async def edit_cafe_menu_text_handler(
     """Обработчик сообщения с изменённой версией приёма пищи."""
     data = await state.get_data()
     start_id = data["start_id"]
-    edit_menu_date = data["edit_menu_date"]
+    edit_date = data["edit_date"]
     edit_meal = data["edit_meal"]
 
     new_menu = message.text
@@ -133,7 +134,7 @@ async def edit_cafe_menu_text_handler(
     await state.update_data(new_menu=new_menu, new_menu_ids=new_menu_ids)
 
     text = (
-        f"*Дата*: `{format_date(edit_menu_date)}`\n"
+        f"*Дата*: `{format_date(edit_date)}`\n"
         f"*Приём пищи*: `{CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()}`\n"
         f"*Новое меню*:\n```\n{new_menu}```\n\n"
         "Для сохранения нажмите кнопку. Если хотите изменить, "
@@ -156,23 +157,23 @@ async def edit_cafe_menu_confirm_handler(
 ) -> None:
     """Обработчик подтверждения изменения меню."""
     data = await state.get_data()
-    edit_menu_date = data["edit_menu_date"]
+    edit_date = data["edit_date"]
     edit_meal = data["edit_meal"]
     new_menu = data["new_menu"]
     new_menu_ids = data["new_menu_ids"]
 
     await state.clear()
 
-    await repo.menu.update(edit_meal, new_menu, edit_menu_date, callback.from_user.id)
+    await repo.menu.update(edit_meal, new_menu, edit_date, callback.from_user.id)
 
     text = (
         f"*{CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()}* на "
-        f"*{format_date(edit_menu_date)}* успешно изменён!"
+        f"*{format_date(edit_date)}* успешно изменён!"
     )
 
     await callback.message.edit_text(
         text=text,
-        reply_markup=await admin_panel_keyboard(repo, callback.from_user.id),
+        reply_markup=await admin_panel_keyboard(repo.user, callback.from_user.id),
     )
 
     for new_menu_id in new_menu_ids:

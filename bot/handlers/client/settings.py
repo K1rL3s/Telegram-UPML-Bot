@@ -3,8 +3,7 @@ from typing import TYPE_CHECKING, Union
 from aiogram import F, Router
 from aiogram.filters import Command, StateFilter
 
-
-from bot.filters import SaveUser
+from bot.filters import SaveUpdateUser
 from bot.funcs.settings import (
     edit_bool_settings_func,
     edit_grade_setting_func,
@@ -17,10 +16,8 @@ from bot.keyboards import (
 )
 from bot.utils.consts import (
     LAUNDRY_ENG_TO_RU,
-    SlashCommands,
-    TextCommands,
-    UserCallback,
 )
+from bot.utils.enums import SlashCommands, TextCommands, UserCallback
 from bot.utils.states import EditingSettings
 
 
@@ -44,14 +41,13 @@ SETTINGS_WELCOME_TEXT = """
 """.strip()
 
 
-@router.callback_query(F.data == UserCallback.OPEN_SETTINGS, SaveUser())
+@router.callback_query(F.data == UserCallback.OPEN_SETTINGS, SaveUpdateUser())
 async def settings_callback_handler(
     callback: "Union[CallbackQuery, Message]",
     repo: "Repository",
 ) -> None:
     """Обработчик кнопки "Настройки"."""
-    settings = await repo.settings.get(callback.from_user.id)
-    keyboard = await settings_keyboard(settings)
+    keyboard = await settings_keyboard(repo.settings, callback.from_user.id)
 
     await callback.message.edit_text(
         text=SETTINGS_WELCOME_TEXT,
@@ -59,15 +55,14 @@ async def settings_callback_handler(
     )
 
 
-@router.message(F.text == TextCommands.SETTINGS, SaveUser())
-@router.message(Command(SlashCommands.SETTINGS), SaveUser())
+@router.message(F.text == TextCommands.SETTINGS, SaveUpdateUser())
+@router.message(Command(SlashCommands.SETTINGS), SaveUpdateUser())
 async def settings_message_handler(
     message: "Message",
     repo: "Repository",
 ) -> None:
     """Обработчик команды "/settings"."""
-    settings = await repo.settings.get(message.from_user.id)
-    keyboard = await settings_keyboard(settings)
+    keyboard = await settings_keyboard(repo.settings, message.from_user.id)
 
     await message.answer(text=SETTINGS_WELCOME_TEXT, reply_markup=keyboard)
 
@@ -78,10 +73,9 @@ async def edit_bool_settings_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик кнопок уведомлений "Уроки" и "Новости"."""
-    await edit_bool_settings_func(repo, callback.from_user.id, callback.data)
+    await edit_bool_settings_func(repo.settings, callback.from_user.id, callback.data)
 
-    settings = await repo.settings.get(callback.from_user.id)
-    keyboard = await settings_keyboard(settings)
+    keyboard = await settings_keyboard(repo.settings, callback.from_user.id)
 
     await callback.message.edit_text(text=SETTINGS_WELCOME_TEXT, reply_markup=keyboard)
 
@@ -92,7 +86,11 @@ async def edit_grade_settings_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик кнопок изменения (выбора) класса."""
-    change = await edit_grade_setting_func(repo, callback.from_user.id, callback.data)
+    change = await edit_grade_setting_func(
+        repo.settings,
+        callback.from_user.id,
+        callback.data,
+    )
 
     if change:
         await settings_callback_handler(callback, repo)
@@ -130,7 +128,7 @@ async def edit_laundry_time_handler(
     attr = data["attr"]
 
     minutes = await edit_laundry_time_func(
-        repo,
+        repo.settings,
         message.from_user.id,
         attr,
         message.text,
@@ -141,8 +139,7 @@ async def edit_laundry_time_handler(
             f"✅`{LAUNDRY_ENG_TO_RU[attr].capitalize()}` "
             f"установлено на `{minutes}` минут."
         )
-        settings = await repo.settings.get(message.from_user.id)
-        keyboard = await settings_keyboard(settings)
+        keyboard = await settings_keyboard(repo.settings, message.from_user.id)
         await state.clear()
     else:
         text = f"❌Не распознал `{message.text}` как минуты. Попробуй ещё раз."
