@@ -11,7 +11,7 @@ class SettingsRepository(BaseRepository):
     """Класс для работы с настройками пользователей в базе данных."""
 
     def __init__(self, session: "AsyncSession") -> None:
-        self.session = session
+        self._session = session
 
     async def get(self, user_id: int) -> "Optional[Settings]":
         """
@@ -38,6 +38,6 @@ class SettingsRepository(BaseRepository):
                 setattr(settings, k, v)
         else:
             settings = Settings(user_id=user_id, **fields)
-            self.session.add(settings)
+            self._session.add(settings)
 
-        await self.session.commit()
+        await self._session.commit()

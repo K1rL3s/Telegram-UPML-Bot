@@ -61,8 +61,8 @@ async def process_album_lessons_func(
         if isinstance(result, tuple):
             grade, lessons_date = result
             results.append(
-                f"Расписание для *{grade}-х классов* на "
-                f"*{format_date(lessons_date)}* сохранено!",
+                f"Расписание для <b>{grade}-х классов</b> на "
+                f"<b>{format_date(lessons_date)}</b> сохранено!",
             )
         else:
             results.append(result)

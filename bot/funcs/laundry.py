@@ -10,11 +10,12 @@ if TYPE_CHECKING:
     from bot.database.repository import LaundryRepository, SettingsRepository
 
 
-async def laundry_welcome_func(laundry: "Laundry") -> int | None:
+async def laundry_time_left(laundry: "Laundry") -> int | None:
     """
-    Логика обработчика кнопки "Прачечная".
+    Возвращает, сколько осталось до конца активного таймера прачечной.
 
     :param laundry: Модель таймера прачечной.
+    :return: Минуты до конца таймера.
     """
     now = datetime_now()
 
@@ -58,6 +59,7 @@ async def laundry_start_timer_func(
         start_time=start_time,
         end_time=end_time,
         is_active=True,
+        rings=0,
     )
 
     return minutes, end_time

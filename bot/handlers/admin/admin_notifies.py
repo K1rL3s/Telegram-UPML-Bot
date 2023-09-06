@@ -34,9 +34,9 @@ async def notify_panel_handler(callback: "CallbackQuery") -> None:
     text = """
 Привет! Я - панель уведомлений.
 
-*Всем* - для всех пользователей.
-*Поток* - для 10 или 11 классов.
-*Класс* - для конкретного класса.
+<b>Всем</b> - для всех пользователей.
+<b>Поток</b> - для 10 или 11 классов.
+<b>Класс</b> - для конкретного класса.
 """.strip()
 
     await callback.message.edit_text(text=text, reply_markup=notify_panel_keyboard)
@@ -68,7 +68,7 @@ async def notify_for_who_handler(
             },
         )
         text = (
-            f"Тип: `{NOTIFIES_ENG_TO_RU.get(notify_type, notify_type)}`\n"
+            f"Тип: <code>{NOTIFIES_ENG_TO_RU.get(notify_type, notify_type)}</code>\n"
             "Напишите сообщение, которое будет в уведомлении"
         )
         keyboard = cancel_state_keyboard
@@ -88,11 +88,11 @@ async def notify_message_handler(
 
     messages_ids = data.get("messages_ids", [])
     messages_ids.append(message.message_id)
-    await state.update_data(message_text=message.text, messages_ids=messages_ids)
+    await state.update_data(message_text=message.html_text, messages_ids=messages_ids)
 
     text = (
-        f"Тип: `{NOTIFIES_ENG_TO_RU.get(notify_type, notify_type)}`\n"
-        f"Сообщение:\n```\n{message.text}```\n\n"
+        f"Тип: <code>{NOTIFIES_ENG_TO_RU.get(notify_type, notify_type)}</code>\n"
+        f"Сообщение:\n{message.html_text}\n\n"
         "Для отправки нажмите кнопку. Если хотите изменить, "
         "отправьте сообщение повторно."
     )

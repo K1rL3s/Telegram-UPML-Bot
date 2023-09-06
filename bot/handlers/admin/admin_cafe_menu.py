@@ -53,30 +53,30 @@ async def edit_cafe_menu_start_handler(
 ) -> None:
     """Обрабочтки кнопки "Изменить меню"."""
     text = f"""
-Введите дату дня, меню которого хотите изменить в формате *ДД.ММ.ГГГГ*
-Например, `{format_date(date_today())}`
+Введите дату дня, меню которого хотите изменить в формате <b>ДД.ММ.ГГГГ</b>
+Например, <code>{format_date(date_today())}</code>
 """.strip()
 
     await state.set_state(EditingMenu.choose_date)
-    await state.set_data({"start_id": callback.message.message_id})
+    await state.update_data(start_id=callback.message.message_id)
 
     await callback.message.edit_text(text=text, reply_markup=cancel_state_keyboard)
 
 
 @router.message(StateFilter(EditingMenu.choose_date), IsAdmin())
 async def edit_cafe_menu_date_handler(message: "Message", state: "FSMContext") -> None:
-    """Обработчик ввода доты для изменения меню."""
-    if not (edit_date := date_by_format(message.text)):  # is False
-        text = f'Не удалось понять дату "`{message.text}`", попробуйте ещё раз'
-        keyboard = cancel_state_keyboard
-    else:
+    """Обработчик ввода даты для изменения меню."""
+    if edit_date := date_by_format(message.text):
         text = (
-            f"*Дата*: `{format_date(edit_date)}`\n"
+            f"<b>Дата</b>: <code>{format_date(edit_date)}</code>\n"
             f"Какой приём пищи вы хотите изменить?"
         )
         keyboard = choose_meal_keyboard
         await state.set_state(EditingMenu.choose_meal)
         await state.update_data(edit_date=edit_date)
+    else:
+        text = "❌ Не удалось понять это как дату, попробуйте ещё раз."
+        keyboard = cancel_state_keyboard
 
     start_id = (await state.get_data())["start_id"]
 
@@ -101,15 +101,14 @@ async def edit_cafe_menu_meal_handler(
     edit_date = (await state.get_data())["edit_date"]
     await state.update_data(edit_meal=edit_meal)
 
-    meal_date = format_date(edit_date)
     meal = CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()
     menu = await get_meal_by_date(repo.menu, edit_meal, edit_date)
     text = (
-        f"*Дата*: `{meal_date}`\n"
-        f"*Приём пищи*: `{meal}`\n"
-        f"*Меню*:\n"
-        f"```\n{menu}\n```\n\n"
-        "Чтобы изменить, отправьте *одним сообщением* изменённую версию."
+        f"<b>Дата</b>: <code>{format_date(edit_date)}</code>\n"
+        f"<b>Приём пищи</b>: <code>{meal}</code>\n"
+        f"<b>Меню:</b>\n"
+        f"{menu}\n\n"
+        "Чтобы изменить, отправьте <b>одним сообщением</b> изменённую версию."
     )
 
     await state.set_state(EditingMenu.writing)
@@ -128,19 +127,18 @@ async def edit_cafe_menu_text_handler(
     edit_date = data["edit_date"]
     edit_meal = data["edit_meal"]
 
-    new_menu = message.text
-    new_menu_ids = data.get("new_menu_ids", [])
-    new_menu_ids.append(message.message_id)
-    await state.update_data(new_menu=new_menu, new_menu_ids=new_menu_ids)
-
+    new_menu = message.html_text
+    new_ids = data.get("new_ids", []) + [message.message_id]
+    await state.update_data(new_menu=new_menu, new_ids=new_ids)
+    meal = CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()
     text = (
-        f"*Дата*: `{format_date(edit_date)}`\n"
-        f"*Приём пищи*: `{CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()}`\n"
-        f"*Новое меню*:\n```\n{new_menu}```\n\n"
-        "Для сохранения нажмите кнопку. Если хотите изменить, "
-        "отправьте сообщение повторно."
+        f"<b>Дата</b>: <code>{format_date(edit_date)}</code>\n"
+        f"<b>Приём пищи</b>: <code>{meal}</code>\n"
+        f"<b>Новое меню</b>:\n"
+        f"{new_menu}\n\n"
+        "Для сохранения нажмите кнопку. "
+        "Если хотите изменить, отправьте сообщение повторно."
     )
-
     await message.bot.edit_message_text(
         text=text,
         chat_id=message.chat.id,
@@ -160,15 +158,15 @@ async def edit_cafe_menu_confirm_handler(
     edit_date = data["edit_date"]
     edit_meal = data["edit_meal"]
     new_menu = data["new_menu"]
-    new_menu_ids = data["new_menu_ids"]
+    new_ids = data["new_ids"]
 
     await state.clear()
 
     await repo.menu.update(edit_meal, new_menu, edit_date, callback.from_user.id)
 
     text = (
-        f"*{CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()}* на "
-        f"*{format_date(edit_date)}* успешно изменён!"
+        f"<b>{CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()}</b> на "
+        f"<b>{format_date(edit_date)}</b> успешно изменён!"
     )
 
     await callback.message.edit_text(
@@ -176,8 +174,8 @@ async def edit_cafe_menu_confirm_handler(
         reply_markup=await admin_panel_keyboard(repo.user, callback.from_user.id),
     )
 
-    for new_menu_id in new_menu_ids:
+    for new_id in new_ids:
         await callback.bot.delete_message(
             chat_id=callback.message.chat.id,
-            message_id=new_menu_id,
+            message_id=new_id,
         )

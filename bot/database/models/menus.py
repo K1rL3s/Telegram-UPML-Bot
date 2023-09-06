@@ -3,10 +3,10 @@ import datetime as dt
 from sqlalchemy import Date, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from bot.database.models.base_models import BaseModel
+from bot.database.models.base_models import AlchemyBaseModel
 
 
-class Menu(BaseModel):
+class Menu(AlchemyBaseModel):
     """Модель для хранения расписания еды на определённую дату."""
 
     __tablename__ = "menus"

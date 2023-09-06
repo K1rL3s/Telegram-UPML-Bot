@@ -30,12 +30,12 @@ async def edit_educators_handler(
 ) -> None:
     """Обработчик ввода даты для изменения расписания воспитателей."""
     text = f"""
-Введите дату дня, расписание которого хотите изменить в формате *ДД.ММ.ГГГГ*
-Например, `{format_date(date_today())}`
+Введите дату дня, расписание которого хотите изменить в формате <b>ДД.ММ.ГГГГ</b>
+Например, <code>{format_date(date_today())}</code>
 """.strip()
 
     await state.set_state(EditingEducators.choose_date)
-    await state.set_data({"start_id": callback.message.message_id})
+    await state.update_data(start_id=callback.message.message_id)
 
     await callback.message.edit_text(text=text, reply_markup=cancel_state_keyboard)
 
@@ -46,10 +46,8 @@ async def edit_educators_date_handler(
     state: "FSMContext",
     repo: "Repository",
 ) -> None:
-    """Обработчик ввода доты для изменения расписания воспитателей."""
-    if not (edit_date := date_by_format(message.text)):  # is False
-        text = f'Не удалось понять дату "`{message.text}`", попробуйте ещё раз'
-    else:
+    """Обработчик ввода даты для изменения расписания воспитателей."""
+    if edit_date := date_by_format(message.text):
         schedule = await get_educators_schedule_by_date(repo.educators, edit_date)
         text = (
             f"<b>Дата</b>: <code>{format_date(edit_date)}</code>\n"
@@ -59,6 +57,8 @@ async def edit_educators_date_handler(
         )
         await state.set_state(EditingEducators.writing)
         await state.update_data(edit_date=edit_date)
+    else:
+        text = "❌ Не понял это как дату, попробуйте ещё раз."
 
     start_id = (await state.get_data())["start_id"]
 
@@ -67,7 +67,6 @@ async def edit_educators_date_handler(
         chat_id=message.chat.id,
         message_id=start_id,
         reply_markup=cancel_state_keyboard,
-        parse_mode="html",
     )
 
     await message.delete()  # ?
@@ -83,14 +82,13 @@ async def edit_educators_text_handler(
     start_id = data["start_id"]
     edit_date = data["edit_date"]
 
-    new_schedule = message.html_text.strip()
-    new_ids = data.get("new_ids", [])
-    new_ids.append(message.message_id)
-    await state.update_data(new_schedule=new_schedule, new_ids=new_ids)
+    new_text = message.html_text.strip()
+    new_ids = data.get("new_ids", []) + [message.message_id]
+    await state.update_data(new_text=new_text, new_ids=new_ids)
 
     text = (
         f"<b>Дата</b>: <code>{format_date(edit_date)}</code>\n"
-        f"<b>Расписание</b>:\n{new_schedule}\n\n"
+        f"<b>Расписание</b>:\n{new_text}\n\n"
         "Для сохранения нажмите кнопку. Если хотите изменить, "
         "отправьте сообщение повторно."
     )
@@ -100,7 +98,6 @@ async def edit_educators_text_handler(
         chat_id=message.chat.id,
         message_id=start_id,
         reply_markup=confirm_edit_keyboard,
-        parse_mode="html",
     )
 
 
@@ -113,18 +110,21 @@ async def edit_educators_confirm_handler(
     """Обработчик подтверждения изменения расписания воспитетелей."""
     data = await state.get_data()
     edit_date = data["edit_date"]
-    new_schedule = data["new_schedule"]
+    new_text = data["new_text"]
     new_ids = data["new_ids"]
 
     await state.clear()
 
     await repo.educators.save_or_update_to_db(
         edit_date,
-        new_schedule,
+        new_text,
         callback.from_user.id,
     )
 
-    text = f"*Расписание воспитателей* на *{format_date(edit_date)}* успешно изменено!"
+    text = (
+        f"<b>Расписание воспитателей</b> на "
+        f"<b>{format_date(edit_date)}</b> успешно изменено!"
+    )
 
     await callback.message.edit_text(
         text=text,

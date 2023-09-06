@@ -14,7 +14,7 @@ class LaundryRepository(BaseRepository):
     """Класс для работы с таймерами прачечной в базе данных."""
 
     def __init__(self, session: "AsyncSession") -> None:
-        self.session = session
+        self._session = session
 
     async def get(self, user_id: int) -> "Optional[Laundry]":
         """
@@ -35,7 +35,7 @@ class LaundryRepository(BaseRepository):
         query = select(Laundry).where(
             Laundry.is_active == True, Laundry.end_time <= now  # noqa
         )
-        return list((await self.session.scalars(query)).all())
+        return list((await self._session.scalars(query)).all())
 
     async def save_or_update_to_db(
         self,
@@ -53,6 +53,6 @@ class LaundryRepository(BaseRepository):
                 setattr(laundry, k, v)
         else:
             laundry = Laundry(user_id=user_id, **fields)
-            self.session.add(laundry)
+            self._session.add(laundry)
 
-        await self.session.commit()
+        await self._session.commit()

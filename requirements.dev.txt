@@ -5,7 +5,7 @@ dlint==0.14.1
 vulture==2.9.1
 tryceratops==2.3.2
 pep8-naming==0.13.3
-pydoclint==0.3.1
+pydoclint==0.3.2
 
 flake8-blind-except==0.2.1
 flake8-mutable==1.2.0

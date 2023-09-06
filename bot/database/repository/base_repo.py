@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 class BaseRepository(ABC):
     """Базовый класс для репозиториев, нужен для переиспользования кода."""
 
-    session: "AsyncSession"
+    _session: "AsyncSession"
 
     async def _get_user_related_model(
         self,
@@ -28,4 +28,4 @@ class BaseRepository(ABC):
         """
         # noinspection PyTypeChecker
         query = select(model).where(model.user_id == user_id)
-        return await self.session.scalar(query)
+        return await self._session.scalar(query)

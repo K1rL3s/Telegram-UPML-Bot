@@ -66,4 +66,5 @@ per-file-ignores=
     bot/upml/**:CCR001,
     bot/utils/funcs.py:R504,
     bot/utils/notify.py:B902,
+    bot/utils/datehelp.py:FNE008,
 

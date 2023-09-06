@@ -16,7 +16,7 @@ class MenuRepository(BaseRepository):
     """Класс для работы с расписаниями столовой в базе данных."""
 
     def __init__(self, session: "AsyncSession") -> None:
-        self.session = session
+        self._session = session
 
     async def get(
         self,
@@ -29,7 +29,7 @@ class MenuRepository(BaseRepository):
         :return: Модель Menu.
         """
         query = select(Menu).where(Menu.date == date)
-        return await self.session.scalar(query)
+        return await self._session.scalar(query)
 
     async def save_or_update_to_db(
         self,
@@ -57,9 +57,9 @@ class MenuRepository(BaseRepository):
                 edit_by=edit_by,
                 date=date,
             )
-            self.session.add(menu)
+            self._session.add(menu)
 
-        await self.session.commit()
+        await self._session.commit()
 
     async def update(
         self,

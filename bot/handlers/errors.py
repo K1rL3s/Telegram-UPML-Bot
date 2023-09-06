@@ -17,7 +17,8 @@ router = Router(name=__name__)
     F.exception.message.contains("is not modified"),
 )
 async def not_modified_error(_: "ErrorEvent") -> bool:
-    """Сообщение не было изменено.
+    """
+    Сообщение не было изменено.
 
     Возникает, если нажать "сегодня" при просмотре расписаний на сегодня.
     """

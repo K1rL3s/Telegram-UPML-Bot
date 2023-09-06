@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 async def laundry_keyboard(
     laundry: "Laundry",
-    add_cancel_if_timer: bool = True,
+    add_cancel_button: bool = True,
 ) -> "InlineKeyboardMarkup":
     """Клавиатура меню прачечной."""
     keyboard = InlineKeyboardBuilder().add(
@@ -34,7 +34,7 @@ async def laundry_keyboard(
         ),
     )
 
-    if add_cancel_if_timer and laundry.is_active:
+    if add_cancel_button and laundry.is_active:
         keyboard.add(
             InlineKeyboardButton(
                 text="❌Отменить таймер",

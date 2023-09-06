@@ -1,0 +1,36 @@
+from typing import TYPE_CHECKING
+
+from aiogram import F, Router
+
+from bot.filters import IsAdmin
+from bot.keyboards.admin.admin import admin_panel_keyboard
+from bot.utils.consts import ADMIN_START_TEXT
+from bot.utils.enums import AdminCallback, TextCommands
+
+if TYPE_CHECKING:
+    from aiogram.types import CallbackQuery, Message
+
+    from bot.database.repository.repository import Repository
+
+
+router = Router(name=__name__)
+
+
+@router.callback_query(F.data == AdminCallback.OPEN_ADMIN_PANEL, IsAdmin())
+async def admin_panel_callback_handler(
+    callback: "CallbackQuery",
+    repo: "Repository",
+) -> None:
+    """Обработчик кнопки "Админ панель"."""
+    keyboard = await admin_panel_keyboard(repo.user, callback.from_user.id)
+    await callback.message.edit_text(text=ADMIN_START_TEXT, reply_markup=keyboard)
+
+
+@router.message(F.text == TextCommands.ADMIN_PANEL, IsAdmin())
+async def admin_panel_message_handler(
+    message: "Message",
+    repo: "Repository",
+) -> None:
+    """Обработчик команды "Админ панель"."""
+    keyboard = await admin_panel_keyboard(repo.user, message.from_user.id)
+    await message.answer(text=ADMIN_START_TEXT, reply_markup=keyboard)

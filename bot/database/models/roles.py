@@ -1,10 +1,10 @@
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from bot.database.models.base_models import BaseModel
+from bot.database.models.base_models import AlchemyBaseModel
 
 
-class Role(BaseModel):
+class Role(AlchemyBaseModel):
     """Модель, представляющая роль - уровень доступа пользователя."""
 
     __tablename__ = "roles"

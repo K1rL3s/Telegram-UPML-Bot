@@ -5,7 +5,7 @@ from sqlalchemy.orm.exc import DetachedInstanceError
 from bot.database.db_session import SqlAlchemyBase
 
 
-class BaseModel(SqlAlchemyBase):
+class AlchemyBaseModel(SqlAlchemyBase):
     """Базовый класс для моделей Алхимии. Реализует удобный вывод для дебага."""
 
     __abstract__ = True
@@ -36,7 +36,7 @@ class BaseModel(SqlAlchemyBase):
         return f"<{self.__class__.__name__} {id(self)}>"
 
 
-class UserRelatedModel(BaseModel):
+class UserRelatedModel(AlchemyBaseModel):
     """Родительский класс для моделей, связанных с моделю User."""
 
     __abstract__ = True

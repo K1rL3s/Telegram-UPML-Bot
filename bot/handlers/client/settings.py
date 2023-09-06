@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 from aiogram import F, Router
 from aiogram.filters import Command, StateFilter
@@ -33,17 +33,17 @@ router = Router(name=__name__)
 SETTINGS_WELCOME_TEXT = """
 Привет! Я - настройки!
 
-*Класс* - твой класс.
-*Уроки* - уведомления при изменении расписания.
-*Новости* - уведомления о мероприятиях, новостях.
-*Стирка* - время таймера для стирки.
-*Сушка* - время таймера для сушки.
+<b>Класс</b> - твой класс.
+<b>Уроки</b> - уведомления при изменении расписания.
+<b>Новости</b> - уведомления о мероприятиях, новостях.
+<b>Стирка</b> - время таймера для стирки.
+<b>Сушка</b> - время таймера для сушки.
 """.strip()
 
 
 @router.callback_query(F.data == UserCallback.OPEN_SETTINGS, SaveUpdateUser())
 async def settings_callback_handler(
-    callback: "Union[CallbackQuery, Message]",
+    callback: "CallbackQuery",
     repo: "Repository",
 ) -> None:
     """Обработчик кнопки "Настройки"."""
@@ -112,7 +112,11 @@ async def edit_laundry_start_handler(
     await state.set_state(EditingSettings.writing)
     await state.update_data(start_id=callback.message.message_id, attr=attr)
 
-    text = f"🕛Введите **{LAUNDRY_ENG_TO_RU[attr]}** в минутах (целых)"
+    text = (
+        f"🕛 Введите часы и минуты для <b>{LAUNDRY_ENG_TO_RU[attr]}</b> "
+        "через точку, запятую или пробел.\n"
+        "<i>(0.30, 1 0, 12,45)</i>"
+    )
     await callback.message.edit_text(text=text, reply_markup=cancel_state_keyboard)
 
 
@@ -127,22 +131,23 @@ async def edit_laundry_time_handler(
     start_id = data["start_id"]
     attr = data["attr"]
 
-    minutes = await edit_laundry_time_func(
+    time = await edit_laundry_time_func(
         repo.settings,
         message.from_user.id,
         attr,
         message.text,
     )
 
-    if minutes:
+    if time:
+        hours, minutes = time
         text = (
-            f"✅`{LAUNDRY_ENG_TO_RU[attr].capitalize()}` "
-            f"установлено на `{minutes}` минут."
+            f"✅ <code>{LAUNDRY_ENG_TO_RU[attr].capitalize()}</code> "
+            f"установлено на <b>{hours} часов, {minutes} минут</b>."
         )
         keyboard = await settings_keyboard(repo.settings, message.from_user.id)
         await state.clear()
     else:
-        text = f"❌Не распознал `{message.text}` как минуты. Попробуй ещё раз."
+        text = "❌ Не распознал это как часы и минуты. Попробуйте ещё раз."
         keyboard = cancel_state_keyboard
 
     await message.bot.edit_message_text(

@@ -3,6 +3,7 @@
 from typing import TYPE_CHECKING
 
 from bot.handlers.admin import (
+    admin,
     admin_cafe_menu,
     admin_educators,
     admin_electives,
@@ -40,6 +41,7 @@ def include_routers(dp: "Dispatcher") -> None:
         laundry.router,
         educators.router,
         electives.router,
+        admin.router,
         admin_cafe_menu.router,
         admin_educators.router,
         admin_electives.router,

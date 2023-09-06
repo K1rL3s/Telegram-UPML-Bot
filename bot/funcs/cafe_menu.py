@@ -20,7 +20,7 @@ def _format_menu(meals: tuple[str, ...]) -> str:
     :return: Отформатированная строка с приёмами пищи.
     """
     return "\n\n".join(
-        f"*{meal_type}:*\n{meal or NO_DATA}".strip()
+        f"<b>{meal_type}:</b>\n{meal or NO_DATA}".strip()
         for meal_type, meal in zip(
             BEAUTIFY_MEALS,
             meals,
@@ -51,6 +51,6 @@ async def get_format_menu_by_date(
     )
 
     return (
-        f"🍺 *Меню на {format_date(date)} "
-        f"({weekday_by_date(date)})*:\n\n{_format_menu(meals).strip()}"
+        f"🍺 <b>Меню на {format_date(date)} ({weekday_by_date(date)})</b>:\n\n"
+        f"{_format_menu(meals).strip()}"
     )

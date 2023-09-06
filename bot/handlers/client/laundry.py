@@ -6,7 +6,7 @@ from aiogram.filters import Command
 from bot.funcs.laundry import (
     laundry_cancel_timer_func,
     laundry_start_timer_func,
-    laundry_welcome_func,
+    laundry_time_left,
 )
 from bot.keyboards import go_to_main_menu_keyboard, laundry_keyboard
 from bot.utils.consts import LAUNDRY_REPEAT
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-async def laundry_handler(
+async def laundry_both_handler(
     user_id: int,
     repo: "LaundryRepository",
 ) -> tuple[str, "InlineKeyboardMarkup"]:
@@ -35,13 +35,13 @@ async def laundry_handler(
     :return: Сообщение пользователю и клавиатура.
     """
     text = f"""Привет! Я - таймер для прачечной.
-После конца таймер запустится ещё три раза на *{LAUNDRY_REPEAT}* минут."""
+После конца таймер запустится ещё три раза на <b>{LAUNDRY_REPEAT}</b> минут."""
 
     laundry = await repo.get(user_id)
     keyboard = await laundry_keyboard(laundry)
 
-    if (minutes := await laundry_welcome_func(laundry)) is not None:
-        text += f"\n\nВремя до конца таймера: *{minutes}* минут"
+    if (minutes := await laundry_time_left(laundry)) is not None:
+        text += f"\n\nВремя до конца таймера: <b>{minutes}</b> минут"
 
     return text, keyboard
 
@@ -52,7 +52,7 @@ async def laundry_callback_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик кнопки "Прачечная"."""
-    text, keyboard = await laundry_handler(callback.from_user.id, repo.laundry)
+    text, keyboard = await laundry_both_handler(callback.from_user.id, repo.laundry)
     await callback.message.edit_text(
         text=text,
         reply_markup=keyboard,
@@ -65,8 +65,8 @@ async def laundry_message_handler(
     message: "Message",
     repo: "Repository",
 ) -> None:
-    """Обработчик кнопки "Прачечная"."""
-    text, keyboard = await laundry_handler(message.from_user.id, repo.laundry)
+    """Обработчик команды "Прачечная"."""
+    text, keyboard = await laundry_both_handler(message.from_user.id, repo.laundry)
     await message.answer(text=text, reply_markup=keyboard)
 
 
@@ -85,7 +85,7 @@ async def laundry_start_timer_handler(
 
     text = (
         f"⏰Таймер запущен!\n"
-        f"Уведомление придёт через *~{minutes} минут* "
+        f"Уведомление придёт через <b>~{minutes} минут</b> "
         f"({format_datetime(end_time)})"
     )
     keyboard = go_to_main_menu_keyboard

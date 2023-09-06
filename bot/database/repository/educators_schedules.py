@@ -15,7 +15,7 @@ class EducatorsScheduleRepository(BaseRepository):
     """Класс для работы с расписаниями воспитателей в базе данных."""
 
     def __init__(self, session: "AsyncSession") -> None:
-        self.session = session
+        self._session = session
 
     async def get(
         self,
@@ -28,7 +28,7 @@ class EducatorsScheduleRepository(BaseRepository):
         :return: Модель EducatorsSchedule.
         """
         query = select(EducatorsSchedule).where(EducatorsSchedule.date == date)
-        return await self.session.scalar(query)
+        return await self._session.scalar(query)
 
     async def save_or_update_to_db(
         self,
@@ -52,6 +52,6 @@ class EducatorsScheduleRepository(BaseRepository):
                 schedule=schedule_text,
                 edit_by=edit_by,
             )
-            self.session.add(schedule)
+            self._session.add(schedule)
 
-        await self.session.commit()
+        await self._session.commit()

@@ -16,7 +16,7 @@ class RoleRepository(BaseRepository):
     """Класс для работы с ролями в базе данных."""
 
     def __init__(self, session: "AsyncSession") -> None:
-        self.session = session
+        self._session = session
 
     async def get(
         self,
@@ -32,4 +32,4 @@ class RoleRepository(BaseRepository):
             role = role.value
 
         role_query = select(Role).where(Role.role == role)
-        return await self.session.scalar(role_query)
+        return await self._session.scalar(role_query)

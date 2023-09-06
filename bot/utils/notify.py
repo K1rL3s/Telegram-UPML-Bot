@@ -40,7 +40,7 @@ async def one_notify(
             f"успешно для {user.short_info()}",
         )
     except TelegramForbiddenError:
-        await repo.update(user.user_id, is_active=0)
+        await repo.update(user.user_id, is_active=False)
         return True
     except TelegramRetryAfter:
         await asyncio.sleep(try_count**2)
@@ -72,8 +72,8 @@ async def do_admin_notifies(
     """
     username = await username_by_user_id(bot, from_who)
     text = (
-        "🔔*Уведомление от администратора* "
-        f"{name_link(username, from_who)} *{for_who}*\n\n" + text
+        "🔔<b>Уведомление от администратора</b> "
+        f"{name_link(username, from_who)} <b>{for_who}</b>\n\n" + text
     )
 
     for i in range(0, len(users), NOTIFIES_PER_BATCH):

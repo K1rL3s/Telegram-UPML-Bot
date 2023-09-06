@@ -4,34 +4,34 @@ from enum import Enum
 class SlashCommands(str, Enum):
     """Слэш команды бота."""
 
-    START: str = "start"
-    HELP: str = "help"
-    SETTINGS: str = "settings"
-    MENU: str = "menu"
-    LESSONS: str = "lessons"
-    CAFE: str = "cafe"
-    LAUNDRY: str = "laundry"
-    ELECTIVES: str = "electives"
-    EDUCATORS: str = "educators"
-    CANCEL: str = "cancel"
-    STOP: str = "stop"
+    START = "start"
+    HELP = "help"
+    SETTINGS = "settings"
+    MENU = "menu"
+    LESSONS = "lessons"
+    CAFE = "cafe"
+    LAUNDRY = "laundry"
+    ELECTIVES = "electives"
+    EDUCATORS = "educators"
+    CANCEL = "cancel"
+    STOP = "stop"
 
 
 class TextCommands(str, Enum):
     """Текстовые команды бота."""
 
-    START: str = "Старт"
-    HELP: str = "Помощь"
-    SETTINGS: str = "⚙️Настройки"
-    MENU: str = "Меню"
-    LESSONS: str = "📓Уроки"
-    CAFE: str = "🍴Меню"
-    LAUNDRY: str = "💦Прачечная"
-    ELECTIVES: str = "📖Элективы"
-    EDUCATORS: str = "👩‍✈️Воспитатели"
-    ADMIN_PANEL: str = "❗Админ панель"
-    CANCEL: str = "Отмена"
-    STOP: str = CANCEL
+    START = "Старт"
+    HELP = "Помощь"
+    SETTINGS = "⚙️Настройки"
+    MENU = "Меню"
+    LESSONS = "📓Уроки"
+    CAFE = "🍴Меню"
+    LAUNDRY = "💦Прачечная"
+    ELECTIVES = "📖Элективы"
+    EDUCATORS = "👩‍✈️Воспитатели"
+    ADMIN_PANEL = "❗Админ панель"
+    CANCEL = "Отмена"
+    STOP = CANCEL
 
 
 class NotifyTypes(str, Enum):
@@ -109,5 +109,5 @@ class AdminCallback(str, Enum):
 class Roles(str, Enum):
     """Роли (права доступа) пользователей."""
 
-    SUPERADMIN: str = "superadmin"
-    ADMIN: str = "admin"
+    SUPERADMIN = "superadmin"
+    ADMIN = "admin"

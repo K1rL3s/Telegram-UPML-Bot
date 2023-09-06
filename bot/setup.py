@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from aiogram import Bot, Dispatcher
+from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand
 from loguru import logger
@@ -43,7 +44,7 @@ def make_dispatcher() -> "Dispatcher":
     return dp
 
 
-async def make_bot(bot_token: str, parse_mode: str = "markdown") -> "Bot":
+async def make_bot(bot_token: str, parse_mode: str = ParseMode.HTML) -> "Bot":
     """Создаёт бота и устанавливает ему команды."""
     bot = Bot(
         token=bot_token,

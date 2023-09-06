@@ -45,7 +45,6 @@ async def admins_list_handler(
 
     keyboard = admins_list_keyboard(admins, page)
     text = "Список админов:"
-
     await callback.message.edit_text(text=text, reply_markup=keyboard)
 
 
@@ -56,6 +55,7 @@ async def admin_add_handler(
 ) -> None:
     """Обработчик кнопки "Добавить админа"."""
     await state.set_state(AddingNewAdmin.username)
+
     text = "Введите имя пользователя, которого хотите сделать админом."
     await callback.message.edit_text(text=text, reply_markup=cancel_state_keyboard)
 

@@ -1,7 +1,8 @@
 from typing import Literal, TYPE_CHECKING
 
+from bot.utils.datehelp import hours_minutes_to_minutes, minutes_to_hours_minutes
 from bot.utils.enums import UserCallback
-from bot.utils.funcs import limit_min_max
+from bot.utils.funcs import laundry_limit_min_max
 
 if TYPE_CHECKING:
     from bot.database.repository import SettingsRepository
@@ -57,7 +58,7 @@ async def edit_laundry_time_func(
     user_id: int,
     attr: Literal["washing_time", "drying_time"],
     text: str,
-) -> int:
+) -> tuple[int, int] | int:
     """
     Логика обработчика ввода минут для смены таймера прачечной.
 
@@ -69,9 +70,9 @@ async def edit_laundry_time_func(
     :return: Сколько минут установлено.
     """
     try:
-        minutes = limit_min_max(int(float(text)), 1, 2 * 24 * 60)  # двое суток
+        minutes = laundry_limit_min_max(hours_minutes_to_minutes(text))
         await repo.save_or_update_to_db(user_id, **{attr: minutes})
     except ValueError:
         return 0
 
-    return minutes
+    return minutes_to_hours_minutes(minutes)

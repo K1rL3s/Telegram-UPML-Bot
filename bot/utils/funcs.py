@@ -70,13 +70,19 @@ def name_link(username: str, user_id: int) -> str:
     :param username: Отображаемое имя.
     :param user_id: ТГ Айди.
     """
-    return f"[{username}](tg://user?id={user_id})"
+    return f'<a href="tg://user?id={user_id}">{username}</a>'
 
 
-def limit_min_max(
+def laundry_limit_min_max(
     value: int | float,
-    minimum: int | float,
-    maximum: int | float,
+    minimum: int | float = 1,
+    maximum: int | float = 2 * 24 * 60,  # Двое суток
 ) -> int | float:
-    """Лимит числового значения по минмуму и максимум."""
+    """
+    Лимит времени таймера прачечной.
+
+    :param value: Введёное число.
+    :param minimum: Минимальное значение.
+    :param maximum: Максимальное значение.
+    """
     return max(min(value, maximum), minimum)

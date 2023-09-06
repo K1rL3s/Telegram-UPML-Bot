@@ -11,7 +11,6 @@ from bot.database.models.settings import Settings
 from bot.database.models.users import User
 from bot.database.repository.base_repo import BaseRepository
 
-
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,7 +21,7 @@ class UserRepository(BaseRepository):
     """Класс для работы с пользователями в базе данных."""
 
     def __init__(self, session: "AsyncSession") -> None:
-        self.session = session
+        self._session = session
 
     async def get(self, user_id: int) -> "Optional[User]":
         """
@@ -51,7 +50,7 @@ class UserRepository(BaseRepository):
         conditions = sa.or_(*conditions) if or_mode else sa.and_(*conditions)
         query = sa.select(User).join(Settings).where(conditions)
 
-        return list((await self.session.scalars(query)).all())
+        return list((await self._session.scalars(query)).all())
 
     async def get_with_role(
         self,
@@ -73,7 +72,7 @@ class UserRepository(BaseRepository):
             .options(selectinload(User.roles))
         )
 
-        return list((await self.session.scalars(query)).all())
+        return list((await self._session.scalars(query)).all())
 
     async def get_user_id_by_username(
         self,
@@ -86,7 +85,7 @@ class UserRepository(BaseRepository):
         :return: Айди юзера.
         """
         query = sa.select(User.user_id).where(User.username == username)
-        return await self.session.scalar(query)
+        return await self._session.scalar(query)
 
     async def save_new_to_db(
         self,
@@ -109,10 +108,10 @@ class UserRepository(BaseRepository):
             user.username = username
         elif not user:
             user = User(user_id=user_id, username=username)
-            self.session.add(user)
+            self._session.add(user)
             logger.info(f"Новый пользователь {user}")
 
-        await self.session.commit()
+        await self._session.commit()
 
     async def update(
         self,
@@ -126,8 +125,8 @@ class UserRepository(BaseRepository):
         :param fields: Поле таблицы=значение, ...
         """
         query = sa.update(User).where(User.user_id == user_id).values(**fields)
-        await self.session.execute(query)
-        await self.session.commit()
+        await self._session.execute(query)
+        await self._session.commit()
 
     async def is_has_any_role(
         self,

@@ -44,17 +44,15 @@ async def get_lessons_for_user(
         ]
 
     for_class = settings.class_ if settings.class_ else "❓"
-
     if any(images):
         text = (
-            f"✏ Расписание на *{format_date(date)}* "
-            f"({weekday_by_date(date)}) для *{for_class}* класса."
+            f"✏ Расписание на <b>{format_date(date)}</b> ({weekday_by_date(date)}) "
+            f"для <b>{for_class}</b> класса."
         )
     else:
         text = (
-            f"🛏 Расписание на *{format_date(date)}* "
-            f"({weekday_by_date(date)}) "
-            f"для *{for_class}* класса не найдено :(."
+            f"🛏 Расписание на <b>{format_date(date)}</b> ({weekday_by_date(date)}) "
+            f"для <b>{for_class}</b> класса не найдено :(."
         )
 
     return text, images

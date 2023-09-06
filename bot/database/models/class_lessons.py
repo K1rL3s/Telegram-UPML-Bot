@@ -3,10 +3,10 @@ import datetime as dt
 from sqlalchemy import Date, Integer, String
 from sqlalchemy.orm import column_property, Mapped, mapped_column
 
-from bot.database.models.base_models import BaseModel
+from bot.database.models.base_models import AlchemyBaseModel
 
 
-class ClassLessons(BaseModel):
+class ClassLessons(AlchemyBaseModel):
     """Модель для хранения расписания уроков для конкретного класса."""
 
     __tablename__ = "class_lessons"

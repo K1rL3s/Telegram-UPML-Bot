@@ -18,25 +18,22 @@ async def check_laundry_timers(bot: "Bot") -> None:
     async with get_session() as session:
         repo = Repository(session)
         for laundry in await repo.laundry.get_expired():
-            laundry.rings = laundry.rings or 0
+            rings = laundry.rings or 0
 
             result = await one_notify(
                 bot,
                 repo.user,
                 laundry.user,
-                f"🔔Таймер прачечной вышел! ({laundry.rings + 1})",
-                await laundry_keyboard(laundry, laundry.rings < 2),
+                f"🔔Таймер прачечной вышел! ({rings + 1})",
+                await laundry_keyboard(laundry, rings < 2),
             )
-            if not result:
-                continue
-
-            if laundry.rings >= 2:
+            if not result or rings >= 2:
                 await laundry_cancel_timer_func(repo.laundry, laundry.user.user_id)
             else:
                 now = datetime_now()
                 await repo.laundry.save_or_update_to_db(
                     laundry.user.user_id,
-                    rings=laundry.rings + 1,
+                    rings=rings + 1,
                     start_time=now,
                     end_time=now + dt.timedelta(minutes=LAUNDRY_REPEAT),
                 )

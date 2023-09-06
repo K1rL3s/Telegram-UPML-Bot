@@ -16,7 +16,7 @@ class LessonsRepository(BaseRepository):
     """Класс для работы с расписаниями уроков в базе данных."""
 
     def __init__(self, session: "AsyncSession") -> None:
-        self.session = session
+        self._session = session
 
     async def get(
         self,
@@ -59,7 +59,7 @@ class LessonsRepository(BaseRepository):
         if letter:
             find_query = find_query.where(model.letter == letter)
 
-        if lessons := await self.session.scalar(find_query):
+        if lessons := await self._session.scalar(find_query):
             lessons.image = image
         else:
             data = {
@@ -70,9 +70,9 @@ class LessonsRepository(BaseRepository):
             if letter:
                 data["letter"] = letter
             lessons = model(**data)
-            self.session.add(lessons)
+            self._session.add(lessons)
 
-        await self.session.commit()
+        await self._session.commit()
 
     async def _get_class_lessons(
         self,
@@ -90,7 +90,7 @@ class LessonsRepository(BaseRepository):
             ClassLessons.date == date,
             ClassLessons.class_ == class_,
         )
-        return await self.session.scalar(query)
+        return await self._session.scalar(query)
 
     async def _get_full_lessons(
         self,
@@ -108,4 +108,4 @@ class LessonsRepository(BaseRepository):
             FullLessons.date == date,
             FullLessons.grade == grade,
         )
-        return await self.session.scalar(query)
+        return await self._session.scalar(query)
