@@ -39,7 +39,7 @@ notify_for_grade_keyboard = InlineKeyboardMarkup(
     ],
 )
 
-notify_for_class_keyboard = (
+notify_for_class_keyboard: "InlineKeyboardMarkup" = (
     InlineKeyboardBuilder()
     .add(
         *(

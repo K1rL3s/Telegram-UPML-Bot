@@ -102,7 +102,7 @@ async def process_lessons_album_handler(
         "\n".join(lesson.text for lesson in lessons if lesson.status)
         + "\n\nНе удалось распознать некоторые расписания.\nВвеcти данные вручную?"
     )
-    await message.answer(
+    await message.reply(
         text=text,
         reply_markup=confirm_cancel_keyboard,
     )
@@ -149,36 +149,30 @@ async def choose_grades_handler(
 ) -> None:
     """Обработчик кнопок "10 классы" и "11 классы" для нераспознанных расписаний."""
     data = await state.get_data()
-    current_lessons: LessonsImage = data.get("current_lessons")
+    lessons: list[LessonsImage] = data["lessons"]
+    current_lessons: LessonsImage = data["current_lessons"]
 
-    if current_lessons:
-        current_lessons.grade = callback.data.split("_")[-1]
+    current_lessons.grade = callback.data.split("_")[-1]
 
-    no_grade_lessons = [lessons for lessons in data["lessons"] if lessons.grade is None]
-
-    if no_grade_lessons:
+    if no_grade_lessons := [lesson for lesson in lessons if lesson.grade is None]:
         current_lessons = no_grade_lessons[0]
-        photo = await callback.bot.send_media_group(
-            chat_id=callback.message.chat.id,
-            media=[InputMediaPhoto(media=current_lessons.photo_id)],
-        )
-        await photo[0].reply(
-            text="Для каких классов это расписание?",
-            reply_markup=choose_grade_parallel_keyboard,
-        )
+        text = "Для каких классов это расписание?"
+        keyboard = choose_grade_parallel_keyboard
     else:
         current_lessons = data["lessons"][0]
+        text = "Введите дату расписания в формате <b>ДД.ММ.ГГГГ</b>"
+        keyboard = cancel_state_keyboard
         await state.set_state(LoadingLessons.choose_date)
-        photo = await callback.bot.send_media_group(
-            chat_id=callback.message.chat.id,
-            media=[InputMediaPhoto(media=current_lessons.photo_id)],
-        )
-        await photo[0].reply(
-            text="Введите дату расписания в формате <b>ДД.ММ.ГГГГ</b>",
-            reply_markup=cancel_state_keyboard,
-        )
 
     await state.update_data(current_lessons=current_lessons)
+    photo = await callback.bot.send_media_group(
+        chat_id=callback.message.chat.id,
+        media=[InputMediaPhoto(media=current_lessons.photo_id)],
+    )
+    await photo[0].reply(
+        text=text,
+        reply_markup=keyboard,
+    )
 
 
 @router.message(StateFilter(LoadingLessons.choose_date), IsAdmin())
@@ -194,9 +188,8 @@ async def choose_dates_handler(
     end = False
     if date := date_by_format(message.text):
         current_lessons.date = date
-        no_date_lessons = [lesson for lesson in lessons if lesson.date is None]
 
-        if no_date_lessons:
+        if no_date_lessons := [lesson for lesson in lessons if lesson.date is None]:
             current_lessons = no_date_lessons[0]
             text = "Введите дату расписания в формате <b>ДД.ММ.ГГГГ</b>"
             await state.update_data(current_lessons=current_lessons)
@@ -212,30 +205,27 @@ async def choose_dates_handler(
         text = "❌ Не понял это как дату, попробуйте ещё раз."
 
     if end:
-        photo = await message.bot.send_media_group(
-            chat_id=message.chat.id,
-            media=[InputMediaPhoto(media=lesson.photo_id) for lesson in lessons],
-        )
-        await photo[0].reply(
-            text=text,
-            reply_markup=confirm_cancel_keyboard,
-        )
+        media = [InputMediaPhoto(media=lesson.photo_id) for lesson in lessons]
+        keyboard = confirm_cancel_keyboard
     else:
-        photo = await message.bot.send_media_group(
-            chat_id=message.chat.id,
-            media=[InputMediaPhoto(media=current_lessons.photo_id)],
-        )
-        await photo[0].reply(
-            text=text,
-            reply_markup=cancel_state_keyboard,
-        )
+        media = [InputMediaPhoto(media=current_lessons.photo_id)]
+        keyboard = cancel_state_keyboard
+
+    photo = await message.bot.send_media_group(
+        chat_id=message.chat.id,
+        media=media,
+    )
+    await photo[0].reply(
+        text=text,
+        reply_markup=keyboard,
+    )
 
 
 @router.callback_query(
     StateFilter(LoadingLessons.confirm),
     F.data == AdminCallback.CONFIRM,
 )
-async def confirm_manually_lessons_handler(
+async def confirm_edit_lessons_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
     repo: "Repository",

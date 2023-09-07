@@ -53,7 +53,7 @@ async def settings_keyboard(
     )
 
 
-choose_grade_keyboard = (
+choose_grade_keyboard: "InlineKeyboardMarkup" = (
     InlineKeyboardBuilder()
     .add(
         *(

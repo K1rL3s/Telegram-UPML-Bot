@@ -101,7 +101,7 @@ async def _tesseract_one_lessons_func(
         logger.warning(text := f"Ошибка при загрузке расписания: {repr(e)}")
         return text
 
-    full_lessons_id = await bytes_io_to_image_id(chat_id, image, bot)
+    full_lessons_id = await bytes_io_to_image_id(chat_id, full_lessons, bot)
     class_lessons_ids = [
         await bytes_io_to_image_id(chat_id, class_image, bot)
         for class_image in class_lessons

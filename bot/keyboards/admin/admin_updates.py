@@ -1,13 +1,14 @@
 from aiogram.utils.keyboard import (
     InlineKeyboardBuilder,
     InlineKeyboardButton,
+    InlineKeyboardMarkup,
 )
 from bot.keyboards.universal import cancel_state_button
 from bot.utils.consts import BEAUTIFY_MEALS
 from bot.utils.enums import AdminCallback
 
 
-choose_meal_keyboard = (
+choose_meal_keyboard: "InlineKeyboardMarkup" = (
     InlineKeyboardBuilder()
     .add(
         *(
