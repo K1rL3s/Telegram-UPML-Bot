@@ -4,12 +4,12 @@ from aiogram import F, Router
 from aiogram.filters import StateFilter
 
 from bot.filters import IsAdmin
-from bot.funcs.admin import get_users_for_notify
+from bot.funcs.admin.admin import get_users_for_notify
 from bot.utils.notify import do_admin_notifies
 from bot.keyboards import (
     admin_panel_keyboard,
     cancel_state_keyboard,
-    notify_confirm_keyboard,
+    confirm_cancel_keyboard,
     notify_for_class_keyboard,
     notify_for_grade_keyboard,
     notify_panel_keyboard,
@@ -101,7 +101,7 @@ async def notify_message_handler(
         text=text,
         message_id=start_id,
         chat_id=message.chat.id,
-        reply_markup=notify_confirm_keyboard,
+        reply_markup=confirm_cancel_keyboard,
     )
 
 

@@ -1,10 +1,7 @@
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 
-from bot.keyboards.universal import (
-    cancel_state_button,
-    go_to_admin_panel_button,
-)
+from bot.keyboards.universal import go_to_admin_panel_button
 from bot.utils.consts import GRADES
 from bot.utils.enums import AdminCallback, NotifyTypes
 
@@ -56,16 +53,4 @@ notify_for_class_keyboard = (
     )
     .adjust(3, 3, 1)
     .as_markup()
-)
-
-notify_confirm_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text="✅Подтвердить",
-                callback_data=AdminCallback.CONFIRM,
-            ),
-        ],
-        [cancel_state_button],
-    ],
 )

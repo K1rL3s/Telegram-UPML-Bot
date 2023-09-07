@@ -4,7 +4,7 @@ from aiogram import F, Router
 from aiogram.filters import Command, StateFilter
 
 from bot.filters import SaveUpdateUser
-from bot.funcs.settings import (
+from bot.funcs.client.settings import (
     edit_bool_settings_func,
     edit_grade_setting_func,
     edit_laundry_time_func,

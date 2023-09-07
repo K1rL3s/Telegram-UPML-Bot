@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from bot.database.repository.repository import Repository
 from bot.database.db_session import get_session
-from bot.funcs.laundry import laundry_cancel_timer_func
+from bot.funcs.client.laundry import laundry_cancel_timer_func
 from bot.keyboards import laundry_keyboard
 from bot.utils.consts import LAUNDRY_REPEAT
 from bot.utils.datehelp import datetime_now

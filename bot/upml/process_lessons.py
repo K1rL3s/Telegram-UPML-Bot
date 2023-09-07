@@ -11,6 +11,9 @@ if TYPE_CHECKING:
     from PIL.PyAccess import PyAccess
 
 
+GRADE_CHARS = "01"
+
+
 def process_one_lessons_file(
     image: "BytesIO",
     tesseract_path: str,
@@ -193,8 +196,13 @@ def _get_date(image: "Image.Image") -> tuple[str, dt.date]:
     :return: День недели и объект даты.
     """
     weekday, dd_mm = (
-        pytesseract.image_to_string(image, lang="rus", config="--psm 13 --oem 3")
+        pytesseract.image_to_string(
+            image,
+            lang="rus",
+            config="--psm 10 --oem 3",
+        )
         .lower()
+        .replace("$", "8")  # Костыль, восьмёрку распознаёт как доллар :(
         .split()
     )
 
@@ -304,6 +312,6 @@ def _get_grade(image: "Image.Image", x: int, y: int) -> str:
     temp = image.crop((left_x, up_y, x, y))
     text = pytesseract.image_to_string(
         temp,
-        config="--psm 10 --oem 3 -c tessedit_char_whitelist=01",
+        config=f"--psm 10 --oem 3 -c tessedit_char_whitelist={GRADE_CHARS}",
     )
     return "10" if "10" in text else "11"  # XD

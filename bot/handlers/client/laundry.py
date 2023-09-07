@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import Command
 
-from bot.funcs.laundry import (
+from bot.funcs.client.laundry import (
     laundry_cancel_timer_func,
     laundry_start_timer_func,
     laundry_time_left,

@@ -5,10 +5,9 @@ from aiogram.filters import StateFilter
 
 
 from bot.filters import IsAdmin
-from bot.funcs.admin import get_educators_schedule_by_date
-from bot.keyboards import cancel_state_keyboard
+from bot.funcs.admin.admin import get_educators_schedule_by_date
+from bot.keyboards import cancel_state_keyboard, confirm_cancel_keyboard
 from bot.keyboards.admin.admin import admin_panel_keyboard
-from bot.keyboards.admin.admin_updates import confirm_edit_keyboard
 from bot.utils.enums import AdminCallback
 from bot.utils.datehelp import date_by_format, date_today, format_date
 from bot.utils.states import EditingEducators
@@ -97,7 +96,7 @@ async def edit_educators_text_handler(
         text=text,
         chat_id=message.chat.id,
         message_id=start_id,
-        reply_markup=confirm_edit_keyboard,
+        reply_markup=confirm_cancel_keyboard,
     )
 
 

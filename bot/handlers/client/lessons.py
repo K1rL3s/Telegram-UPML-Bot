@@ -5,7 +5,7 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, InputMediaPhoto, Message
 
 from bot.filters import SaveUpdateUser
-from bot.funcs.lessons import get_lessons_for_user
+from bot.funcs.client.lessons import get_lessons_for_user
 from bot.keyboards import lessons_keyboard
 from bot.utils.enums import SlashCommands, TextCommands, UserCallback
 from bot.utils.datehelp import date_by_format

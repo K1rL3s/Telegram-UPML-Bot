@@ -89,7 +89,9 @@ class AdminCallback(str, Enum):
     EDIT_SUPPER = "edit_supper"
     EDIT_EDUCATORS = "edit_educators"
 
-    UPLOAD_LESSONS = "upload_lessons"
+    UPLOAD_LESSONS = "upload_lessons_"
+    UPLOAD_LESSONS_FOR_10 = UPLOAD_LESSONS + "for_10"
+    UPLOAD_LESSONS_FOR_11 = UPLOAD_LESSONS + "for_11"
 
     DO_A_NOTIFY_FOR_ = "do_a_notify_for_"
     NOTIFY_FOR_ALL = DO_A_NOTIFY_FOR_ + NotifyTypes.ALL
@@ -103,7 +105,7 @@ class AdminCallback(str, Enum):
     ADD_NEW_ADMIN = "add_new_admin"
     ADD_NEW_ADMIN_SURE = "add_new_admin_sure"
 
-    CONFIRM = "confirm_state"
+    CONFIRM = "confirm_in_state"
 
 
 class Roles(str, Enum):

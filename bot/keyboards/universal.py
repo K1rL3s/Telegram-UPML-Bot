@@ -32,6 +32,18 @@ cancel_state_button = InlineKeyboardButton(
 
 cancel_state_keyboard = InlineKeyboardMarkup(inline_keyboard=[[cancel_state_button]])
 
+confirm_cancel_keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text="✅Подтвердить",
+                callback_data=AdminCallback.CONFIRM,
+            ),
+            cancel_state_button,
+        ],
+    ],
+)
+
 
 def _keyboard_for_left_right_menu(
     open_smt_on_callback: str,

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import Command
 
-from bot.funcs.educators import get_format_educators_by_date
+from bot.funcs.client.educators import get_format_educators_by_date
 from bot.keyboards import educators_keyboard
 from bot.utils.enums import SlashCommands, TextCommands, UserCallback
 from bot.utils.datehelp import date_by_format
@@ -31,7 +31,6 @@ async def educators_callback_handler(
     await callback.message.edit_text(
         text=text,
         reply_markup=educators_keyboard(schedule_date),
-        parse_mode="html",
     )
 
 
@@ -50,5 +49,4 @@ async def educators_message_handler(
     await message.answer(
         text=text,
         reply_markup=educators_keyboard(schedule_date),
-        parse_mode="html",
     )

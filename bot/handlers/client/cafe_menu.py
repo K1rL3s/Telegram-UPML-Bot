@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import Command
 
-from bot.funcs.cafe_menu import get_format_menu_by_date
+from bot.funcs.client.cafe_menu import get_format_menu_by_date
 from bot.keyboards import cafe_menu_keyboard
 from bot.utils.enums import SlashCommands, TextCommands, UserCallback
 from bot.utils.datehelp import date_by_format

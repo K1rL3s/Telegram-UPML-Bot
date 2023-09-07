@@ -2,13 +2,21 @@ from typing import TYPE_CHECKING
 
 from aiogram import F, Router
 from aiogram.filters import StateFilter
+from aiogram.types import InputMediaPhoto
 
-from bot.custom_types import Album
-
+from bot.custom_types import Album, LessonsImage
 from bot.filters import IsAdmin
-from bot.funcs.admin import process_album_lessons_func
-from bot.keyboards import cancel_state_keyboard, go_to_main_menu_keyboard
-
+from bot.funcs.admin.admin_lessons import (
+    save_lessons_to_db_func,
+    tesseract_album_lessons_func,
+)
+from bot.keyboards import (
+    cancel_state_keyboard,
+    confirm_cancel_keyboard,
+    go_to_main_menu_keyboard,
+)
+from bot.keyboards.admin.admin_lessons import choose_grade_parallel_keyboard
+from bot.utils.datehelp import date_by_format, format_date
 from bot.utils.enums import AdminCallback
 from bot.utils.states import LoadingLessons
 
@@ -73,15 +81,179 @@ async def process_lessons_album_handler(
     album: "Album",
 ) -> None:
     """Обработчки фотографий расписаний при нескольких штуках."""
-    text = await process_album_lessons_func(
+    lessons = await tesseract_album_lessons_func(
+        message.bot,
+        repo.lessons,
         message.chat.id,
         album,
         settings.other.TESSERACT_PATH,
-        message.bot,
-        repo.lessons,
     )
 
-    if state:
+    if all(lesson.status for lesson in lessons):  # Всё успешно обработалось
         await state.clear()
+        text = "\n".join(lesson.text for lesson in lessons)
+        await message.reply(text=text, reply_markup=go_to_main_menu_keyboard)
+        return
 
-    await message.reply(text=text, reply_markup=go_to_main_menu_keyboard)
+    await state.set_state(LoadingLessons.bad_images)
+    await state.update_data(lessons=[lesson for lesson in lessons if not lesson.status])
+
+    text = (
+        "\n".join(lesson.text for lesson in lessons if lesson.status)
+        + "\n\nНе удалось распознать некоторые расписания.\nВвеcти данные вручную?"
+    )
+    await message.answer(
+        text=text,
+        reply_markup=confirm_cancel_keyboard,
+    )
+
+
+@router.callback_query(
+    StateFilter(LoadingLessons.bad_images),
+    F.data == AdminCallback.CONFIRM,
+    IsAdmin(),
+)
+async def start_choose_grades_handler(
+    callback: "CallbackQuery",
+    state: "FSMContext",
+) -> None:
+    """Обработка кнопки "Подтвердить" для ручного ввода информации о расписании."""
+    await state.set_state(LoadingLessons.choose_grade)
+    data = await state.get_data()
+    current_lessons = data["lessons"][0]
+    await state.update_data(current_lessons=current_lessons)
+
+    photo = await callback.bot.send_media_group(
+        chat_id=callback.message.chat.id,
+        media=[InputMediaPhoto(media=current_lessons.photo_id)],
+    )
+    await photo[0].reply(
+        text="Для каких классов это расписание?",
+        reply_markup=choose_grade_parallel_keyboard,
+    )
+
+
+@router.callback_query(
+    StateFilter(LoadingLessons.choose_grade),
+    F.data.in_(
+        {
+            AdminCallback.UPLOAD_LESSONS_FOR_10,
+            AdminCallback.UPLOAD_LESSONS_FOR_11,
+        },
+    ),
+    IsAdmin(),
+)
+async def choose_grades_handler(
+    callback: "CallbackQuery",
+    state: "FSMContext",
+) -> None:
+    """Обработчик кнопок "10 классы" и "11 классы" для нераспознанных расписаний."""
+    data = await state.get_data()
+    current_lessons: LessonsImage = data.get("current_lessons")
+
+    if current_lessons:
+        current_lessons.grade = callback.data.split("_")[-1]
+
+    no_grade_lessons = [lessons for lessons in data["lessons"] if lessons.grade is None]
+
+    if no_grade_lessons:
+        current_lessons = no_grade_lessons[0]
+        photo = await callback.bot.send_media_group(
+            chat_id=callback.message.chat.id,
+            media=[InputMediaPhoto(media=current_lessons.photo_id)],
+        )
+        await photo[0].reply(
+            text="Для каких классов это расписание?",
+            reply_markup=choose_grade_parallel_keyboard,
+        )
+    else:
+        current_lessons = data["lessons"][0]
+        await state.set_state(LoadingLessons.choose_date)
+        photo = await callback.bot.send_media_group(
+            chat_id=callback.message.chat.id,
+            media=[InputMediaPhoto(media=current_lessons.photo_id)],
+        )
+        await photo[0].reply(
+            text="Введите дату расписания в формате <b>ДД.ММ.ГГГГ</b>",
+            reply_markup=cancel_state_keyboard,
+        )
+
+    await state.update_data(current_lessons=current_lessons)
+
+
+@router.message(StateFilter(LoadingLessons.choose_date), IsAdmin())
+async def choose_dates_handler(
+    message: "Message",
+    state: "FSMContext",
+) -> None:
+    """Обработка ввода даты для нераспознанных расписаний."""
+    data = await state.get_data()
+    lessons: list[LessonsImage] = data["lessons"]
+    current_lessons: LessonsImage = data["current_lessons"]
+
+    end = False
+    if date := date_by_format(message.text):
+        current_lessons.date = date
+        no_date_lessons = [lesson for lesson in lessons if lesson.date is None]
+
+        if no_date_lessons:
+            current_lessons = no_date_lessons[0]
+            text = "Введите дату расписания в формате <b>ДД.ММ.ГГГГ</b>"
+            await state.update_data(current_lessons=current_lessons)
+        else:
+            end = True
+            text = "\n".join(
+                f"Расписание для <b>{good_lessons.grade}-х классов</b> "
+                f"на <b>{format_date(good_lessons.date)}</b>"
+                for good_lessons in lessons
+            )
+            await state.set_state(LoadingLessons.confirm)
+    else:
+        text = "❌ Не понял это как дату, попробуйте ещё раз."
+
+    if end:
+        photo = await message.bot.send_media_group(
+            chat_id=message.chat.id,
+            media=[InputMediaPhoto(media=lesson.photo_id) for lesson in lessons],
+        )
+        await photo[0].reply(
+            text=text,
+            reply_markup=confirm_cancel_keyboard,
+        )
+    else:
+        photo = await message.bot.send_media_group(
+            chat_id=message.chat.id,
+            media=[InputMediaPhoto(media=current_lessons.photo_id)],
+        )
+        await photo[0].reply(
+            text=text,
+            reply_markup=cancel_state_keyboard,
+        )
+
+
+@router.callback_query(
+    StateFilter(LoadingLessons.confirm),
+    F.data == AdminCallback.CONFIRM,
+)
+async def confirm_manually_lessons_handler(
+    callback: "CallbackQuery",
+    state: "FSMContext",
+    repo: "Repository",
+) -> None:
+    """Обработка подтверждения сохранения нераспознанных расписаний."""
+    data = await state.get_data()
+
+    for lesson in data["lessons"]:
+        lesson: LessonsImage
+        await save_lessons_to_db_func(
+            repo.lessons,
+            lesson,
+            [],
+        )
+
+    await state.clear()
+
+    await callback.message.answer(
+        text="Успешно!",
+        reply_markup=go_to_main_menu_keyboard,
+    )

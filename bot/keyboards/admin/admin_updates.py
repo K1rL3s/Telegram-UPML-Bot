@@ -1,7 +1,6 @@
 from aiogram.utils.keyboard import (
     InlineKeyboardBuilder,
     InlineKeyboardButton,
-    InlineKeyboardMarkup,
 )
 from bot.keyboards.universal import cancel_state_button
 from bot.utils.consts import BEAUTIFY_MEALS
@@ -28,16 +27,4 @@ choose_meal_keyboard = (
     )
     .adjust(3, 2, 1)
     .as_markup()
-)
-
-confirm_edit_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text="✅Подтвердить",
-                callback_data=AdminCallback.CONFIRM,
-            ),
-            cancel_state_button,
-        ],
-    ],
 )

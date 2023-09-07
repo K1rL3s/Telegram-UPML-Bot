@@ -4,12 +4,12 @@ from aiogram import F, Router
 from aiogram.filters import StateFilter
 
 from bot.filters import IsAdmin
-from bot.funcs.admin import get_meal_by_date
+from bot.funcs.admin.admin import get_meal_by_date
 from bot.keyboards import (
     admin_panel_keyboard,
     cancel_state_keyboard,
     choose_meal_keyboard,
-    confirm_edit_keyboard,
+    confirm_cancel_keyboard,
 )
 from bot.upml.save_cafe_menu import process_cafe_menu
 from bot.utils.consts import CAFE_MENU_ENG_TO_RU
@@ -143,7 +143,7 @@ async def edit_cafe_menu_text_handler(
         text=text,
         chat_id=message.chat.id,
         message_id=start_id,
-        reply_markup=confirm_edit_keyboard,
+        reply_markup=confirm_cancel_keyboard,
     )
 
 

@@ -4,7 +4,6 @@ from uuid import uuid1
 from aiocache import cached
 from aiogram.types import BufferedInputFile
 
-
 if TYPE_CHECKING:
     from io import BytesIO
 
