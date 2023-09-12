@@ -39,7 +39,7 @@ class LessonsRepository(BaseRepository):
         image: str,
         date: "dt.date",
         grade: str,
-        letter: str = None,
+        letter: str | None = None,
     ) -> None:
         """
         Сохраняет или обновляет уроки для паралелли.

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, ForeignKey, Table
 
-from bot.database.db_session import SqlAlchemyBase
+from bot.database import SqlAlchemyBase
 
 
 # Подумать над записью таблицы через класс

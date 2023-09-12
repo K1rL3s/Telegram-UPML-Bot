@@ -34,16 +34,16 @@ class MenuRepository(BaseRepository):
     async def save_or_update_to_db(
         self,
         date: "dt.date",
-        edit_by: int | None = None,
         **fields: Any,
     ) -> None:
         """
         Сохраняет или обновляет меню для определённой даты.
 
         :param date: Дата меня.
-        :param edit_by: Кем редактируется, ТГ Айди, 0 - автоматически.
         :param fields: Ключ - колонка, значение - новое значение.
         """
+        edit_by = fields.get("edit_by")
+
         if menu := await self.get(date):
             for k, v in fields.items():
                 # Если редактируется вручную или информации о еде нет:

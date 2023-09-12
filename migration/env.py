@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from bot.settings import get_settings
 from bot.database.models import *  # noqa
-from bot.database.db_session import SqlAlchemyBase
+from bot.database import SqlAlchemyBase
 
 
 config = context.config

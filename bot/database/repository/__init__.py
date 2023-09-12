@@ -7,7 +7,7 @@ from bot.database.repository.settings import SettingsRepository
 from bot.database.repository.users import UserRepository
 
 
-__all__ = [
+__all__ = (
     "EducatorsScheduleRepository",
     "LaundryRepository",
     "LessonsRepository",
@@ -15,4 +15,4 @@ __all__ = [
     "RoleRepository",
     "SettingsRepository",
     "UserRepository",
-]
+)

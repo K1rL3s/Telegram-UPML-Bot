@@ -45,7 +45,6 @@ flake8-tidy-imports==4.10.0
 flake8-type-checking==2.4.1
 flake8-annotations-coverage==0.0.6
 flake8-annotations==3.0.1
-flake8-new-union-types==0.4.1
 flake8-pep585==0.1.7
 flake8-typing-imports==1.14.0
 flake8-black==0.3.6

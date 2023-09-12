@@ -1,5 +1,7 @@
 from typing import Any, Optional, TYPE_CHECKING
 
+from sqlalchemy import select
+
 from bot.database.models.settings import Settings
 from bot.database.repository.base_repo import BaseRepository
 
@@ -20,7 +22,8 @@ class SettingsRepository(BaseRepository):
         :param user_id: ТГ Айди.
         :return: Модель Settings.
         """
-        return await self._get_user_related_model(Settings, user_id)
+        query = select(Settings).where(Settings.user_id == user_id)
+        return await self._session.scalar(query)
 
     async def save_or_update_to_db(
         self,

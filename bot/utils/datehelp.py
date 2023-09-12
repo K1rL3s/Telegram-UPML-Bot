@@ -2,6 +2,7 @@ import datetime as dt
 from typing import Union
 
 from bot.settings import get_settings
+from bot.utils.consts import TODAY
 
 
 # Смещение часового пояса по умолчанию, используется при работе бота.
@@ -41,7 +42,7 @@ def date_by_format(
     :param timezone_offset: Смещение часового пояса в часах.
     :return: Объект даты.
     """
-    if date.lower() == "today":
+    if date.lower() == TODAY:
         return date_today(timezone_offset)
 
     date = date.replace("-", " ").replace(".", " ")

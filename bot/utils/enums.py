@@ -1,5 +1,7 @@
 from enum import Enum
 
+from bot.utils.consts import TODAY
+
 
 class SlashCommands(str, Enum):
     """Слэш команды бота."""
@@ -53,11 +55,11 @@ class UserCallback(str, Enum):
     OPEN_EDUCATORS = "open_educators"
     OPEN_ELECTIVES = "open_electives"
     OPEN_CAFE_MENU_ON_ = "open_cafe_menu_on_"
-    OPEN_CAFE_MENU_TODAY = OPEN_CAFE_MENU_ON_ + "today"
+    OPEN_CAFE_MENU_TODAY = OPEN_CAFE_MENU_ON_ + TODAY
     OPEN_LESSONS_ON_ = "open_lessons_on_"
-    OPEN_LESSONS_TODAY = OPEN_LESSONS_ON_ + "today"
+    OPEN_LESSONS_TODAY = OPEN_LESSONS_ON_ + TODAY
     OPEN_EDUCATORS_ON_ = "open_educators_on_"
-    OPEN_EDUCATORS_TODAY = OPEN_EDUCATORS_ON_ + "today"
+    OPEN_EDUCATORS_TODAY = OPEN_EDUCATORS_ON_ + TODAY
 
     CHANGE_GRADE_TO_ = "change_grade_to_"
     PREFIX_SWITCH = "switch_"

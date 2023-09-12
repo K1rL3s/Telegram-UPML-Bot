@@ -10,6 +10,7 @@ from bot.keyboards import cancel_state_keyboard, confirm_cancel_keyboard
 from bot.keyboards.admin.admin import admin_panel_keyboard
 from bot.utils.enums import AdminCallback
 from bot.utils.datehelp import date_by_format, date_today, format_date
+from bot.utils.phrases import DONT_UNDERSTAND_DATE
 from bot.utils.states import EditingEducators
 
 if TYPE_CHECKING:
@@ -57,7 +58,7 @@ async def edit_educators_date_handler(
         await state.set_state(EditingEducators.writing)
         await state.update_data(edit_date=edit_date)
     else:
-        text = "❌ Не понял это как дату, попробуйте ещё раз."
+        text = DONT_UNDERSTAND_DATE
 
     start_id = (await state.get_data())["start_id"]
 

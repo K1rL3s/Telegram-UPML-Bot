@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from bot.database.models.settings import Settings
 from bot.database.models.users import User
-from bot.utils.consts import NO_DATA
+from bot.utils.phrases import NO_DATA
 
 if TYPE_CHECKING:
     import datetime as dt

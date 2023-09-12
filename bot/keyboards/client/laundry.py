@@ -10,12 +10,18 @@ from bot.keyboards.universal import (
     go_to_settings_button,
 )
 from bot.utils.enums import UserCallback
+from bot.utils.phrases import NO
 
 
 if TYPE_CHECKING:
     from aiogram.utils.keyboard import InlineKeyboardMarkup
 
     from bot.database.models.laundries import Laundry
+
+
+START_WASHING = "🏖Запустить стирку"
+START_DRYING = "💨Запустить сушку"
+STOP_TIMER = f"{NO}Отменить таймер"
 
 
 async def laundry_keyboard(
@@ -25,11 +31,11 @@ async def laundry_keyboard(
     """Клавиатура меню прачечной."""
     keyboard = InlineKeyboardBuilder().add(
         InlineKeyboardButton(
-            text="🏖Запустить стирку",
+            text=START_WASHING,
             callback_data=UserCallback.START_WASHING_TIMER,
         ),
         InlineKeyboardButton(
-            text="💨Запустить сушку",
+            text=START_DRYING,
             callback_data=UserCallback.START_DRYING_TIMER,
         ),
     )
@@ -37,7 +43,7 @@ async def laundry_keyboard(
     if add_cancel_button and laundry.is_active:
         keyboard.add(
             InlineKeyboardButton(
-                text="❌Отменить таймер",
+                text=STOP_TIMER,
                 callback_data=UserCallback.CANCEL_LAUNDRY_TIMER,
             ),
         )

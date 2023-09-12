@@ -18,8 +18,8 @@ from bot.utils.consts import (
     LAUNDRY_ENG_TO_RU,
 )
 from bot.utils.enums import SlashCommands, TextCommands, UserCallback
+from bot.utils.phrases import DONT_UNDERSTAND_TIMER, YES
 from bot.utils.states import EditingSettings
-
 
 if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
@@ -141,13 +141,13 @@ async def edit_laundry_time_handler(
     if time:
         hours, minutes = time
         text = (
-            f"✅ <code>{LAUNDRY_ENG_TO_RU[attr].capitalize()}</code> "
+            f"{YES} <code>{LAUNDRY_ENG_TO_RU[attr].capitalize()}</code> "
             f"установлено на <b>{hours} часов, {minutes} минут</b>."
         )
         keyboard = await settings_keyboard(repo.settings, message.from_user.id)
         await state.clear()
     else:
-        text = "❌ Не распознал это как часы и минуты. Попробуйте ещё раз."
+        text = DONT_UNDERSTAND_TIMER
         keyboard = cancel_state_keyboard
 
     await message.bot.edit_message_text(

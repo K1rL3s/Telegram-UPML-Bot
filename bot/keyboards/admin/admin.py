@@ -15,6 +15,13 @@ if TYPE_CHECKING:
     from bot.database.repository import UserRepository
 
 
+SET_CAFE_MENU = "🍴Загрузить меню"
+EDIT_CAFE_MENU = "🍴Изменить меню"
+SET_LESSONS = "📓Загрузить уроки"
+NOTIFY = "🔔Уведомление"
+EDIT_EDUCATORS_SCHEDULE = "👩‍✈️Изменить расписание воспитателей"
+
+
 async def admin_panel_keyboard(
     repo: "UserRepository",
     user_id: int,
@@ -24,11 +31,11 @@ async def admin_panel_keyboard(
 
     for button_text, callback_data in zip(
         (
-            "🍴Загрузить меню",
-            "🍴Изменить меню",
-            "📓Загрузить уроки",
-            "🔔Уведомление",
-            "👩‍✈️Изменить расписание воспитателей",
+            SET_CAFE_MENU,
+            EDIT_CAFE_MENU,
+            SET_LESSONS,
+            NOTIFY,
+            EDIT_EDUCATORS_SCHEDULE,
         ),
         (
             AdminCallback.AUTO_UPDATE_CAFE_MENU,

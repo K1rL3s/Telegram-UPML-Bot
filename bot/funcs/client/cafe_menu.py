@@ -2,7 +2,8 @@ from typing import TYPE_CHECKING
 
 from cachetools.func import ttl_cache
 
-from bot.utils.consts import BEAUTIFY_MEALS, CAFE_MENU_ENG_TO_RU, NO_DATA
+from bot.utils.consts import BEAUTIFY_MEALS, CAFE_MENU_ENG_TO_RU
+from bot.utils.phrases import NO_DATA
 from bot.utils.datehelp import date_today, format_date, weekday_by_date
 
 if TYPE_CHECKING:

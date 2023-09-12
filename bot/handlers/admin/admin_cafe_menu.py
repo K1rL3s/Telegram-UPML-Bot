@@ -15,6 +15,7 @@ from bot.upml.save_cafe_menu import process_cafe_menu
 from bot.utils.consts import CAFE_MENU_ENG_TO_RU
 from bot.utils.enums import AdminCallback
 from bot.utils.datehelp import date_by_format, date_today, format_date
+from bot.utils.phrases import NO
 from bot.utils.states import EditingMenu
 
 if TYPE_CHECKING:
@@ -75,7 +76,7 @@ async def edit_cafe_menu_date_handler(message: "Message", state: "FSMContext") -
         await state.set_state(EditingMenu.choose_meal)
         await state.update_data(edit_date=edit_date)
     else:
-        text = "❌ Не удалось понять это как дату, попробуйте ещё раз."
+        text = f"{NO} Не удалось понять это как дату, попробуйте ещё раз."
         keyboard = cancel_state_keyboard
 
     start_id = (await state.get_data())["start_id"]

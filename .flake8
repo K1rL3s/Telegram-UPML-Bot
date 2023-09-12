@@ -57,14 +57,10 @@ ignore=
 
 per-file-ignores=
     migration/env.py:F401, F403,
-    bot/database/**:A003,
-    bot/database/models/**:TC003,A003,
+    bot/database/models/**:TC003, A003,
     bot/filters/**:D102,
     bot/middlewares/**:D102,
-    bot/middlewares/repository.py:D102,NU001,
-    bot/middlewares/logging.py:D102,R504,
+    bot/middlewares/outer/logging.py:D102, R504,
     bot/upml/**:CCR001,
-    bot/utils/funcs.py:R504,
     bot/utils/notify.py:B902,
     bot/utils/datehelp.py:FNE008,
-

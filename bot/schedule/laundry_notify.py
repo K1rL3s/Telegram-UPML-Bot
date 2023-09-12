@@ -1,8 +1,9 @@
 import datetime as dt
 from typing import TYPE_CHECKING
 
+from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+
 from bot.database.repository.repository import Repository
-from bot.database.db_session import get_session
 from bot.funcs.client.laundry import laundry_cancel_timer_func
 from bot.keyboards import laundry_keyboard
 from bot.utils.consts import LAUNDRY_REPEAT
@@ -13,9 +14,15 @@ if TYPE_CHECKING:
     from aiogram import Bot
 
 
-async def check_laundry_timers(bot: "Bot") -> None:
+LAUNDRY_TIMER_EXPIRED = "🔔Таймер прачечной вышел! ({0})".format
+
+
+async def check_laundry_timers(
+    bot: "Bot",
+    session_maker: "async_sessionmaker[AsyncSession]",
+) -> None:
     """Делатель уведомлений для истёкших таймеров прачечной."""
-    async with get_session() as session:
+    async with session_maker() as session:
         repo = Repository(session)
         for laundry in await repo.laundry.get_expired():
             rings = laundry.rings or 0
@@ -24,7 +31,7 @@ async def check_laundry_timers(bot: "Bot") -> None:
                 bot,
                 repo.user,
                 laundry.user,
-                f"🔔Таймер прачечной вышел! ({rings + 1})",
+                LAUNDRY_TIMER_EXPIRED(rings + 1),
                 await laundry_keyboard(laundry, rings < 2),
             )
             if not result or rings >= 2:

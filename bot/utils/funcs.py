@@ -30,9 +30,8 @@ async def bytes_io_to_image_id(
         chat_id=chat_id,
         photo=file,
     )
-    file_id = message.photo[-1].file_id
     await message.delete()
-    return file_id
+    return message.photo[-1].file_id
 
 
 @cached(ttl=60 * 60)

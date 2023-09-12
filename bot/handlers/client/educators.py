@@ -5,6 +5,7 @@ from aiogram.filters import Command
 
 from bot.funcs.client.educators import get_format_educators_by_date
 from bot.keyboards import educators_keyboard
+from bot.utils.consts import TODAY
 from bot.utils.enums import SlashCommands, TextCommands, UserCallback
 from bot.utils.datehelp import date_by_format
 
@@ -41,8 +42,7 @@ async def educators_message_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик команды "/educators"."""
-    date_ = "today"
-    schedule_date = date_by_format(date_)
+    schedule_date = date_by_format(TODAY)
 
     text = await get_format_educators_by_date(repo.educators, schedule_date)
 

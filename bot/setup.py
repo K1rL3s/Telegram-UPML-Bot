@@ -1,14 +1,24 @@
 from pathlib import Path
+from typing import Final, TYPE_CHECKING
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import BotCommand
-from loguru import logger
+from aiogram.types import BotCommand, BotCommandScopeAllPrivateChats
+from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from sqlalchemy.orm import close_all_sessions
+from loguru import logger
 
 from bot.handlers import include_routers
-from bot.utils.consts import SLASH_COMMANDS
+from bot.utils.enums import SlashCommands
+
+
+if TYPE_CHECKING:
+    from bot.settings import Settings
+
+
+SETTINGS_KEY: Final[str] = "settings"
+SESSION_MAKER_KEY: Final[str] = "session_maker"
 
 
 async def on_startup() -> None:
@@ -23,18 +33,33 @@ async def on_shutdown() -> None:
 
 async def set_commands(bot: "Bot") -> bool:
     """Установка команд для бота."""
+    commands: dict[str, str] = {
+        SlashCommands.START: "Старт",
+        SlashCommands.HELP: "Помощь",
+        SlashCommands.SETTINGS: "Настройки",
+        SlashCommands.MENU: "Меню",
+    }
+
     return await bot.set_my_commands(
         [
             BotCommand(command=command, description=description)
-            for command, description in SLASH_COMMANDS.items()
+            for command, description in commands.items()
         ],
-        language_code="ru",
+        scope=BotCommandScopeAllPrivateChats(),
     )
 
 
-def make_dispatcher() -> "Dispatcher":
+def make_dispatcher(
+    settings: "Settings",
+    session_maker: "async_sessionmaker[AsyncSession]",
+    settings_key: str = SETTINGS_KEY,
+    session_maker_key: str = SESSION_MAKER_KEY,
+) -> "Dispatcher":
     """Создаёт диспетчер и регистрирует все роуты."""
     dp = Dispatcher(storage=MemoryStorage(), name="__main__")
+
+    dp[settings_key] = settings
+    dp[session_maker_key] = session_maker
 
     include_routers(dp)
 

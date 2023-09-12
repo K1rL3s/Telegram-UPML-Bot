@@ -29,4 +29,4 @@ async def not_modified_error(_: "ErrorEvent") -> bool:
 @router.errors()
 async def all_errors(event: "ErrorEvent") -> None:
     """Логгер всех ошибок при обработке событий телеграма."""
-    logger.error(f"Exception while handling: {event.exception} | {event.update}")
+    logger.exception(f"Exception while handling: {event.exception} | {event.update}")

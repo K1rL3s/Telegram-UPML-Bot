@@ -4,31 +4,25 @@ from aiogram.utils.keyboard import (
     InlineKeyboardMarkup,
 )
 
-from bot.keyboards.universal import (
-    cancel_state_button,
-    go_to_admin_panel_button,
-)
+from bot.keyboards.universal import go_to_admin_panel_button
 from bot.utils.enums import AdminCallback
 
 
+ADMIN_LIST = "👮‍♀️Список админов"
+ADD_ADMIN = "🔎Добавить админа"
+PAGE_BACK = "⬅️Назад"
+PAGE_FORWARD = "➡️Вперёд"
+REMOVE_ROLE = "🚫Снять роль админа"
+REMOVE_ROLE_SURE = "🚫Точно снять роль"
+
+
 open_admins_list_button = InlineKeyboardButton(
-    text="👮‍♀️Список админов",
+    text=ADMIN_LIST,
     callback_data=AdminCallback.OPEN_ADMINS_LIST_PAGE_,
 )
 add_new_admin_button = InlineKeyboardButton(
-    text="🔎Добавить админа",
+    text=ADD_ADMIN,
     callback_data=AdminCallback.ADD_NEW_ADMIN,
-)
-add_new_admin_sure_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text="✅Подтвердить",
-                callback_data=AdminCallback.ADD_NEW_ADMIN_SURE,
-            ),
-            cancel_state_button,
-        ],
-    ],
 )
 
 
@@ -56,7 +50,7 @@ def admins_list_keyboard(
     if page > 0:
         keyboard.add(
             InlineKeyboardButton(
-                text="⬅️Назад",
+                text=PAGE_BACK,
                 callback_data=AdminCallback.OPEN_ADMINS_LIST_PAGE_ + f"{page - 1}",
             ),
         )
@@ -64,7 +58,7 @@ def admins_list_keyboard(
     if page * upp + upp < len(users):
         keyboard.add(
             InlineKeyboardButton(
-                text="➡️Вперёд",
+                text=PAGE_FORWARD,
                 callback_data=AdminCallback.OPEN_ADMINS_LIST_PAGE_ + f"{page + 1}",
             ),
         )
@@ -92,7 +86,7 @@ def check_admin_keyboard(
     :param sure: Уверенность в снятии роли.
     """
     remove_button = InlineKeyboardButton(
-        text="🚫Точно снять роль" if sure else "🚫Снять роль админа",
+        text=REMOVE_ROLE_SURE if sure else REMOVE_ROLE,
         callback_data=(
             AdminCallback.REMOVE_ADMIN_SURE_ + f"{user_id}_{page}"
             if sure
@@ -105,7 +99,7 @@ def check_admin_keyboard(
         .add(
             go_to_admin_panel_button,
             InlineKeyboardButton(
-                text="👨‍✈️Список админов",
+                text=ADMIN_LIST,
                 callback_data=AdminCallback.OPEN_ADMINS_LIST_PAGE_ + f"{page}",
             ),
         )

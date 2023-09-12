@@ -18,6 +18,7 @@ from bot.keyboards import (
 from bot.keyboards.admin.admin_lessons import choose_grade_parallel_keyboard
 from bot.utils.datehelp import date_by_format, format_date
 from bot.utils.enums import AdminCallback
+from bot.utils.phrases import DONT_UNDERSTAND_DATE
 from bot.utils.states import LoadingLessons
 
 if TYPE_CHECKING:
@@ -202,7 +203,7 @@ async def choose_dates_handler(
             )
             await state.set_state(LoadingLessons.confirm)
     else:
-        text = "❌ Не понял это как дату, попробуйте ещё раз."
+        text = DONT_UNDERSTAND_DATE
 
     if end:
         media = [InputMediaPhoto(media=lesson.photo_id) for lesson in lessons]
@@ -224,6 +225,7 @@ async def choose_dates_handler(
 @router.callback_query(
     StateFilter(LoadingLessons.confirm),
     F.data == AdminCallback.CONFIRM,
+    IsAdmin(),
 )
 async def confirm_edit_lessons_handler(
     callback: "CallbackQuery",

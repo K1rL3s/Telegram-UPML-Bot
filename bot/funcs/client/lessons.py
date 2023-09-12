@@ -1,6 +1,8 @@
 from typing import TYPE_CHECKING
 
 from bot.utils.datehelp import format_date, weekday_by_date
+from bot.utils.phrases import QUESTION
+
 
 if TYPE_CHECKING:
     import datetime as dt
@@ -43,7 +45,7 @@ async def get_lessons_for_user(
             getattr(full_11_lessons, "image", None),
         ]
 
-    for_class = settings.class_ if settings.class_ else "❓"
+    for_class = settings.class_ if settings.class_ else QUESTION
     if any(images):
         text = (
             f"✏ Расписание на <b>{format_date(date)}</b> ({weekday_by_date(date)}) "

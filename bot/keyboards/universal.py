@@ -8,10 +8,16 @@ from aiogram.utils.keyboard import (
 
 from bot.utils.enums import AdminCallback, TextCommands, UserCallback
 from bot.utils.datehelp import date_today, format_date
+from bot.utils.phrases import NO, YES
+
+
+MAIN_MENU = "🏠Главное меню"
+CANCEL = f"{NO}Отмена"
+CONFIRM = f"{YES}Подтвердить"
 
 
 go_to_main_menu_button = InlineKeyboardButton(
-    text="🏠Главное меню",
+    text=MAIN_MENU,
     callback_data=UserCallback.OPEN_MAIN_MENU,
 )
 
@@ -26,7 +32,7 @@ go_to_admin_panel_button = InlineKeyboardButton(
 )
 
 cancel_state_button = InlineKeyboardButton(
-    text="❌Отмена",
+    text=CANCEL,
     callback_data=UserCallback.CANCEL_STATE,
 )
 
@@ -36,7 +42,7 @@ confirm_cancel_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [
             InlineKeyboardButton(
-                text="✅Подтвердить",
+                text=CONFIRM,
                 callback_data=AdminCallback.CONFIRM,
             ),
             cancel_state_button,

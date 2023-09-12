@@ -30,7 +30,8 @@ class UserRepository(BaseRepository):
         :param user_id: ТГ Айди.
         :return: Модель User.
         """
-        return await self._get_user_related_model(User, user_id)
+        query = sa.select(User).where(User.user_id == user_id)
+        return await self._session.scalar(query)
 
     async def get_by_conditions(
         self,

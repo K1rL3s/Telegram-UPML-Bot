@@ -50,18 +50,18 @@ def get_settings(path_to_env: "Optional[Union[str, Path]]" = None) -> Settings:
     load_dotenv(path_to_env, override=True)
 
     db = DBSettings(
-        POSTGRES_HOST=os.getenv("POSTGRES_HOST"),
-        POSTGRES_HOST_PORT=int(os.getenv("POSTGRES_HOST_PORT")),
-        POSTGRES_DB=os.getenv("POSTGRES_DB"),
-        POSTGRES_USER=os.getenv("POSTGRES_USER"),
-        POSTGRES_PASSWORD=os.getenv("POSTGRES_PASSWORD"),
+        POSTGRES_HOST=os.environ["POSTGRES_HOST"],
+        POSTGRES_HOST_PORT=int(os.environ["POSTGRES_HOST_PORT"]),
+        POSTGRES_DB=os.environ["POSTGRES_DB"],
+        POSTGRES_USER=os.environ["POSTGRES_USER"],
+        POSTGRES_PASSWORD=os.environ["POSTGRES_PASSWORD"],
     )
     bot = BotSettings(
-        BOT_TOKEN=os.getenv("BOT_TOKEN"),
+        BOT_TOKEN=os.environ["BOT_TOKEN"],
     )
     other = OtherSettings(
-        TESSERACT_PATH=os.getenv("TESSERACT_PATH"),
-        TIMEOUT=20,
+        TESSERACT_PATH=os.environ["TESSERACT_PATH"],
+        TIMEOUT=int(os.getenv("TIMEOUT") or 10),
         TIMEZONE_OFFSET=int(os.getenv("TIMEZONE_OFFSET") or 0),
     )
 

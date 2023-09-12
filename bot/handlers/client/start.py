@@ -6,7 +6,7 @@ from aiogram.filters import Command, CommandStart, StateFilter
 from bot.filters import SaveUpdateUser
 from bot.keyboards import main_menu_inline_keyboard
 from bot.keyboards.client.start import start_reply_keyboard
-from bot.utils.consts import MAIN_MENU_TEXT, USER_START_TEXT
+from bot.utils.phrases import MAIN_MENU_TEXT, USER_START_TEXT
 from bot.utils.enums import SlashCommands, TextCommands, UserCallback
 
 if TYPE_CHECKING:

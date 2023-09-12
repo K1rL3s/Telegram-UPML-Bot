@@ -7,6 +7,7 @@ from aiogram.types import CallbackQuery, InputMediaPhoto, Message
 from bot.filters import SaveUpdateUser
 from bot.funcs.client.lessons import get_lessons_for_user
 from bot.keyboards import lessons_keyboard
+from bot.utils.consts import TODAY
 from bot.utils.enums import SlashCommands, TextCommands, UserCallback
 from bot.utils.datehelp import date_by_format
 
@@ -91,8 +92,7 @@ async def date_lessons_message_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик команды "Уроки"."""
-    date_ = "today"
-    lessons_date = date_by_format(date_)
+    lessons_date = date_by_format(TODAY)
 
     text = await send_lessons_images(
         message.from_user.id,

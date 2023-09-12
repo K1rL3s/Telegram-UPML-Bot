@@ -23,7 +23,8 @@ class LaundryRepository(BaseRepository):
         :param user_id: ТГ Айди.
         :return: Модель Laundry.
         """
-        return await self._get_user_related_model(Laundry, user_id)
+        query = select(Laundry).where(Laundry.user_id == user_id)
+        return await self._session.scalar(query)
 
     async def get_expired(self) -> list["Laundry"]:
         """

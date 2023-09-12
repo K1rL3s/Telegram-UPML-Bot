@@ -25,14 +25,12 @@ from bot.keyboards.admin.admin_updates import (
     choose_meal_keyboard,
 )
 from bot.keyboards.admin.admin_manage import (
-    add_new_admin_sure_keyboard,
     admins_list_keyboard,
     check_admin_keyboard,
 )
 
 
-__all__ = [
-    "add_new_admin_sure_keyboard",
+__all__ = (
     "admin_panel_keyboard",
     "admins_list_keyboard",
     "cafe_menu_keyboard",
@@ -52,4 +50,4 @@ __all__ = [
     "notify_panel_keyboard",
     "settings_keyboard",
     "start_reply_keyboard",
-]
+)

@@ -9,10 +9,21 @@ from aiogram.utils.keyboard import (
 from bot.keyboards.universal import go_to_main_menu_button
 from bot.utils.consts import GRADES
 from bot.utils.enums import UserCallback
+from bot.utils.phrases import NO, QUESTION, YES
 
 
 if TYPE_CHECKING:
     from bot.database.repository import SettingsRepository
+
+
+USER_CLASS = "Класс {0}".format
+LESSONS_NOTIFY = "Уроки {0}".format
+NEWS_NOTIFY = "Новости {0}".format
+
+WASHING = "⏳Стирка {0} мин.".format
+DRYING = "💨Сушка {0} мин.".format
+BACK_TO_SETTINGS = "⏪Настройки"
+RESET_CLASS = f"{QUESTION}Сбросить класс"
 
 
 async def settings_keyboard(
@@ -26,25 +37,25 @@ async def settings_keyboard(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Класс " + (settings.class_ if settings.class_ else "❓"),
+                    text=USER_CLASS(settings.class_ if settings.class_ else QUESTION),
                     callback_data=UserCallback.CHANGE_GRADE_TO_,
                 ),
                 InlineKeyboardButton(
-                    text="Уроки " + ("✅" if settings.lessons_notify else "❌"),
+                    text=LESSONS_NOTIFY(YES if settings.lessons_notify else NO),
                     callback_data=UserCallback.SWITCH_LESSONS_NOTIFY,
                 ),
                 InlineKeyboardButton(
-                    text="Новости " + ("✅" if settings.news_notify else "❌"),
+                    text=NEWS_NOTIFY(YES if settings.news_notify else NO),
                     callback_data=UserCallback.SWITCH_NEWS_NOTIFY,
                 ),
             ],
             [
                 InlineKeyboardButton(
-                    text=f"⏳Стирка {settings.washing_time} мин.",
+                    text=WASHING(settings.washing_time),
                     callback_data=UserCallback.EDIT_WASHING_TIME,
                 ),
                 InlineKeyboardButton(
-                    text=f"💨Сушка {settings.drying_time} мин.",
+                    text=DRYING(settings.drying_time),
                     callback_data=UserCallback.EDIT_DRYING_TIME,
                 ),
             ],
@@ -64,12 +75,12 @@ choose_grade_keyboard: "InlineKeyboardMarkup" = (
             for grade_letter in GRADES
         ),
         InlineKeyboardButton(
-            text="⏪Настройки",
+            text=BACK_TO_SETTINGS,
             callback_data=UserCallback.OPEN_SETTINGS,
         ),
         InlineKeyboardButton(
-            text="❓Сбросить класс",
-            callback_data=UserCallback.CHANGE_GRADE_TO_ + "None",
+            text=RESET_CLASS,
+            callback_data=UserCallback.CHANGE_GRADE_TO_ + "None",  # xd
         ),
     )
     .adjust(3, 3, 2)

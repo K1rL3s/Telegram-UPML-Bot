@@ -12,7 +12,7 @@ from bot.database.models.educators_schedules import EducatorsSchedule
 from bot.database.models.users_to_roles import users_to_roles
 
 
-__all__ = [
+__all__ = (
     "AlchemyBaseModel",
     "UserRelatedModel",
     "User",
@@ -24,4 +24,4 @@ __all__ = [
     "FullLessons",
     "EducatorsSchedule",
     "users_to_roles",
-]
+)

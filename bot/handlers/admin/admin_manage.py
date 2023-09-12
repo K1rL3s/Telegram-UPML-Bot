@@ -5,11 +5,11 @@ from aiogram.filters import StateFilter
 
 from bot.filters import IsSuperAdmin
 from bot.keyboards import (
-    add_new_admin_sure_keyboard,
     admin_panel_keyboard,
     admins_list_keyboard,
     cancel_state_keyboard,
     check_admin_keyboard,
+    confirm_cancel_keyboard,
 )
 from bot.utils.enums import AdminCallback, Roles
 from bot.utils.funcs import name_link, username_by_user_id
@@ -78,11 +78,11 @@ async def admin_add_username_handler(
     await state.set_state(AddingNewAdmin.confirm)
 
     text = f"Добавить в админы {name_link(username, user_id)}?"
-    await message.reply(text=text, reply_markup=add_new_admin_sure_keyboard)
+    await message.reply(text=text, reply_markup=confirm_cancel_keyboard)
 
 
 @router.callback_query(
-    F.data == AdminCallback.ADD_NEW_ADMIN_SURE,
+    F.data == AdminCallback.CONFIRM,
     StateFilter(AddingNewAdmin.confirm),
     IsSuperAdmin(),
 )

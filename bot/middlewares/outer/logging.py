@@ -14,7 +14,7 @@ class LoggingMiddleware(BaseInfoMiddleware):
     """Мидлварь для логов."""
 
     async def start_callbackquery(self, callback: "CallbackQuery") -> None:
-        """Лог при старте обработки callback'а."""
+        """Лог при получении callback'а."""
         logger.debug(
             f'Вызван callback "{callback.data}" '
             f"[{await self.get_short_info(callback)}]",
@@ -28,7 +28,7 @@ class LoggingMiddleware(BaseInfoMiddleware):
         )
 
     async def start_message(self, message: "Message") -> None:
-        """Лог при старте обработки сообщения."""
+        """Лог при получении сообщения."""
         if message.text:
             logger.debug(
                 f'Получено сообщение "{" ".join(message.text.split())}" '

@@ -26,9 +26,7 @@ if TYPE_CHECKING:
     from aiogram import Dispatcher
 
 
-__all__ = [
-    "include_routers",
-]
+__all__ = ("include_routers",)
 
 
 def include_routers(dp: "Dispatcher") -> None:

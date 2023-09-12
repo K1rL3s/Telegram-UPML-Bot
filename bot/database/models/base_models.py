@@ -2,7 +2,7 @@ from typing import Any
 
 from sqlalchemy.orm.exc import DetachedInstanceError
 
-from bot.database.db_session import SqlAlchemyBase
+from bot.database import SqlAlchemyBase
 
 
 class AlchemyBaseModel(SqlAlchemyBase):

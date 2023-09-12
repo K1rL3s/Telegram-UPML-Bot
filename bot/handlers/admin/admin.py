@@ -4,7 +4,7 @@ from aiogram import F, Router
 
 from bot.filters import IsAdmin
 from bot.keyboards.admin.admin import admin_panel_keyboard
-from bot.utils.consts import ADMIN_START_TEXT
+from bot.utils.phrases import ADMIN_START_TEXT
 from bot.utils.enums import AdminCallback, TextCommands
 
 if TYPE_CHECKING:

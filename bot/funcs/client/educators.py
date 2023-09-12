@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from bot.utils.consts import NO_DATA
+from bot.utils.phrases import NO_DATA
 from bot.utils.datehelp import date_today, format_date, weekday_by_date
 
 if TYPE_CHECKING:

@@ -5,6 +5,7 @@ from aiogram.filters import Command
 
 from bot.funcs.client.cafe_menu import get_format_menu_by_date
 from bot.keyboards import cafe_menu_keyboard
+from bot.utils.consts import TODAY
 from bot.utils.enums import SlashCommands, TextCommands, UserCallback
 from bot.utils.datehelp import date_by_format
 
@@ -41,8 +42,7 @@ async def date_cafe_menu_message_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик команды "/cafe", открывает расписание еды."""
-    date_ = "today"
-    menu_date = date_by_format(date_)
+    menu_date = date_by_format(TODAY)
 
     text = await get_format_menu_by_date(repo.menu, menu_date)
 
