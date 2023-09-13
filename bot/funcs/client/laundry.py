@@ -2,12 +2,39 @@ import datetime as dt
 from math import ceil
 from typing import TYPE_CHECKING
 
+from bot.keyboards import laundry_keyboard
+from bot.utils.consts import LAUNDRY_REPEAT
 from bot.utils.enums import UserCallback
 from bot.utils.datehelp import datetime_now
 
 if TYPE_CHECKING:
+    from aiogram.types import InlineKeyboardMarkup
+
     from bot.database.models.laundries import Laundry
     from bot.database.repository import LaundryRepository, SettingsRepository
+
+
+async def laundry_both_handler(
+    user_id: int,
+    repo: "LaundryRepository",
+) -> tuple[str, "InlineKeyboardMarkup"]:
+    """
+    Текст и клавиатура при переходе в таймеры для прачечной.
+
+    :param user_id: ТГ Айди.
+    :param repo: Репозиторий таймеров прачечной.
+    :return: Сообщение пользователю и клавиатура.
+    """
+    text = f"""Привет! Я - таймер для прачечной.
+После конца таймер запустится ещё два раза на <b>{LAUNDRY_REPEAT}</b> минут."""
+
+    laundry = await repo.get(user_id)
+    keyboard = await laundry_keyboard(laundry)
+
+    if (minutes := await laundry_time_left(laundry)) is not None:
+        text += f"\n\nВремя до конца таймера: <b>{minutes}</b> минут"
+
+    return text, keyboard
 
 
 async def laundry_time_left(laundry: "Laundry") -> int | None:

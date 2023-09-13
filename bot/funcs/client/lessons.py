@@ -1,13 +1,56 @@
 from typing import TYPE_CHECKING
 
+from aiogram.types import InputMediaPhoto
+
+from bot.keyboards import lessons_keyboard
 from bot.utils.datehelp import format_date, weekday_by_date
 from bot.utils.phrases import QUESTION
-
 
 if TYPE_CHECKING:
     import datetime as dt
 
+    from aiogram import Bot
+
+    from bot.database.repository.repository import Repository
     from bot.database.repository import LessonsRepository, SettingsRepository
+
+
+async def send_lessons_images(
+    user_id: int,
+    chat_id: int,
+    date: "dt.date",
+    bot: "Bot",
+    repo: "Repository",
+) -> str | None:
+    """
+    Общий код обработчиков просмотра уроков. Если имеется, отправляет фото расписания.
+
+    Отправляет расписание уроков паралелли и класса, если выбран класс.
+    Отправляет расписание двух паралеллей, если не выбран класс.
+
+    :param user_id: ТГ Айди.
+    :param chat_id: Айди чата с пользователем.
+    :param date: Дата уроков.
+    :param bot: ТГ Бот.
+    :param repo: Доступ к базе данных.
+    :return: Сообщение для пользователя.
+    """
+    text, images = await get_lessons_for_user(
+        repo.settings,
+        repo.lessons,
+        user_id,
+        date,
+    )
+
+    if any(images):
+        messages = await bot.send_media_group(
+            chat_id=chat_id,
+            media=[InputMediaPhoto(media=media_id) for media_id in images if media_id],
+        )
+        await messages[0].reply(text=text, reply_markup=lessons_keyboard(date))
+        return
+
+    return text
 
 
 async def get_lessons_for_user(

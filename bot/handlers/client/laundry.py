@@ -4,46 +4,20 @@ from aiogram import F, Router
 from aiogram.filters import Command
 
 from bot.funcs.client.laundry import (
+    laundry_both_handler,
     laundry_cancel_timer_func,
     laundry_start_timer_func,
-    laundry_time_left,
 )
-from bot.keyboards import go_to_main_menu_keyboard, laundry_keyboard
-from bot.utils.consts import LAUNDRY_REPEAT
+from bot.keyboards import go_to_main_menu_keyboard
 from bot.utils.enums import SlashCommands, TextCommands, UserCallback
 from bot.utils.datehelp import format_datetime
 
 if TYPE_CHECKING:
-    from aiogram.types import CallbackQuery, InlineKeyboardMarkup, Message
+    from aiogram.types import CallbackQuery, Message
 
     from bot.database.repository.repository import Repository
-    from bot.database.repository import LaundryRepository
-
 
 router = Router(name=__name__)
-
-
-async def laundry_both_handler(
-    user_id: int,
-    repo: "LaundryRepository",
-) -> tuple[str, "InlineKeyboardMarkup"]:
-    """
-    Текст и клавиатура при переходе в таймеры для прачечной.
-
-    :param user_id: ТГ Айди.
-    :param repo: Репозиторий таймеров прачечной.
-    :return: Сообщение пользователю и клавиатура.
-    """
-    text = f"""Привет! Я - таймер для прачечной.
-После конца таймер запустится ещё три раза на <b>{LAUNDRY_REPEAT}</b> минут."""
-
-    laundry = await repo.get(user_id)
-    keyboard = await laundry_keyboard(laundry)
-
-    if (minutes := await laundry_time_left(laundry)) is not None:
-        text += f"\n\nВремя до конца таймера: <b>{minutes}</b> минут"
-
-    return text, keyboard
 
 
 @router.callback_query(F.data == UserCallback.OPEN_LAUNDRY)

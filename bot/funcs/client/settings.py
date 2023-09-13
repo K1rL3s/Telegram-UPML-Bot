@@ -1,10 +1,16 @@
 from typing import Literal, TYPE_CHECKING
 
+from bot.keyboards import cancel_state_keyboard, settings_keyboard
+from bot.utils.consts import LAUNDRY_ENG_TO_RU
 from bot.utils.datehelp import hours_minutes_to_minutes, minutes_to_hours_minutes
 from bot.utils.enums import UserCallback
 from bot.utils.funcs import laundry_limit_min_max
+from bot.utils.phrases import DONT_UNDERSTAND_TIMER, YES
 
 if TYPE_CHECKING:
+    from aiogram.types import InlineKeyboardMarkup
+    from aiogram.fsm.context import FSMContext
+
     from bot.database.repository import SettingsRepository
 
 
@@ -55,14 +61,16 @@ async def edit_grade_setting_func(
 
 async def edit_laundry_time_func(
     repo: "SettingsRepository",
+    state: "FSMContext",
     user_id: int,
     attr: Literal["washing_time", "drying_time"],
     text: str,
-) -> tuple[int, int] | int:
+) -> tuple[str, "InlineKeyboardMarkup"]:
     """
     Логика обработчика ввода минут для смены таймера прачечной.
 
     :param repo: Репозиторий настроек.
+    :param state: Состояние пользователя.
     :param user_id: ТГ Айди.
     :param attr: Время стирки или время сушки.
     :param text: Сообщение пользователя.
@@ -73,6 +81,14 @@ async def edit_laundry_time_func(
         minutes = laundry_limit_min_max(hours_minutes_to_minutes(text))
         await repo.save_or_update_to_db(user_id, **{attr: minutes})
     except ValueError:
-        return 0
+        return DONT_UNDERSTAND_TIMER, cancel_state_keyboard
 
-    return minutes_to_hours_minutes(minutes)
+    hours, minutes = minutes_to_hours_minutes(minutes)
+    text = (
+        f"{YES} <code>{LAUNDRY_ENG_TO_RU[attr].capitalize()}</code> "
+        f"установлено на <b>{hours} часов, {minutes} минут</b>."
+    )
+    keyboard = await settings_keyboard(repo, user_id)
+    await state.clear()
+
+    return text, keyboard

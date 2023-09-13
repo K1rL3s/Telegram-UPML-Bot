@@ -18,7 +18,6 @@ from bot.utils.consts import (
     LAUNDRY_ENG_TO_RU,
 )
 from bot.utils.enums import SlashCommands, TextCommands, UserCallback
-from bot.utils.phrases import DONT_UNDERSTAND_TIMER, YES
 from bot.utils.states import EditingSettings
 
 if TYPE_CHECKING:
@@ -128,32 +127,20 @@ async def edit_laundry_time_handler(
 ) -> None:
     """Обработчик сообщения с минутами для изменения таймера прачечной."""
     data = await state.get_data()
-    start_id = data["start_id"]
-    attr = data["attr"]
+    start_id, attr = data["start_id"], data["attr"]
 
-    time = await edit_laundry_time_func(
+    text, keyboard = await edit_laundry_time_func(
         repo.settings,
+        state,
         message.from_user.id,
         attr,
         message.text,
     )
 
-    if time:
-        hours, minutes = time
-        text = (
-            f"{YES} <code>{LAUNDRY_ENG_TO_RU[attr].capitalize()}</code> "
-            f"установлено на <b>{hours} часов, {minutes} минут</b>."
-        )
-        keyboard = await settings_keyboard(repo.settings, message.from_user.id)
-        await state.clear()
-    else:
-        text = DONT_UNDERSTAND_TIMER
-        keyboard = cancel_state_keyboard
-
+    await message.delete()
     await message.bot.edit_message_text(
         text=text,
         reply_markup=keyboard,
         message_id=start_id,
         chat_id=message.chat.id,
     )
-    await message.delete()

@@ -31,10 +31,10 @@ def setup_middlewares(
 
     dp.callback_query.outer_middleware(CallbackAnswerMiddleware())
 
+    dp.message.outer_middleware(AlbumMiddleware())
+
     dp.message.outer_middleware(ThrottlingMiddleware())
     dp.callback_query.outer_middleware(ThrottlingMiddleware())
 
     dp.message.outer_middleware(RepositoryMiddleware(session_maker))
     dp.callback_query.outer_middleware(RepositoryMiddleware(session_maker))
-
-    dp.message.middleware(AlbumMiddleware())

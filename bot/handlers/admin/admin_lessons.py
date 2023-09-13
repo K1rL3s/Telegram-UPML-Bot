@@ -4,21 +4,21 @@ from aiogram import F, Router
 from aiogram.filters import StateFilter
 from aiogram.types import InputMediaPhoto
 
-from bot.custom_types import Album, LessonsImage
+from bot.custom_types import Album
 from bot.filters import IsAdmin
 from bot.funcs.admin.admin_lessons import (
-    save_lessons_to_db_func,
-    tesseract_album_lessons_func,
+    choose_dates_func,
+    choose_grades_func,
+    confirm_edit_lessons_func,
+    process_lessons_album_func,
+    start_choose_grades_func,
 )
 from bot.keyboards import (
     cancel_state_keyboard,
-    confirm_cancel_keyboard,
     go_to_main_menu_keyboard,
 )
 from bot.keyboards.admin.admin_lessons import choose_grade_parallel_keyboard
-from bot.utils.datehelp import date_by_format, format_date
 from bot.utils.enums import AdminCallback
-from bot.utils.phrases import DONT_UNDERSTAND_DATE
 from bot.utils.states import LoadingLessons
 
 if TYPE_CHECKING:
@@ -82,30 +82,17 @@ async def process_lessons_album_handler(
     album: "Album",
 ) -> None:
     """Обработчки фотографий расписаний при нескольких штуках."""
-    lessons = await tesseract_album_lessons_func(
-        message.bot,
-        repo.lessons,
+    text, keyboard = await process_lessons_album_func(
         message.chat.id,
         album,
+        message.bot,
+        repo.lessons,
+        state,
         settings.other.TESSERACT_PATH,
-    )
-
-    if all(lesson.status for lesson in lessons):  # Всё успешно обработалось
-        await state.clear()
-        text = "\n".join(lesson.text for lesson in lessons)
-        await message.reply(text=text, reply_markup=go_to_main_menu_keyboard)
-        return
-
-    await state.set_state(LoadingLessons.bad_images)
-    await state.update_data(lessons=[lesson for lesson in lessons if not lesson.status])
-
-    text = (
-        "\n".join(lesson.text for lesson in lessons if lesson.status)
-        + "\n\nНе удалось распознать некоторые расписания.\nВвеcти данные вручную?"
     )
     await message.reply(
         text=text,
-        reply_markup=confirm_cancel_keyboard,
+        reply_markup=keyboard,
     )
 
 
@@ -119,17 +106,14 @@ async def start_choose_grades_handler(
     state: "FSMContext",
 ) -> None:
     """Обработка кнопки "Подтвердить" для ручного ввода информации о расписании."""
-    await state.set_state(LoadingLessons.choose_grade)
-    data = await state.get_data()
-    current_lessons = data["lessons"][0]
-    await state.update_data(current_lessons=current_lessons)
+    text, current_lesson = await start_choose_grades_func(state)
 
     photo = await callback.bot.send_media_group(
         chat_id=callback.message.chat.id,
-        media=[InputMediaPhoto(media=current_lessons.photo_id)],
+        media=[InputMediaPhoto(media=current_lesson.photo_id)],
     )
     await photo[0].reply(
-        text="Для каких классов это расписание?",
+        text=text,
         reply_markup=choose_grade_parallel_keyboard,
     )
 
@@ -149,26 +133,11 @@ async def choose_grades_handler(
     state: "FSMContext",
 ) -> None:
     """Обработчик кнопок "10 классы" и "11 классы" для нераспознанных расписаний."""
-    data = await state.get_data()
-    lessons: list[LessonsImage] = data["lessons"]
-    current_lessons: LessonsImage = data["current_lessons"]
+    text, keyboard, current_lesson = await choose_grades_func(callback.data, state)
 
-    current_lessons.grade = callback.data.split("_")[-1]
-
-    if no_grade_lessons := [lesson for lesson in lessons if lesson.grade is None]:
-        current_lessons = no_grade_lessons[0]
-        text = "Для каких классов это расписание?"
-        keyboard = choose_grade_parallel_keyboard
-    else:
-        current_lessons = data["lessons"][0]
-        text = "Введите дату расписания в формате <b>ДД.ММ.ГГГГ</b>"
-        keyboard = cancel_state_keyboard
-        await state.set_state(LoadingLessons.choose_date)
-
-    await state.update_data(current_lessons=current_lessons)
     photo = await callback.bot.send_media_group(
         chat_id=callback.message.chat.id,
-        media=[InputMediaPhoto(media=current_lessons.photo_id)],
+        media=[InputMediaPhoto(media=current_lesson.photo_id)],
     )
     await photo[0].reply(
         text=text,
@@ -182,35 +151,7 @@ async def choose_dates_handler(
     state: "FSMContext",
 ) -> None:
     """Обработка ввода даты для нераспознанных расписаний."""
-    data = await state.get_data()
-    lessons: list[LessonsImage] = data["lessons"]
-    current_lessons: LessonsImage = data["current_lessons"]
-
-    end = False
-    if date := date_by_format(message.text):
-        current_lessons.date = date
-
-        if no_date_lessons := [lesson for lesson in lessons if lesson.date is None]:
-            current_lessons = no_date_lessons[0]
-            text = "Введите дату расписания в формате <b>ДД.ММ.ГГГГ</b>"
-            await state.update_data(current_lessons=current_lessons)
-        else:
-            end = True
-            text = "\n".join(
-                f"Расписание для <b>{good_lessons.grade}-х классов</b> "
-                f"на <b>{format_date(good_lessons.date)}</b>"
-                for good_lessons in lessons
-            )
-            await state.set_state(LoadingLessons.confirm)
-    else:
-        text = DONT_UNDERSTAND_DATE
-
-    if end:
-        media = [InputMediaPhoto(media=lesson.photo_id) for lesson in lessons]
-        keyboard = confirm_cancel_keyboard
-    else:
-        media = [InputMediaPhoto(media=current_lessons.photo_id)]
-        keyboard = cancel_state_keyboard
+    text, keyboard, media = await choose_dates_func(message.text, state)
 
     photo = await message.bot.send_media_group(
         chat_id=message.chat.id,
@@ -233,19 +174,9 @@ async def confirm_edit_lessons_handler(
     repo: "Repository",
 ) -> None:
     """Обработка подтверждения сохранения нераспознанных расписаний."""
-    data = await state.get_data()
-
-    for lesson in data["lessons"]:
-        lesson: LessonsImage
-        await save_lessons_to_db_func(
-            repo.lessons,
-            lesson,
-            [],
-        )
-
-    await state.clear()
+    text = await confirm_edit_lessons_func(state, repo.lessons)
 
     await callback.message.answer(
-        text="Успешно!",
+        text=text,
         reply_markup=go_to_main_menu_keyboard,
     )

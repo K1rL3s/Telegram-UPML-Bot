@@ -48,6 +48,10 @@ def date_by_format(
     date = date.replace("-", " ").replace(".", " ")
     try:
         day, month, year = map(int, date.strip().split())
+
+        if year < 1000:  # Если не ГГГГ, а ГГ
+            year += date_today().year // 1000 * 1000
+
         date_obj = dt.date(day=day, month=month, year=year)
     except ValueError:
         return False

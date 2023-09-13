@@ -3,14 +3,16 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import StateFilter
 
-
 from bot.filters import IsAdmin
-from bot.funcs.admin.admin import get_educators_schedule_by_date
+from bot.funcs.admin.admin_educators import (
+    edit_educators_confirm_func,
+    edit_educators_date_func,
+    edit_educators_text_func,
+)
 from bot.keyboards import cancel_state_keyboard, confirm_cancel_keyboard
 from bot.keyboards.admin.admin import admin_panel_keyboard
 from bot.utils.enums import AdminCallback
-from bot.utils.datehelp import date_by_format, date_today, format_date
-from bot.utils.phrases import DONT_UNDERSTAND_DATE
+from bot.utils.datehelp import date_today, format_date
 from bot.utils.states import EditingEducators
 
 if TYPE_CHECKING:
@@ -47,29 +49,15 @@ async def edit_educators_date_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик ввода даты для изменения расписания воспитателей."""
-    if edit_date := date_by_format(message.text):
-        schedule = await get_educators_schedule_by_date(repo.educators, edit_date)
-        text = (
-            f"<b>Дата</b>: <code>{format_date(edit_date)}</code>\n"
-            f"<b>Расписание</b>:\n{schedule}\n\n"
-            "Чтобы изменить, отправьте <b>одним сообщением</b> "
-            "изменённую версию."
-        )
-        await state.set_state(EditingEducators.writing)
-        await state.update_data(edit_date=edit_date)
-    else:
-        text = DONT_UNDERSTAND_DATE
+    text, start_id = await edit_educators_date_func(message.text, state, repo.educators)
 
-    start_id = (await state.get_data())["start_id"]
-
+    await message.delete()  # ?
     await message.bot.edit_message_text(
         text=text,
         chat_id=message.chat.id,
         message_id=start_id,
         reply_markup=cancel_state_keyboard,
     )
-
-    await message.delete()  # ?
 
 
 @router.message(StateFilter(EditingEducators.writing), IsAdmin())
@@ -78,19 +66,10 @@ async def edit_educators_text_handler(
     state: "FSMContext",
 ) -> None:
     """Обработчик сообщения с изменённым расписанием воспитателей."""
-    data = await state.get_data()
-    start_id = data["start_id"]
-    edit_date = data["edit_date"]
-
-    new_text = message.html_text.strip()
-    new_ids = data.get("new_ids", []) + [message.message_id]
-    await state.update_data(new_text=new_text, new_ids=new_ids)
-
-    text = (
-        f"<b>Дата</b>: <code>{format_date(edit_date)}</code>\n"
-        f"<b>Расписание</b>:\n{new_text}\n\n"
-        "Для сохранения нажмите кнопку. Если хотите изменить, "
-        "отправьте сообщение повторно."
+    text, start_id = await edit_educators_text_func(
+        message.html_text,
+        message.message_id,
+        state,
     )
 
     await message.bot.edit_message_text(
@@ -108,22 +87,10 @@ async def edit_educators_confirm_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик подтверждения изменения расписания воспитетелей."""
-    data = await state.get_data()
-    edit_date = data["edit_date"]
-    new_text = data["new_text"]
-    new_ids = data["new_ids"]
-
-    await state.clear()
-
-    await repo.educators.save_or_update_to_db(
-        edit_date,
-        new_text,
+    text, new_ids = await edit_educators_confirm_func(
         callback.from_user.id,
-    )
-
-    text = (
-        f"<b>Расписание воспитателей</b> на "
-        f"<b>{format_date(edit_date)}</b> успешно изменено!"
+        state,
+        repo.educators,
     )
 
     await callback.message.edit_text(

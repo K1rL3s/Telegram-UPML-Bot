@@ -1,158 +1,188 @@
-import datetime as dt
-from io import BytesIO
 from typing import TYPE_CHECKING
 
-from loguru import logger
+from aiogram.types import InlineKeyboardMarkup, InputMediaPhoto
 
-from bot.custom_types import Album, LessonsImage
-from bot.upml.process_lessons import process_one_lessons_file
-from bot.utils.datehelp import format_date
-from bot.utils.funcs import bytes_io_to_image_id
+from bot.keyboards import (
+    cancel_state_keyboard,
+    choose_grade_parallel_keyboard,
+    confirm_cancel_keyboard,
+    go_to_main_menu_keyboard,
+)
+from bot.upml.album_lessons import tesseract_album_lessons_func
+from bot.utils.datehelp import date_by_format, format_date
+from bot.utils.phrases import DONT_UNDERSTAND_DATE
+from bot.utils.states import LoadingLessons
 
 if TYPE_CHECKING:
     from aiogram import Bot
+    from aiogram.fsm.context import FSMContext
 
+    from bot.custom_types import Album, LessonsImage
     from bot.database.repository import LessonsRepository
 
 
-async def tesseract_album_lessons_func(
-    bot: "Bot",
-    repo: "LessonsRepository",
+async def process_lessons_album_func(
     chat_id: int,
     album: "Album",
-    tesseract_path: str,
-) -> list[LessonsImage]:
-    """
-    Приниматель альбома для поочерёдной обработки каждой фотографии расписания.
-
-    :param album: Альбом с фотографиями расписаний.
-    :param chat_id: Откуда пришёл альбом с расписаниями.
-    :param tesseract_path: Путь до exeшника тессеракта.
-    :param bot: Текущий ТГ Бот.
-    :param repo: Репозиторий расписаний уроков.
-    :return: Склейка итогов обработки расписаний.
-    """
-    results: list[LessonsImage] = []
-
-    for photo in album.photo:
-        photo_id = photo.file_id
-        photo = await bot.get_file(photo_id)
-        await bot.download_file(photo.file_path, image := BytesIO())
-
-        result = await _tesseract_one_lessons_func(
-            bot,
-            repo,
-            chat_id,
-            image,
-            tesseract_path,
-        )
-
-        if isinstance(result, tuple):
-            grade, date = result
-            results.append(
-                LessonsImage(
-                    text=(
-                        f"Расписание для <b>{grade}-х классов</b> "
-                        f"на <b>{format_date(date)}</b> сохранено!"
-                    ),
-                    status=True,
-                    photo_id=photo_id,
-                    grade=grade,
-                    date=date,
-                ),
-            )
-        else:
-            results.append(
-                LessonsImage(
-                    text=result,
-                    status=False,
-                    photo_id=photo_id,
-                    grade=None,
-                    date=None,
-                ),
-            )
-
-    return results
-
-
-async def _tesseract_one_lessons_func(
     bot: "Bot",
     repo: "LessonsRepository",
-    chat_id: int,
-    image: "BytesIO",
+    state: "FSMContext",
     tesseract_path: str,
-) -> tuple[str, "dt.date"] | str:
+) -> tuple[str, "InlineKeyboardMarkup"]:
     """
-    Передача расписания в обработчик и сохранение результата в базу данных.
+    Обработчки фотографий расписаний при нескольких штуках.
 
-    :param chat_id: Айди чата, откуда пришло изображение с расписанием.
-    :param image: Изображение с расписанием.
-    :param tesseract_path: Путь до exeшника тессеракта.
+    :param chat_id: Айди чата.
+    :param album: Альбом с расписаниями.
     :param bot: ТГ Бот.
     :param repo: Репозиторий расписаний уроков.
-    :return: Паралелль и дата, если окей, иначе текст ошибки.
+    :param state: Состояние пользователя.
+    :param tesseract_path: Путь до исполняемого файла тессеракта.
+    :return: Сообщение и клавиатура для пользователя.
     """
-    try:
-        date, grade, full_lessons, class_lessons = process_one_lessons_file(
-            image,
-            tesseract_path,
-        )
-    except ValueError as e:
-        logger.warning(text := f"Ошибка при загрузке расписания: {repr(e)}")
-        return text
-
-    full_lessons_id = await bytes_io_to_image_id(chat_id, full_lessons, bot)
-    class_lessons_ids = [
-        await bytes_io_to_image_id(chat_id, class_image, bot)
-        for class_image in class_lessons
-    ]
-
-    await save_lessons_to_db_func(
+    lessons = await tesseract_album_lessons_func(
+        bot,
         repo,
-        LessonsImage(
-            text=None,
-            status=True,
-            photo_id=full_lessons_id,
-            grade=grade,
-            date=date,
-        ),
-        [
-            LessonsImage(
-                text=None,
-                status=True,
-                photo_id=class_id,
-                grade=grade,
-                date=date,
+        chat_id,
+        album,
+        tesseract_path,
+    )
+
+    if all(lesson.status for lesson in lessons):  # Всё успешно обработалось
+        await state.clear()
+        text = "\n".join(lesson.text for lesson in lessons)
+        return text, go_to_main_menu_keyboard
+
+    await state.set_state(LoadingLessons.bad_images)
+    await state.update_data(lessons=[lesson for lesson in lessons if not lesson.status])
+
+    text = (
+        "\n".join(lesson.text for lesson in lessons if lesson.status)
+        + "\n\nНе удалось распознать некоторые расписания.\nВвеcти данные вручную?"
+    )
+    return text, confirm_cancel_keyboard
+
+
+async def start_choose_grades_func(
+    state: "FSMContext",
+) -> tuple[str, "LessonsImage"]:
+    """
+    Обработка кнопки "Подтвердить" для ручного ввода информации о расписании.
+
+    :param state: Состояние пользователя.
+    :return: Сообщение пользователю и текущее расписаний.
+    """
+    await state.set_state(LoadingLessons.choose_grade)
+    data = await state.get_data()
+    current_lesson = data["lessons"][0]
+    await state.update_data(current_lesson=current_lesson)
+
+    return "Для каких классов это расписание?", current_lesson
+
+
+async def choose_grades_func(
+    callback_data: str,
+    state: "FSMContext",
+) -> tuple[str, "InlineKeyboardMarkup", "LessonsImage"]:
+    """Обработчик кнопок "10 классы" и "11 классы" для нераспознанных расписаний.
+
+    :param callback_data: Сообщение пользователя, дата.
+    :param state: Состояние пользователя.
+    :return: Сообщение и клавиатура пользователю.
+             Если всё, то первое медиа и вводом даты.
+             Если не всё, то медиа с одним изображением и выбором класса.
+    """
+    data = await state.get_data()
+    lessons: list[LessonsImage] = data["lessons"]
+    current_lesson: LessonsImage = data["current_lesson"]
+
+    current_lesson.grade = callback_data.split("_")[-1]
+
+    if no_grade_lessons := [lesson for lesson in lessons if lesson.grade is None]:
+        current_lesson = no_grade_lessons[0]
+        text = "Для каких классов это расписание?"
+        keyboard = choose_grade_parallel_keyboard
+    else:
+        current_lesson = data["lessons"][0]
+        text = "Введите дату расписания в формате <b>ДД.ММ.ГГГГ</b>"
+        keyboard = cancel_state_keyboard
+        await state.set_state(LoadingLessons.choose_date)
+
+    await state.update_data(current_lesson=current_lesson)
+
+    return text, keyboard, current_lesson
+
+
+async def choose_dates_func(
+    text: str,
+    state: "FSMContext",
+) -> tuple[str, "InlineKeyboardMarkup", list["InputMediaPhoto"]]:
+    """
+    Обработка ввода даты для нераспознанных расписаний.
+
+    :param text: Сообщение пользователя, дата.
+    :param state: Состояние пользователя.
+    :return: Сообщение и клавиатура пользователю.
+             Если всё, то медиа со всеми расписаниями и текстом для проверки.
+             Если не всё, то медиа с одним изображением и вводом датой.
+    """
+    data = await state.get_data()
+    lessons: list[LessonsImage] = data["lessons"]
+    current_lesson: LessonsImage = data["current_lesson"]
+
+    end = False
+    if date := date_by_format(text):
+        current_lesson.date = date
+
+        if no_date_lessons := [lesson for lesson in lessons if lesson.date is None]:
+            current_lesson = no_date_lessons[0]
+            text = "Введите дату расписания в формате <b>ДД.ММ.ГГГГ</b>"
+            await state.update_data(current_lesson=current_lesson)
+        else:
+            end = True
+            text = "\n".join(
+                f"Расписание для <b>{good_lessons.grade}-х классов</b> "
+                f"на <b>{format_date(good_lessons.date)}</b>"
+                for good_lessons in lessons
             )
-            for class_id in class_lessons_ids
-        ],
-    )
+            await state.set_state(LoadingLessons.confirm)
+    else:
+        text = DONT_UNDERSTAND_DATE
 
-    return grade, date
+    if end:
+        media = [InputMediaPhoto(media=lesson.photo_id) for lesson in lessons]
+        keyboard = confirm_cancel_keyboard
+    else:
+        media = [InputMediaPhoto(media=current_lesson.photo_id)]
+        keyboard = cancel_state_keyboard
+
+    return text, keyboard, media
 
 
-async def save_lessons_to_db_func(
+async def confirm_edit_lessons_func(
+    state: "FSMContext",
     repo: "LessonsRepository",
-    full_lessons: "LessonsImage",
-    class_lessons: "list[LessonsImage]",
-) -> None:
+) -> str:
     """
-    Сохранение готовых изображений расписаний уроков на дату для параллели.
+    Обработка подтверждения сохранения нераспознанных расписаний.
 
+    :param state: Состояние пользователя.
     :param repo: Репозиторий расписаний уроков.
-    :param full_lessons: Полное изображение расписания уроков.
-    :param class_lessons: Обрезанные изображения расписания уроков по буквам классов.
+    :return: Сообщение пользователю.
     """
-    await repo.save_or_update_to_db(
-        full_lessons.photo_id,
-        full_lessons.date,
-        full_lessons.grade,
-    )
-    for class_lesson, letter in zip(class_lessons, "АБВ"):
-        class_lesson: LessonsImage
-        await repo.save_or_update_to_db(
-            class_lesson.photo_id,
-            class_lesson.date,
-            class_lesson.grade,
-            letter,
+    data = await state.get_data()
+
+    for lesson in data["lessons"]:
+        lesson: LessonsImage
+        await repo.delete_class_lessons(
+            lesson.date,
+            lesson.grade,
         )
+        await repo.save_prepared_to_db(
+            lesson,
+            [],
+        )
+
+    await state.clear()
+
+    return "Успешно!"

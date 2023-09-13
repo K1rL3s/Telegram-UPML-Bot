@@ -4,18 +4,20 @@ from aiogram import F, Router
 from aiogram.filters import StateFilter
 
 from bot.filters import IsAdmin
-from bot.funcs.admin.admin import get_meal_by_date
+from bot.funcs.admin.admin_cafe_menu import (
+    edit_cafe_menu_confirm_func,
+    edit_cafe_menu_date_func,
+    edit_cafe_menu_meal_func,
+    edit_cafe_menu_text_func,
+)
 from bot.keyboards import (
     admin_panel_keyboard,
     cancel_state_keyboard,
-    choose_meal_keyboard,
     confirm_cancel_keyboard,
 )
 from bot.upml.save_cafe_menu import process_cafe_menu
-from bot.utils.consts import CAFE_MENU_ENG_TO_RU
 from bot.utils.enums import AdminCallback
-from bot.utils.datehelp import date_by_format, date_today, format_date
-from bot.utils.phrases import NO
+from bot.utils.datehelp import date_today, format_date
 from bot.utils.states import EditingMenu
 
 if TYPE_CHECKING:
@@ -65,30 +67,20 @@ async def edit_cafe_menu_start_handler(
 
 
 @router.message(StateFilter(EditingMenu.choose_date), IsAdmin())
-async def edit_cafe_menu_date_handler(message: "Message", state: "FSMContext") -> None:
+async def edit_cafe_menu_date_handler(
+    message: "Message",
+    state: "FSMContext",
+) -> None:
     """Обработчик ввода даты для изменения меню."""
-    if edit_date := date_by_format(message.text):
-        text = (
-            f"<b>Дата</b>: <code>{format_date(edit_date)}</code>\n"
-            f"Какой приём пищи вы хотите изменить?"
-        )
-        keyboard = choose_meal_keyboard
-        await state.set_state(EditingMenu.choose_meal)
-        await state.update_data(edit_date=edit_date)
-    else:
-        text = f"{NO} Не удалось понять это как дату, попробуйте ещё раз."
-        keyboard = cancel_state_keyboard
+    text, keyboard, start_id = await edit_cafe_menu_date_func(message.text, state)
 
-    start_id = (await state.get_data())["start_id"]
-
+    await message.delete()
     await message.bot.edit_message_text(
         text=text,
         chat_id=message.chat.id,
         message_id=start_id,
         reply_markup=keyboard,
     )
-
-    await message.delete()  # ?
 
 
 @router.callback_query(StateFilter(EditingMenu.choose_meal), IsAdmin())
@@ -98,22 +90,7 @@ async def edit_cafe_menu_meal_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик кнопки с выбором приёма пищи для изменения."""
-    edit_meal = callback.data.split("_")[-1]
-    edit_date = (await state.get_data())["edit_date"]
-    await state.update_data(edit_meal=edit_meal)
-
-    meal = CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()
-    menu = await get_meal_by_date(repo.menu, edit_meal, edit_date)
-    text = (
-        f"<b>Дата</b>: <code>{format_date(edit_date)}</code>\n"
-        f"<b>Приём пищи</b>: <code>{meal}</code>\n"
-        f"<b>Меню:</b>\n"
-        f"{menu}\n\n"
-        "Чтобы изменить, отправьте <b>одним сообщением</b> изменённую версию."
-    )
-
-    await state.set_state(EditingMenu.writing)
-
+    text = await edit_cafe_menu_meal_func(callback.data, state, repo.menu)
     await callback.message.edit_text(text=text, reply_markup=cancel_state_keyboard)
 
 
@@ -123,22 +100,10 @@ async def edit_cafe_menu_text_handler(
     state: "FSMContext",
 ) -> None:
     """Обработчик сообщения с изменённой версией приёма пищи."""
-    data = await state.get_data()
-    start_id = data["start_id"]
-    edit_date = data["edit_date"]
-    edit_meal = data["edit_meal"]
-
-    new_menu = message.html_text
-    new_ids = data.get("new_ids", []) + [message.message_id]
-    await state.update_data(new_menu=new_menu, new_ids=new_ids)
-    meal = CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()
-    text = (
-        f"<b>Дата</b>: <code>{format_date(edit_date)}</code>\n"
-        f"<b>Приём пищи</b>: <code>{meal}</code>\n"
-        f"<b>Новое меню</b>:\n"
-        f"{new_menu}\n\n"
-        "Для сохранения нажмите кнопку. "
-        "Если хотите изменить, отправьте сообщение повторно."
+    text, start_id = await edit_cafe_menu_text_func(
+        message.html_text,
+        message.message_id,
+        state,
     )
     await message.bot.edit_message_text(
         text=text,
@@ -155,19 +120,10 @@ async def edit_cafe_menu_confirm_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик подтверждения изменения меню."""
-    data = await state.get_data()
-    edit_date = data["edit_date"]
-    edit_meal = data["edit_meal"]
-    new_menu = data["new_menu"]
-    new_ids = data["new_ids"]
-
-    await state.clear()
-
-    await repo.menu.update(edit_meal, new_menu, edit_date, callback.from_user.id)
-
-    text = (
-        f"<b>{CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()}</b> на "
-        f"<b>{format_date(edit_date)}</b> успешно изменён!"
+    text, new_ids = await edit_cafe_menu_confirm_func(
+        callback.from_user.id,
+        state,
+        repo.menu,
     )
 
     await callback.message.edit_text(

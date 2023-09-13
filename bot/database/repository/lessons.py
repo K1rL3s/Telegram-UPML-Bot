@@ -1,6 +1,6 @@
 from typing import Optional, TYPE_CHECKING, Union
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 from bot.database.models.class_lessons import ClassLessons
 from bot.database.models.full_lessons import FullLessons
@@ -10,6 +10,8 @@ if TYPE_CHECKING:
     import datetime as dt
 
     from sqlalchemy.ext.asyncio import AsyncSession
+
+    from bot.custom_types import LessonsImage
 
 
 class LessonsRepository(BaseRepository):
@@ -73,6 +75,48 @@ class LessonsRepository(BaseRepository):
             self._session.add(lessons)
 
         await self._session.commit()
+
+    async def save_prepared_to_db(
+        self,
+        full_lessons: "LessonsImage",
+        class_lessons: "list[LessonsImage]",
+    ) -> None:
+        """
+        Сохранение готовых изображений расписаний уроков на дату для параллели.
+
+        :param full_lessons: Полное изображение расписания уроков.
+        :param class_lessons: Изображения расписания уроков по буквам классов.
+        """
+        await self.save_or_update_to_db(
+            full_lessons.photo_id,
+            full_lessons.date,
+            full_lessons.grade,
+        )
+        for class_lesson, letter in zip(class_lessons, "АБВ"):
+            class_lesson: LessonsImage
+            await self.save_or_update_to_db(
+                class_lesson.photo_id,
+                class_lesson.date,
+                class_lesson.grade,
+                letter,
+            )
+
+    async def delete_class_lessons(
+        self,
+        date: "dt.date",
+        grade: str,
+    ) -> None:
+        """
+        Удаляет расписания для отдельных классов по дате и паралелли.
+
+        :param date: Дата.
+        :param grade: Параллель.
+        """
+        query = delete(ClassLessons).where(
+            ClassLessons.date == date,
+            ClassLessons.grade == grade,
+        )
+        await self._session.execute(query)
 
     async def _get_class_lessons(
         self,

@@ -290,7 +290,7 @@ def _get_grade(image: "Image.Image", x: int, y: int) -> str:
     :param image: Исходник расписания.
     :param x: X конца префиксной части расписания.
     :param y: Y первой горизонтальной линии.
-    :return: 10 или 11
+    :return: 10 или 11.
     """
     x += 1
     y += 2
@@ -308,6 +308,9 @@ def _get_grade(image: "Image.Image", x: int, y: int) -> str:
 
     while y < height and not _is_pixel_black(pixels[x, y]):
         y += 1
+
+    if left_x == x or up_y == y:
+        raise ValueError("Не удалось правильно выделить класс")
 
     temp = image.crop((left_x, up_y, x, y))
     text = pytesseract.image_to_string(
