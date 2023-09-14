@@ -119,10 +119,10 @@ async def choose_grades_func(
     current_lesson: LessonsAlbum = data["current_lesson"]
 
     current_lesson.grade = callback_data.split("_")[-1]
-    await state.update_data(current_lesson=current_lesson)
 
     if no_grade_lessons := [lesson for lesson in lessons if lesson.grade is None]:
         current_lesson = no_grade_lessons[0]
+        await state.update_data(current_lesson=current_lesson)
         return (
             "Для каких классов это расписание?",
             choose_grade_parallel_keyboard,
@@ -131,6 +131,8 @@ async def choose_grades_func(
 
     # Начало ввода дат
     current_lesson = data["lessons"][0]
+    await state.update_data(current_lesson=current_lesson)
+
     text = "Введите дату расписания в формате <b>ДД.ММ.ГГГГ</b>"
     keyboard = cancel_state_keyboard
     await state.set_state(LoadingLessons.choose_date)
