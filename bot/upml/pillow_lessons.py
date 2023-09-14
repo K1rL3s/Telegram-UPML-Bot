@@ -101,7 +101,7 @@ def _x_prefix_for_lessons(image: "Image.Image", y: int) -> int:
 
     black_count = 0
 
-    while black_count < 4 and x < width:
+    while black_count < 4 and x < width -1:
         x += 1
         if (
             x > 0
