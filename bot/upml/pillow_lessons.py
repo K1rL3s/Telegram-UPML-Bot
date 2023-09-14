@@ -197,7 +197,8 @@ def _tesseract_date(image: "Image.Image") -> dt.date:
         )
         .lower()
         .replace("$", "8")  # Костыль, восьмёрку распознаёт как доллар :(
-    )
+        .split()
+    )[-1]
 
     day, month = map(int, dd_mm.split("."))
 

@@ -83,9 +83,19 @@ async def start_choose_grades_func(
     :param state: Состояние пользователя.
     :return: Сообщение пользователю и текущее расписаний.
     """
-    await state.set_state(LoadingLessons.choose_grade)
     data = await state.get_data()
-    current_lesson = data["lessons"][0]
+    lessons: list["LessonsAlbum"] = data["lessons"]
+
+    if await state.get_state() == LoadingLessons.all_good:
+        for lesson in lessons:
+            lesson.status = False
+            lesson.grade = None
+            lesson.date = None
+            lesson.class_photo_ids = []
+        await state.update_data(lessons=lessons)
+
+    await state.set_state(LoadingLessons.choose_grade)
+    current_lesson = lessons[0]
     await state.update_data(current_lesson=current_lesson)
 
     # Начало выбора классов
