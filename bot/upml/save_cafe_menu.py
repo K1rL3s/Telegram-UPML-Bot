@@ -33,7 +33,7 @@ async def process_cafe_menu(repo: "MenuRepository", timeout: int) -> tuple[bool,
     if isinstance(menu_date, str):
         return False, menu_date
 
-    await _process_pdf_menu(repo, pdf_reader, menu_date)
+    await _parse_pdf_menu(repo, pdf_reader, menu_date)
     return True, "Расписание еды обновлено!"
 
 
@@ -137,7 +137,7 @@ def _compare_pdf_date(pdf_reader: "PdfReader") -> "Union[dt.date, str]":
     return menu_date
 
 
-async def _process_pdf_menu(
+async def _parse_pdf_menu(
     repo: "MenuRepository",
     pdf_reader: "PdfReader",
     date: "dt.date",

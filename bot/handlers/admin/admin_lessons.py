@@ -7,6 +7,7 @@ from aiogram.types import InputMediaPhoto
 from bot.custom_types import Album
 from bot.filters import IsAdmin
 from bot.funcs.admin.admin_lessons import (
+    all_good_lessons_func,
     choose_dates_func,
     choose_grades_func,
     confirm_edit_lessons_func,
@@ -54,7 +55,6 @@ async def process_lessons_handler(
     message: "Message",
     state: "FSMContext",
     settings: "Settings",
-    repo: "Repository",
 ) -> None:
     """Обработчки фотографий расписаний при только одной штуке."""
     album = Album.model_validate(
@@ -65,7 +65,7 @@ async def process_lessons_handler(
         },
         context={"bot": message.bot},
     )
-    await process_lessons_album_handler(message, state, settings, repo, album)
+    await process_lessons_album_handler(message, state, settings, album)
 
 
 @router.message(
@@ -78,7 +78,6 @@ async def process_lessons_album_handler(
     message: "Message",
     state: "FSMContext",
     settings: "Settings",
-    repo: "Repository",
     album: "Album",
 ) -> None:
     """Обработчки фотографий расписаний при нескольких штуках."""
@@ -86,7 +85,6 @@ async def process_lessons_album_handler(
         message.chat.id,
         album,
         message.bot,
-        repo.lessons,
         state,
         settings.other.TESSERACT_PATH,
     )
@@ -97,7 +95,31 @@ async def process_lessons_album_handler(
 
 
 @router.callback_query(
-    StateFilter(LoadingLessons.bad_images),
+    StateFilter(LoadingLessons.all_good),
+    F.data == AdminCallback.CONFIRM,
+    IsAdmin(),
+)
+async def all_good_lessons_handler(
+    callback: "CallbackQuery",
+    state: "FSMContext",
+    repo: "Repository",
+) -> None:
+    """Обработка кнопки "Подтвердить" при всех верных расписаниях."""
+    text, keyboard = await all_good_lessons_func(state, repo.lessons)
+
+    await callback.message.answer(
+        text=text,
+        reply_markup=keyboard,
+    )
+
+
+@router.callback_query(
+    StateFilter(LoadingLessons.all_good),
+    F.data == AdminCallback.NOT_CONFIRM,
+    IsAdmin(),
+)
+@router.callback_query(
+    StateFilter(LoadingLessons.something_bad),
     F.data == AdminCallback.CONFIRM,
     IsAdmin(),
 )
@@ -105,12 +127,12 @@ async def start_choose_grades_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
 ) -> None:
-    """Обработка кнопки "Подтвердить" для ручного ввода информации о расписании."""
+    """Обработка кнопок для старта ручного ввода информации о расписании."""
     text, current_lesson = await start_choose_grades_func(state)
 
     photo = await callback.bot.send_media_group(
         chat_id=callback.message.chat.id,
-        media=[InputMediaPhoto(media=current_lesson.photo_id)],
+        media=[InputMediaPhoto(media=current_lesson.full_photo_id)],
     )
     await photo[0].reply(
         text=text,
@@ -137,7 +159,7 @@ async def choose_grades_handler(
 
     photo = await callback.bot.send_media_group(
         chat_id=callback.message.chat.id,
-        media=[InputMediaPhoto(media=current_lesson.photo_id)],
+        media=[InputMediaPhoto(media=current_lesson.full_photo_id)],
     )
     await photo[0].reply(
         text=text,

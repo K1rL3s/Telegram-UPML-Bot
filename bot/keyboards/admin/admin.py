@@ -7,7 +7,7 @@ from aiogram.utils.keyboard import (
 )
 
 from bot.keyboards.admin.admin_manage import open_admins_list_button
-from bot.keyboards.universal import go_to_main_menu_button
+from bot.keyboards.universal import CONFIRM, go_to_main_menu_button, NOT_CONFIRM
 from bot.utils.enums import AdminCallback, Roles
 
 
@@ -20,6 +20,22 @@ EDIT_CAFE_MENU = "🍴Изменить меню"
 SET_LESSONS = "📓Загрузить уроки"
 NOTIFY = "🔔Уведомление"
 EDIT_EDUCATORS_SCHEDULE = "👩‍✈️Изменить расписание воспитателей"
+
+
+confirm_unconfirm_keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text=CONFIRM,
+                callback_data=AdminCallback.CONFIRM,
+            ),
+            InlineKeyboardButton(
+                text=NOT_CONFIRM,
+                callback_data=AdminCallback.NOT_CONFIRM,
+            ),
+        ],
+    ],
+)
 
 
 async def admin_panel_keyboard(

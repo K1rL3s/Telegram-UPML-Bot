@@ -7,11 +7,12 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class LessonsImage:
-    """Изображение расписания уроков, нужно для обработки нераспознаных расписаний."""
+class LessonsAlbum:
+    """Сборник расписаний. Дата, класс, полное расписание и для каждого класса."""
 
     text: str | None
     status: bool
-    photo_id: str
+    full_photo_id: str
+    class_photo_ids: list[str]
     grade: str | None
     date: "Optional[dt.date]"

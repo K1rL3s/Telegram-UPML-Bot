@@ -20,7 +20,8 @@ class LoadingLessons(StatesGroup):
     """Админское состояние для отправки расписания уроков."""
 
     image = State()
-    bad_images = State()
+    all_good = State()
+    something_bad = State()
     choose_grade = State()
     choose_date = State()
     confirm = State()

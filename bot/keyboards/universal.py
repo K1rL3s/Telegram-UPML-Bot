@@ -12,7 +12,7 @@ from bot.utils.phrases import NO, YES
 
 
 MAIN_MENU = "🏠Главное меню"
-CANCEL = f"{NO}Отмена"
+CANCEL = NOT_CONFIRM = f"{NO}Отмена"
 CONFIRM = f"{YES}Подтвердить"
 
 

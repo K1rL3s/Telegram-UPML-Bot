@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
     from sqlalchemy.ext.asyncio import AsyncSession
 
-    from bot.custom_types import LessonsImage
+    from bot.custom_types import LessonsAlbum
 
 
 class LessonsRepository(BaseRepository):
@@ -78,26 +78,23 @@ class LessonsRepository(BaseRepository):
 
     async def save_prepared_to_db(
         self,
-        full_lessons: "LessonsImage",
-        class_lessons: "list[LessonsImage]",
+        lessons: "LessonsAlbum",
     ) -> None:
         """
         Сохранение готовых изображений расписаний уроков на дату для параллели.
 
-        :param full_lessons: Полное изображение расписания уроков.
-        :param class_lessons: Изображения расписания уроков по буквам классов.
+        :param lessons: Полное изображение расписания уроков.
         """
         await self.save_or_update_to_db(
-            full_lessons.photo_id,
-            full_lessons.date,
-            full_lessons.grade,
+            lessons.full_photo_id,
+            lessons.date,
+            lessons.grade,
         )
-        for class_lesson, letter in zip(class_lessons, "АБВ"):
-            class_lesson: LessonsImage
+        for class_photo_id, letter in zip(lessons.class_photo_ids, "АБВ"):
             await self.save_or_update_to_db(
-                class_lesson.photo_id,
-                class_lesson.date,
-                class_lesson.grade,
+                class_photo_id,
+                lessons.date,
+                lessons.grade,
                 letter,
             )
 
@@ -117,6 +114,7 @@ class LessonsRepository(BaseRepository):
             ClassLessons.grade == grade,
         )
         await self._session.execute(query)
+        await self._session.commit()
 
     async def _get_class_lessons(
         self,

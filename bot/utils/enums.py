@@ -108,6 +108,7 @@ class AdminCallback(str, Enum):
     ADD_NEW_ADMIN_SURE = "add_new_admin_sure"
 
     CONFIRM = "confirm_in_state"
+    NOT_CONFIRM = "not_confirm_in_state"
 
 
 class Roles(str, Enum):
