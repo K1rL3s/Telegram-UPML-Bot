@@ -82,7 +82,6 @@ async def process_lessons_album_handler(
 ) -> None:
     """Обработчки фотографий расписаний при нескольких штуках."""
     text, keyboard = await process_lessons_album_func(
-        message.chat.id,
         album,
         message.bot,
         state,
@@ -105,7 +104,12 @@ async def all_good_lessons_handler(
     repo: "Repository",
 ) -> None:
     """Обработка кнопки "Подтвердить" при всех верных расписаниях."""
-    text, keyboard = await all_good_lessons_func(state, repo.lessons)
+    text, keyboard = await all_good_lessons_func(
+        callback.message.chat.id,
+        callback.bot,
+        state,
+        repo.lessons,
+    )
 
     await callback.message.answer(
         text=text,

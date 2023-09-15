@@ -1,31 +1,18 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import MetaData, URL
+from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession, create_async_engine
-from sqlalchemy.orm import DeclarativeBase
+
+from bot.database.base import AlchemyBaseModel
 
 if TYPE_CHECKING:
     from bot.settings import DBSettings
 
 
 __all__ = (
-    "SqlAlchemyBase",
+    "AlchemyBaseModel",
     "database_init",
 )
-
-
-class SqlAlchemyBase(DeclarativeBase):
-    """Декларативная база для моделей Алхимии."""
-
-    metadata = MetaData(
-        naming_convention={
-            "ix": "ix_%(column_0_label)s",
-            "uq": "uq_%(table_name)s_%(column_0_name)s",
-            "ck": "ck_%(table_name)s_%(constraint_name)s",
-            "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-            "pk": "pk_%(table_name)s",
-        },
-    )
 
 
 async def database_init(db_settings: "DBSettings") -> async_sessionmaker[AsyncSession]:

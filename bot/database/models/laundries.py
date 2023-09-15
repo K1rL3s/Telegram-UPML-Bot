@@ -3,7 +3,7 @@ import datetime as dt
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from bot.database.models.base_models import UserRelatedModel
+from bot.database.base import UserRelatedModel
 
 
 class Laundry(UserRelatedModel):

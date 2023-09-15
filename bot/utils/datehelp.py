@@ -81,11 +81,11 @@ def minutes_to_hours_minutes(minutes: int) -> tuple[int, int]:
     return hours, minutes
 
 
-def weekday_by_date(date_: "dt.date") -> str:
+def weekday_by_date(date: "dt.date") -> str:
     """
     День недели по дате.
 
-    :param date_: Объект даты.
+    :param date: Объект даты.
     :return: День недели в виде строки.
     """
     return (
@@ -96,7 +96,7 @@ def weekday_by_date(date_: "dt.date") -> str:
         "пятница",
         "суббота",
         "воскресенье",
-    )[date_.weekday()]
+    )[date.weekday()]
 
 
 def get_this_week_monday(timezone_offset: int = default_timezone_offset) -> "dt.date":

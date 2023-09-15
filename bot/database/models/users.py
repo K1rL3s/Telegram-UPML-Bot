@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import BigInteger, Boolean, DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from bot.database.models.base_models import UserRelatedModel
-from bot.database.models.users_to_roles import users_to_roles
+from bot.database.base import UserRelatedModel
 from bot.utils.datehelp import datetime_now
 
 if TYPE_CHECKING:
@@ -60,7 +59,7 @@ class User(UserRelatedModel):
 
     # Роли пользователя
     roles: Mapped[list["Role"]] = relationship(
-        secondary=users_to_roles,
+        secondary="users_to_roles",
         lazy="selectin",
     )
     # Настройки пользователя

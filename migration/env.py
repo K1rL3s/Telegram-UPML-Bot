@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from bot.settings import get_settings
 from bot.database.models import *  # noqa
-from bot.database import SqlAlchemyBase
+from bot.database import AlchemyBaseModel
 
 
 config = context.config
@@ -29,7 +29,7 @@ config.set_section_option(section, "POSTGRES_PASSWORD", db_settings.POSTGRES_PAS
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = SqlAlchemyBase.metadata
+target_metadata = AlchemyBaseModel.metadata
 
 
 def process_revision_directives(context, revision, directives):

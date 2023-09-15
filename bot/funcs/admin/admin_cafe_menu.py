@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from bot.funcs.admin.admin import get_meal_by_date
 from bot.keyboards import cancel_state_keyboard, choose_meal_keyboard
 from bot.utils.consts import CAFE_MENU_ENG_TO_RU
-from bot.utils.datehelp import date_by_format, format_date
+from bot.utils.datehelp import date_by_format, format_date, weekday_by_date
 from bot.utils.phrases import NO
 from bot.utils.states import EditingMenu
 
@@ -27,7 +27,8 @@ async def edit_cafe_menu_date_func(
     """
     if edit_date := date_by_format(text):
         text = (
-            f"<b>Дата</b>: <code>{format_date(edit_date)}</code>\n"
+            f"<b>Дата</b>: <code>{format_date(edit_date)}</code> "
+            f"({weekday_by_date(edit_date)})\n"
             f"Какой приём пищи вы хотите изменить?"
         )
         keyboard = choose_meal_keyboard
@@ -62,7 +63,8 @@ async def edit_cafe_menu_meal_func(
     await state.set_state(EditingMenu.writing)
 
     return (
-        f"<b>Дата</b>: <code>{format_date(edit_date)}</code>\n"
+        f"<b>Дата</b>: <code>{format_date(edit_date)}</code> "
+        f"({weekday_by_date(edit_date)})\n"
         f"<b>Приём пищи</b>: <code>{meal}</code>\n"
         f"<b>Меню:</b>\n"
         f"{menu}\n\n"
@@ -92,7 +94,8 @@ async def edit_cafe_menu_text_func(
     await state.update_data(new_menu=html_text, new_ids=new_ids)
     meal = CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()
     text = (
-        f"<b>Дата</b>: <code>{format_date(edit_date)}</code>\n"
+        f"<b>Дата</b>: <code>{format_date(edit_date)}</code> "
+        f"({weekday_by_date(edit_date)})\n"
         f"<b>Приём пищи</b>: <code>{meal}</code>\n"
         f"<b>Новое меню</b>:\n"
         f"{html_text}\n\n"
@@ -128,7 +131,8 @@ async def edit_cafe_menu_confirm_func(
 
     text = (
         f"<b>{CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()}</b> на "
-        f"<b>{format_date(edit_date)}</b> успешно изменён!"
+        f"<b>{format_date(edit_date)} ({weekday_by_date(edit_date)})</b> "
+        f"успешно изменён!"
     )
 
     return text, new_ids

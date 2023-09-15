@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from aiogram.types import InlineKeyboardMarkup, InputMediaPhoto
 
+from bot.custom_types import LessonsAlbum
 from bot.keyboards import (
     cancel_state_keyboard,
     choose_grade_parallel_keyboard,
@@ -10,7 +11,8 @@ from bot.keyboards import (
 )
 from bot.keyboards.admin.admin import confirm_unconfirm_keyboard
 from bot.upml.album_lessons import tesseract_album_lessons_func
-from bot.utils.datehelp import date_by_format, format_date
+from bot.utils.datehelp import date_by_format, format_date, weekday_by_date
+from bot.utils.funcs import multi_bytes_to_ids
 from bot.utils.phrases import DONT_UNDERSTAND_DATE
 from bot.utils.states import LoadingLessons
 
@@ -18,12 +20,11 @@ if TYPE_CHECKING:
     from aiogram import Bot
     from aiogram.fsm.context import FSMContext
 
-    from bot.custom_types import Album, LessonsAlbum
+    from bot.custom_types import Album
     from bot.database.repository import LessonsRepository
 
 
 async def process_lessons_album_func(
-    chat_id: int,
     album: "Album",
     bot: "Bot",
     state: "FSMContext",
@@ -32,14 +33,13 @@ async def process_lessons_album_func(
     """
     Обработчки фотографий расписаний при нескольких штуках.
 
-    :param chat_id: Айди чата.
     :param album: Альбом с расписаниями.
     :param bot: ТГ Бот.
     :param state: Состояние пользователя.
     :param tesseract_path: Путь до исполняемого файла тессеракта.
     :return: Сообщение и клавиатура для пользователя.
     """
-    lessons = await tesseract_album_lessons_func(chat_id, bot, album, tesseract_path)
+    lessons = await tesseract_album_lessons_func(bot, album, tesseract_path)
     await state.update_data(lessons=lessons)
 
     if all(lesson.status for lesson in lessons):  # Всё успешно обработалось
@@ -55,18 +55,28 @@ async def process_lessons_album_func(
 
 
 async def all_good_lessons_func(
+    chat_id: int,
+    bot: "Bot",
     state: "FSMContext",
     repo: "LessonsRepository",
 ) -> tuple[str, "InlineKeyboardMarkup"]:
     """
     Обработка кнопки "Подтвердить" при всех верных расписаниях.
 
+    :param chat_id: Айди чата.
+    :param bot: ТГ Бот.
     :param state: Состояние пользователя.
     :param repo: Репозиторий расписаний уроков.
     :return: Сообщение и клавиатура для пользователя.
     """
     lessons: list["LessonsAlbum"] = (await state.get_data())["lessons"]
+
     for lesson in lessons:
+        lesson.class_photo_ids = await multi_bytes_to_ids(
+            chat_id,
+            lesson.class_photos,
+            bot,
+        )
         await repo.save_prepared_to_db(lesson)
 
     await state.clear()
@@ -87,16 +97,16 @@ async def start_choose_grades_func(
     lessons: list["LessonsAlbum"] = data["lessons"]
 
     if await state.get_state() == LoadingLessons.all_good:
-        for lesson in lessons:
-            lesson.status = False
-            lesson.grade = None
-            lesson.date = None
-            lesson.class_photo_ids = []
+        for i, lesson in enumerate(lessons):
+            lessons[i] = LessonsAlbum(
+                text=lesson.text,
+                full_photo_id=lesson.full_photo_id,
+            )
         await state.update_data(lessons=lessons)
 
-    await state.set_state(LoadingLessons.choose_grade)
     current_lesson = lessons[0]
     await state.update_data(current_lesson=current_lesson)
+    await state.set_state(LoadingLessons.choose_grade)
 
     # Начало выбора классов
     return "Для каких классов это расписание?", current_lesson
@@ -177,7 +187,8 @@ async def choose_dates_func(
     else:
         text = "\n".join(
             f"Расписание для <b>{good_lessons.grade}-х классов</b> "
-            f"на <b>{format_date(good_lessons.date)}</b>"
+            f"на <b>{format_date(good_lessons.date)}</b> "
+            f"({weekday_by_date(good_lessons.date)})"
             for good_lessons in lessons
         )
         keyboard = confirm_cancel_keyboard

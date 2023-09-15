@@ -34,6 +34,22 @@ async def bytes_io_to_image_id(
     return message.photo[-1].file_id
 
 
+async def multi_bytes_to_ids(
+    chat_id: int,
+    images: list["BytesIO"],
+    bot: "Bot",
+) -> list[str]:
+    """
+    Перевод изображений из байтов в айдишники файлов телеграма.
+
+    :param chat_id: Куда отправлять для сохранения.
+    :param images: Файлы с расписаниями по классам.
+    :param bot: ТГ Бот.
+    :return: Айдишник полного расписания и айдишники отдельных расписаний.
+    """
+    return [await bytes_io_to_image_id(chat_id, image, bot) for image in images]
+
+
 @cached(ttl=60 * 60)
 async def username_by_user_id(bot: "Bot", user_id: int) -> str | None:
     """

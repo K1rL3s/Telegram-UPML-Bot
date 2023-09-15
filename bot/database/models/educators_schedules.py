@@ -3,7 +3,7 @@ import datetime as dt
 from sqlalchemy import Date, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from bot.database.models.base_models import AlchemyBaseModel
+from bot.database.base import AlchemyBaseModel
 
 
 class EducatorsSchedule(AlchemyBaseModel):

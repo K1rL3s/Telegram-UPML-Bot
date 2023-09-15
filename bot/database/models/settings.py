@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean, ForeignKey, Integer, String
 from sqlalchemy.orm import column_property, Mapped, mapped_column, relationship
 
-from bot.database.models.base_models import UserRelatedModel
+from bot.database.base import UserRelatedModel
 
 
 class Settings(UserRelatedModel):
