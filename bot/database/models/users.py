@@ -57,11 +57,6 @@ class User(UserRelatedModel):
         nullable=False,
     )
 
-    # Роли пользователя
-    roles: Mapped[list["Role"]] = relationship(
-        secondary="users_to_roles",
-        lazy="selectin",
-    )
     # Настройки пользователя
     settings: Mapped["Settings"] = relationship(
         "Settings",
@@ -72,6 +67,11 @@ class User(UserRelatedModel):
     laundry: Mapped["Laundry"] = relationship(
         "Laundry",
         back_populates="user",
+        lazy="selectin",
+    )
+    # Роли пользователя
+    roles: Mapped[list["Role"]] = relationship(
+        secondary="users_to_roles",
         lazy="selectin",
     )
 

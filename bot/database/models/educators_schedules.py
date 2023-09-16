@@ -1,4 +1,5 @@
 import datetime as dt
+from typing import Optional
 
 from sqlalchemy import Date, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -26,7 +27,7 @@ class EducatorsSchedule(AlchemyBaseModel):
         index=True,
     )
 
-    edit_by: Mapped[int] = mapped_column(
+    edit_by: Mapped[Optional[int]] = mapped_column(
         ForeignKey("users.user_id"),
         nullable=True,
     )

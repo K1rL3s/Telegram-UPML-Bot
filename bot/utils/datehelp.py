@@ -58,6 +58,45 @@ def date_by_format(
     return date_obj
 
 
+def time_by_format(time: str) -> "dt.time":
+    """
+    Конвертация строки формата "{часы}:{минуты}" в объект времени.
+
+    :param time: Время в виде строки, где часы и минуты разделены двоеточием.
+    :return: Объект времени.
+    """
+    hours, minutes = map(int, time.split(':'))
+    return dt.time(hour=hours, minute=minutes)
+
+
+def format_time(time: "dt.time") -> str:
+    """
+    Формат объекта времени в вид "HH:MM" с лидирующими нулями.
+
+    :param time: Объект времени.
+    :return: Отформатированная строка.
+    """
+    return time.strftime("%H:%M")
+
+
+def datetime_and_time_delta(datetime: "dt.datetime", time: "dt.time") -> "dt.timedelta":
+    """
+    Возвращает разницу между временем из объекта datetime и переданным временем.
+
+    :param datetime: Объект datetime, с которым нужно сравнить время.
+    :param time: Целевое время для сравнения.
+    :return: timedelta объект, представляющий разницу во времени.
+    """
+    datetime_time = datetime.time()
+
+    timedelta = dt.timedelta(hours=time.hour, minutes=time.minute) - dt.timedelta(hours=datetime_time.hour, minutes=datetime_time.minute)
+
+    if timedelta.total_seconds() < 0:
+        timedelta += dt.timedelta(hours=24)
+
+    return timedelta
+
+
 def hours_minutes_to_minutes(text: str) -> int:
     """
     Строка формата "{часы} {минуты}" в минуты, разделитель точка, запятая или пробел.

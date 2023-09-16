@@ -14,9 +14,6 @@ from bot.keyboards import (
     choose_grade_keyboard,
     settings_keyboard,
 )
-from bot.utils.consts import (
-    LAUNDRY_ENG_TO_RU,
-)
 from bot.utils.enums import SlashCommands, TextCommands, UserCallback
 from bot.utils.states import EditingSettings
 
@@ -112,9 +109,11 @@ async def edit_laundry_start_handler(
     await state.update_data(start_id=callback.message.message_id, attr=attr)
 
     text = (
-        f"🕛 Введите часы и минуты для <b>{LAUNDRY_ENG_TO_RU[attr]}</b> "
-        "через точку, запятую или пробел.\n"
-        "<i>(0.30, 1 0, 12,45)</i>"
+        f"🕛 Чтобы установить таймер на срабатывание через какое-то время, "
+        "введите часы и минуты через точку, запятую или пробел "
+        "<i>(0.30, 1 0, 12,45)</i>.\n"
+        "⏰ Чтобы установить таймер на срабатывание в какое-то время, "
+        "введите это время через двоеточие <i>(12:30, 16:00, 19:50)</i>"
     )
     await callback.message.edit_text(text=text, reply_markup=cancel_state_keyboard)
 
@@ -130,11 +129,11 @@ async def edit_laundry_time_handler(
     start_id, attr = data["start_id"], data["attr"]
 
     text, keyboard = await edit_laundry_time_func(
-        repo.settings,
-        state,
         message.from_user.id,
         attr,
         message.text,
+        state,
+        repo.settings,
     )
 
     await message.delete()

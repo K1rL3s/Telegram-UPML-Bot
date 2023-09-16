@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from bot.keyboards import laundry_keyboard
 from bot.utils.consts import LAUNDRY_REPEAT
 from bot.utils.enums import UserCallback
-from bot.utils.datehelp import datetime_now
+from bot.utils.datehelp import datetime_and_time_delta, datetime_now
 
 if TYPE_CHECKING:
     from aiogram.types import InlineKeyboardMarkup
@@ -32,7 +32,7 @@ async def laundry_both_handler(
     keyboard = await laundry_keyboard(laundry)
 
     if (minutes := await laundry_time_left(laundry)) is not None:
-        text += f"\n\nВремя до конца таймера: <b>{minutes}</b> минут"
+        text += f"\n\nВремя до конца таймера: <b>~{minutes}</b> минут"
 
     return text, keyboard
 
@@ -74,12 +74,14 @@ async def laundry_start_timer_func(
     """
     settings = await settings_repo.get(user_id)
 
-    minutes = getattr(
-        settings,
-        callback_data.replace(UserCallback.START_LAUNDRY_PREFIX, ""),
-    )
+    attr = callback_data.replace(UserCallback.START_LAUNDRY_PREFIX, "")
     start_time = datetime_now()
-    end_time = start_time + dt.timedelta(minutes=minutes)
+    if time := getattr(settings, f"{attr}_time"):
+        timedelta = datetime_and_time_delta(start_time, time)
+    else:
+        timedelta = dt.timedelta(minutes=(getattr(settings, f"{attr}_minutes")))
+
+    end_time = start_time + timedelta
 
     await laundry_repo.save_or_update_to_db(
         user_id,
@@ -89,7 +91,7 @@ async def laundry_start_timer_func(
         rings=0,
     )
 
-    return minutes, end_time
+    return timedelta.seconds // 60, end_time
 
 
 async def laundry_cancel_timer_func(repo: "LaundryRepository", user_id: int) -> None:

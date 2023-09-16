@@ -15,8 +15,8 @@ NOTIFIES_ENG_TO_RU: Final[dict[str, str]] = {
     "grade_11": "одиннадцатым",
 }
 LAUNDRY_ENG_TO_RU: Final[dict[str, str]] = {
-    "washing_time": "время стирки",
-    "drying_time": "время сушки",
+    "washing": "время стирки",
+    "drying": "время сушки",
 }
 
 GRADES: Final[tuple[str, ...]] = ("10А", "10Б", "10В", "11А", "11Б", "11В")

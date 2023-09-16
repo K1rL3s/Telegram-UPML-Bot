@@ -66,12 +66,12 @@ class UserCallback(str, Enum):
     SWITCH_LESSONS_NOTIFY = PREFIX_SWITCH + "lessons_notify"
     SWITCH_NEWS_NOTIFY = PREFIX_SWITCH + "news_notify"
     EDIT_SETTINGS_PREFIX = "edit_settings_"
-    EDIT_WASHING_TIME = EDIT_SETTINGS_PREFIX + "washing_time"
-    EDIT_DRYING_TIME = EDIT_SETTINGS_PREFIX + "drying_time"
+    EDIT_WASHING_TIME = EDIT_SETTINGS_PREFIX + "washing"
+    EDIT_DRYING_TIME = EDIT_SETTINGS_PREFIX + "drying"
 
     START_LAUNDRY_PREFIX = "start_laundry_"
-    START_WASHING_TIMER = START_LAUNDRY_PREFIX + "washing_time"
-    START_DRYING_TIMER = START_LAUNDRY_PREFIX + "drying_time"
+    START_WASHING_TIMER = START_LAUNDRY_PREFIX + "washing"
+    START_DRYING_TIMER = START_LAUNDRY_PREFIX + "drying"
     CANCEL_LAUNDRY_TIMER = "cancel_laundry_timer"
 
     CANCEL_STATE = "cancel_state"

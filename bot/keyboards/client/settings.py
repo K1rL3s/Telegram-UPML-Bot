@@ -8,6 +8,7 @@ from aiogram.utils.keyboard import (
 
 from bot.keyboards.universal import go_to_main_menu_button
 from bot.utils.consts import GRADES
+from bot.utils.datehelp import format_time
 from bot.utils.enums import UserCallback
 from bot.utils.phrases import NO, QUESTION, YES
 
@@ -20,8 +21,8 @@ USER_CLASS = "Класс {0}".format
 LESSONS_NOTIFY = "Уроки {0}".format
 NEWS_NOTIFY = "Новости {0}".format
 
-WASHING = "⏳Стирка {0} мин.".format
-DRYING = "💨Сушка {0} мин.".format
+WASHING = "⏳Стирка: {0}".format
+DRYING = "💨Сушка: {0}".format
 BACK_TO_SETTINGS = "⏪Настройки"
 RESET_CLASS = f"{QUESTION}Сбросить класс"
 
@@ -50,12 +51,21 @@ async def settings_keyboard(
                 ),
             ],
             [
+
                 InlineKeyboardButton(
-                    text=WASHING(settings.washing_time),
+                    text=WASHING(
+                        format_time(settings.washing_time)  # noqa
+                        if settings.washing_time is not None else
+                        f"{settings.washing_minutes} мин."
+                    ),
                     callback_data=UserCallback.EDIT_WASHING_TIME,
                 ),
                 InlineKeyboardButton(
-                    text=DRYING(settings.drying_time),
+                    text=DRYING(
+                        format_time(settings.drying_time)  # noqa
+                        if settings.drying_time is not None else
+                        f"{settings.drying_minutes} мин."
+                    ),
                     callback_data=UserCallback.EDIT_DRYING_TIME,
                 ),
             ],

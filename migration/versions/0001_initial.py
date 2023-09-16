@@ -81,7 +81,7 @@ def upgrade() -> None:
         "menus",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("date", sa.Date(), nullable=False),
-        sa.Column("edit_by", sa.BigInteger(), nullable=False),
+        sa.Column("edit_by", sa.BigInteger(), nullable=True),
         sa.Column("breakfast", sa.String(), nullable=True),
         sa.Column("lunch", sa.String(), nullable=True),
         sa.Column("dinner", sa.String(), nullable=True),

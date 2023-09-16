@@ -23,7 +23,7 @@ def upgrade() -> None:
         "educators_schedules",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("date", sa.Date(), nullable=False),
-        sa.Column("edit_by", sa.BigInteger(), nullable=False),
+        sa.Column("edit_by", sa.BigInteger(), nullable=True),
         sa.Column("schedule", sa.String(length=1024), nullable=True),
         sa.ForeignKeyConstraint(
             ["edit_by"],
