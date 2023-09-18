@@ -11,6 +11,6 @@ class BaseInfoMiddleware(BaseMiddleware, ABC):
     """Базовый мидлварь. Он нужен, чтобы метод get_short_info был везде."""
 
     @staticmethod
-    async def get_short_info(message: "Union[Message, CallbackQuery]") -> str | None:
+    def get_short_info(message: "Union[Message, CallbackQuery]") -> str | None:
         """Короткая информация о пользователе для логов."""
         return f"id={message.from_user.id}, username={extract_username(message)}"

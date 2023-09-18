@@ -65,7 +65,7 @@ def time_by_format(time: str) -> "dt.time":
     :param time: Время в виде строки, где часы и минуты разделены двоеточием.
     :return: Объект времени.
     """
-    hours, minutes = map(int, time.split(':'))
+    hours, minutes = map(int, time.split(":"))
     return dt.time(hour=hours, minute=minutes)
 
 
@@ -79,7 +79,7 @@ def format_time(time: "dt.time") -> str:
     return time.strftime("%H:%M")
 
 
-def datetime_and_time_delta(datetime: "dt.datetime", time: "dt.time") -> "dt.timedelta":
+def datetime_time_delta(datetime: "dt.datetime", time: "dt.time") -> "dt.timedelta":
     """
     Возвращает разницу между временем из объекта datetime и переданным временем.
 
@@ -89,7 +89,13 @@ def datetime_and_time_delta(datetime: "dt.datetime", time: "dt.time") -> "dt.tim
     """
     datetime_time = datetime.time()
 
-    timedelta = dt.timedelta(hours=time.hour, minutes=time.minute) - dt.timedelta(hours=datetime_time.hour, minutes=datetime_time.minute)
+    timedelta = dt.timedelta(
+        hours=time.hour,
+        minutes=time.minute,
+    ) - dt.timedelta(
+        hours=datetime_time.hour,
+        minutes=datetime_time.minute,
+    )
 
     if timedelta.total_seconds() < 0:
         timedelta += dt.timedelta(hours=24)

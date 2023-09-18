@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import StateFilter
 
-from bot.filters import IsAdmin
 from bot.funcs.admin.admin_notifies import (
     notify_confirm_func,
     notify_for_who_func,
@@ -27,7 +26,7 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(F.data == AdminCallback.DO_A_NOTIFY_FOR_, IsAdmin())
+@router.callback_query(F.data == AdminCallback.DO_A_NOTIFY_FOR_)
 async def notify_panel_handler(callback: "CallbackQuery") -> None:
     """Обработчик кнопки "Уведомление"."""
     text = """
@@ -41,10 +40,7 @@ async def notify_panel_handler(callback: "CallbackQuery") -> None:
     await callback.message.edit_text(text=text, reply_markup=notify_panel_keyboard)
 
 
-@router.callback_query(
-    F.data.startswith(AdminCallback.DO_A_NOTIFY_FOR_),
-    IsAdmin(),
-)
+@router.callback_query(F.data.startswith(AdminCallback.DO_A_NOTIFY_FOR_))
 async def notify_for_who_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
@@ -58,7 +54,7 @@ async def notify_for_who_handler(
     await callback.message.edit_text(text=text, reply_markup=keyboard)
 
 
-@router.message(StateFilter(DoNotify.writing), IsAdmin())
+@router.message(StateFilter(DoNotify.writing))
 async def notify_message_handler(
     message: "Message",
     state: "FSMContext",
@@ -80,7 +76,6 @@ async def notify_message_handler(
 @router.callback_query(
     F.data == AdminCallback.CONFIRM,
     StateFilter(DoNotify.writing),
-    IsAdmin(),
 )
 async def notify_confirm_handler(
     callback: "CallbackQuery",

@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import StateFilter
 
-from bot.filters import IsSuperAdmin
 from bot.funcs.admin.admin_manage import (
     admin_add_confirm_func,
     admin_add_username_func,
@@ -28,10 +27,7 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(
-    F.data.startswith(AdminCallback.OPEN_ADMINS_LIST_PAGE_),
-    IsSuperAdmin(),
-)
+@router.callback_query(F.data.startswith(AdminCallback.OPEN_ADMINS_LIST_PAGE_))
 async def admins_list_handler(
     callback: "CallbackQuery",
     repo: "Repository",
@@ -46,7 +42,7 @@ async def admins_list_handler(
     await callback.message.edit_text(text=text, reply_markup=keyboard)
 
 
-@router.callback_query(F.data == AdminCallback.ADD_NEW_ADMIN, IsSuperAdmin())
+@router.callback_query(F.data == AdminCallback.ADD_NEW_ADMIN)
 async def admin_add_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
@@ -58,7 +54,7 @@ async def admin_add_handler(
     await callback.message.edit_text(text=text, reply_markup=cancel_state_keyboard)
 
 
-@router.message(StateFilter(AddingNewAdmin.username), IsSuperAdmin())
+@router.message(StateFilter(AddingNewAdmin.username))
 async def admin_add_username_handler(
     message: "Message",
     state: "FSMContext",
@@ -72,7 +68,6 @@ async def admin_add_username_handler(
 @router.callback_query(
     F.data == AdminCallback.CONFIRM,
     StateFilter(AddingNewAdmin.confirm),
-    IsSuperAdmin(),
 )
 async def admin_add_confirm_handler(
     callback: "CallbackQuery",
@@ -87,20 +82,14 @@ async def admin_add_confirm_handler(
     )
 
 
-@router.callback_query(
-    F.data.startswith(AdminCallback.CHECK_ADMIN_),
-    IsSuperAdmin(),
-)
+@router.callback_query(F.data.startswith(AdminCallback.CHECK_ADMIN_))
 async def admin_check_handler(callback: "CallbackQuery") -> None:
     """Обработчик кнопки с юзернеймом админа в списке админов."""
     text, keyboard = await admin_check_func(callback.data, callback.bot)
     await callback.message.edit_text(text=text, reply_markup=keyboard)
 
 
-@router.callback_query(
-    F.data.startswith(AdminCallback.REMOVE_ADMIN_),
-    IsSuperAdmin(),
-)
+@router.callback_query(F.data.startswith(AdminCallback.REMOVE_ADMIN_))
 async def admin_remove_handler(
     callback: "CallbackQuery",
     repo: "Repository",

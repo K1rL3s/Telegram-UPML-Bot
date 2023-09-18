@@ -36,8 +36,9 @@ async def one_notify(
     try:
         await bot.send_message(text=text, chat_id=user.user_id, reply_markup=keyboard)
         logger.debug(
-            f'Уведомление "{" ".join(text.split())}" '
-            f"успешно для {user.short_info()}",
+            'Уведомление "{text}" успешно для {short_info}',
+            text=" ".join(text.split()),
+            short_info=user.short_info(),
         )
     except TelegramForbiddenError:
         await repo.update(user.user_id, is_active=False)
@@ -46,7 +47,11 @@ async def one_notify(
         await asyncio.sleep(try_count**2)
         return await one_notify(bot, repo, user, text, keyboard, try_count + 1)
     except Exception as e:
-        logger.warning(f"Ошибка при уведомлении: {e} [{user.short_info()}]")
+        logger.warning(
+            "Ошибка при уведомлении: {err} [{short_info}]",
+            err=e,
+            short_info=user.short_info(),
+        )
         return False
 
     return True

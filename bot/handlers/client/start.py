@@ -3,9 +3,9 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import Command, CommandStart, StateFilter
 
-from bot.filters import SaveUpdateUser
 from bot.keyboards import main_menu_inline_keyboard
 from bot.keyboards.client.start import start_reply_keyboard
+from bot.middlewares.inner.save_user import SaveUpdateUserMiddleware
 from bot.utils.phrases import MAIN_MENU_TEXT, USER_START_TEXT
 from bot.utils.enums import SlashCommands, TextCommands, UserCallback
 
@@ -17,10 +17,11 @@ if TYPE_CHECKING:
 
 
 router = Router(name=__name__)
+router.message.middleware(SaveUpdateUserMiddleware())
 
 
-@router.message(F.text == TextCommands.START, StateFilter("*"), SaveUpdateUser())
-@router.message(CommandStart(), StateFilter("*"), SaveUpdateUser())
+@router.message(F.text == TextCommands.START, StateFilter("*"))
+@router.message(CommandStart(), StateFilter("*"))
 async def start_handler(
     message: "Message",
     repo: "Repository",
@@ -34,7 +35,7 @@ async def start_handler(
     )
 
 
-@router.callback_query(F.data == UserCallback.OPEN_MAIN_MENU, SaveUpdateUser())
+@router.callback_query(F.data == UserCallback.OPEN_MAIN_MENU)
 async def main_menu_callback_handler(
     callback: "CallbackQuery",
     repo: "Repository",
@@ -44,7 +45,7 @@ async def main_menu_callback_handler(
     await callback.message.edit_text(text=MAIN_MENU_TEXT, reply_markup=keyboard)
 
 
-@router.message(F.text == TextCommands.MENU, SaveUpdateUser())
+@router.message(F.text == TextCommands.MENU)
 @router.message(Command(SlashCommands.MENU))
 async def main_menu_message_handler(
     message: "Message",
@@ -55,8 +56,8 @@ async def main_menu_message_handler(
     await message.reply(text=MAIN_MENU_TEXT, reply_markup=keyboard)
 
 
-@router.message(F.text == TextCommands.HELP, SaveUpdateUser())
-@router.message(Command(SlashCommands.HELP), SaveUpdateUser())
+@router.message(F.text == TextCommands.HELP)
+@router.message(Command(SlashCommands.HELP))
 async def help_handler(message: "Message") -> None:
     """Обработчик команды "/help"."""
     await message.reply("Помощь!")

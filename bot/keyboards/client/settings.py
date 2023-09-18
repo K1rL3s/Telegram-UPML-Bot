@@ -51,20 +51,19 @@ async def settings_keyboard(
                 ),
             ],
             [
-
                 InlineKeyboardButton(
                     text=WASHING(
-                        format_time(settings.washing_time)  # noqa
-                        if settings.washing_time is not None else
                         f"{settings.washing_minutes} мин."
+                        if settings.washing_time is None
+                        else format_time(settings.washing_time),
                     ),
                     callback_data=UserCallback.EDIT_WASHING_TIME,
                 ),
                 InlineKeyboardButton(
                     text=DRYING(
-                        format_time(settings.drying_time)  # noqa
-                        if settings.drying_time is not None else
                         f"{settings.drying_minutes} мин."
+                        if settings.drying_time is None
+                        else format_time(settings.drying_time),
                     ),
                     callback_data=UserCallback.EDIT_DRYING_TIME,
                 ),

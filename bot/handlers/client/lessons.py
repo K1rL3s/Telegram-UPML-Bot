@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import Command
 
-from bot.filters import SaveUpdateUser
 from bot.funcs.client.lessons import send_lessons_images
 from bot.keyboards import lessons_keyboard
 from bot.utils.consts import TODAY
@@ -19,10 +18,7 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(
-    F.data.startswith(UserCallback.OPEN_LESSONS_ON_),
-    SaveUpdateUser(),
-)
+@router.callback_query(F.data.startswith(UserCallback.OPEN_LESSONS_ON_))
 async def date_lessons_callback_handler(
     callback: "CallbackQuery",
     repo: "Repository",
@@ -46,8 +42,8 @@ async def date_lessons_callback_handler(
         )
 
 
-@router.message(F.text == TextCommands.LESSONS, SaveUpdateUser())
-@router.message(Command(SlashCommands.LESSONS), SaveUpdateUser())
+@router.message(F.text == TextCommands.LESSONS)
+@router.message(Command(SlashCommands.LESSONS))
 async def date_lessons_message_handler(
     message: "Message",
     repo: "Repository",

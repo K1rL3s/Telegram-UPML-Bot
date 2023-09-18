@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import Command, StateFilter
 
-from bot.filters import SaveUpdateUser
 from bot.funcs.client.settings import (
     edit_bool_settings_func,
     edit_grade_setting_func,
@@ -14,6 +13,7 @@ from bot.keyboards import (
     choose_grade_keyboard,
     settings_keyboard,
 )
+from bot.middlewares.inner.save_user import SaveUpdateUserMiddleware
 from bot.utils.enums import SlashCommands, TextCommands, UserCallback
 from bot.utils.states import EditingSettings
 
@@ -25,6 +25,7 @@ if TYPE_CHECKING:
 
 
 router = Router(name=__name__)
+router.message.middleware(SaveUpdateUserMiddleware())
 
 SETTINGS_WELCOME_TEXT = """
 Привет! Я - настройки!
@@ -37,7 +38,7 @@ SETTINGS_WELCOME_TEXT = """
 """.strip()
 
 
-@router.callback_query(F.data == UserCallback.OPEN_SETTINGS, SaveUpdateUser())
+@router.callback_query(F.data == UserCallback.OPEN_SETTINGS)
 async def settings_callback_handler(
     callback: "CallbackQuery",
     repo: "Repository",
@@ -51,8 +52,8 @@ async def settings_callback_handler(
     )
 
 
-@router.message(F.text == TextCommands.SETTINGS, SaveUpdateUser())
-@router.message(Command(SlashCommands.SETTINGS), SaveUpdateUser())
+@router.message(F.text == TextCommands.SETTINGS)
+@router.message(Command(SlashCommands.SETTINGS))
 async def settings_message_handler(
     message: "Message",
     repo: "Repository",
@@ -109,7 +110,7 @@ async def edit_laundry_start_handler(
     await state.update_data(start_id=callback.message.message_id, attr=attr)
 
     text = (
-        f"🕛 Чтобы установить таймер на срабатывание через какое-то время, "
+        "🕛 Чтобы установить таймер на срабатывание через какое-то время, "
         "введите часы и минуты через точку, запятую или пробел "
         "<i>(0.30, 1 0, 12,45)</i>.\n"
         "⏰ Чтобы установить таймер на срабатывание в какое-то время, "

@@ -1,5 +1,4 @@
 import datetime as dt
-from typing import Optional
 
 from sqlalchemy import Date, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -27,13 +26,13 @@ class Menu(AlchemyBaseModel):
         index=True,
     )
 
-    edit_by: Mapped[Optional[int]] = mapped_column(
+    edit_by: Mapped[int | None] = mapped_column(
         ForeignKey("users.user_id"),
         nullable=True,
     )
 
-    breakfast: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    lunch: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    dinner: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    snack: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    supper: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    breakfast: Mapped[str | None] = mapped_column(String, nullable=True)
+    lunch: Mapped[str | None] = mapped_column(String, nullable=True)
+    dinner: Mapped[str | None] = mapped_column(String, nullable=True)
+    snack: Mapped[str | None] = mapped_column(String, nullable=True)
+    supper: Mapped[str | None] = mapped_column(String, nullable=True)

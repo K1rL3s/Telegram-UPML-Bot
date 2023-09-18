@@ -12,23 +12,6 @@ if TYPE_CHECKING:
     from bot.database.repository import MenuRepository
 
 
-@ttl_cache(ttl=60 * 60 * 24)  # Сутки
-def _format_menu(meals: tuple[str, ...]) -> str:
-    """
-    Формат дневного меню для сообщения в телегу.
-
-    :param meals: Строки по порядку приёмов пищи.
-    :return: Отформатированная строка с приёмами пищи.
-    """
-    return "\n\n".join(
-        f"<b>{meal_type}:</b>\n{meal or NO_DATA}".strip()
-        for meal_type, meal in zip(
-            BEAUTIFY_MEALS,
-            meals,
-        )
-    )
-
-
 # @ttl_cache(ttl=60 * 60)  # Час
 async def get_format_menu_by_date(
     repo: "MenuRepository",
@@ -54,4 +37,21 @@ async def get_format_menu_by_date(
     return (
         f"🍺 <b>Меню на {format_date(date)} ({weekday_by_date(date)})</b>:\n\n"
         f"{_format_menu(meals).strip()}"
+    )
+
+
+@ttl_cache(ttl=60 * 60 * 24)  # Сутки
+def _format_menu(meals: tuple[str, ...]) -> str:
+    """
+    Формат дневного меню для сообщения в телегу.
+
+    :param meals: Строки по порядку приёмов пищи.
+    :return: Отформатированная строка с приёмами пищи.
+    """
+    return "\n\n".join(
+        f"<b>{meal_type}:</b>\n{meal or NO_DATA}".strip()
+        for meal_type, meal in zip(
+            BEAUTIFY_MEALS,
+            meals,
+        )
     )

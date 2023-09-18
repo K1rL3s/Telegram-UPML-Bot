@@ -1,5 +1,4 @@
 import datetime as dt
-from typing import Optional
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -25,24 +24,24 @@ class Laundry(UserRelatedModel):
         nullable=False,
     )
 
-    # Когда был запущен таймер  UNUSED !!
-    start_time: Mapped[Optional[dt.datetime]] = mapped_column(
+    # Когда был запущен таймер.  UNUSED !!
+    start_time: Mapped[dt.datetime | None] = mapped_column(
         DateTime,
         nullable=True,
     )
     # Когда он должен закончится
-    end_time: Mapped[Optional[dt.datetime]] = mapped_column(
+    end_time: Mapped[dt.datetime | None] = mapped_column(
         DateTime,
         nullable=True,
     )
     # Сколько раз было уведомление
-    rings: Mapped[Optional[int]] = mapped_column(
+    rings: Mapped[int | None] = mapped_column(
         Integer,
         default=0,
         nullable=True,
     )
     # Активен ли таймер
-    is_active: Mapped[Optional[bool]] = mapped_column(
+    is_active: Mapped[bool | None] = mapped_column(
         Boolean,
         default=False,
         nullable=True,

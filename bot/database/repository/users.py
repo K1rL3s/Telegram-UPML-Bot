@@ -110,7 +110,7 @@ class UserRepository(BaseRepository):
         elif not user:
             user = User(user_id=user_id, username=username)
             self._session.add(user)
-            logger.info(f"Новый пользователь {user}")
+            logger.info("Новый пользователь {user}", user=user)
 
         await self._session.commit()
 

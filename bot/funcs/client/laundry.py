@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from bot.keyboards import laundry_keyboard
 from bot.utils.consts import LAUNDRY_REPEAT
 from bot.utils.enums import UserCallback
-from bot.utils.datehelp import datetime_and_time_delta, datetime_now
+from bot.utils.datehelp import datetime_now, datetime_time_delta
 
 if TYPE_CHECKING:
     from aiogram.types import InlineKeyboardMarkup
@@ -77,9 +77,9 @@ async def laundry_start_timer_func(
     attr = callback_data.replace(UserCallback.START_LAUNDRY_PREFIX, "")
     start_time = datetime_now()
     if time := getattr(settings, f"{attr}_time"):
-        timedelta = datetime_and_time_delta(start_time, time)
+        timedelta = datetime_time_delta(start_time, time)
     else:
-        timedelta = dt.timedelta(minutes=(getattr(settings, f"{attr}_minutes")))
+        timedelta = dt.timedelta(minutes=getattr(settings, f"{attr}_minutes"))
 
     end_time = start_time + timedelta
 

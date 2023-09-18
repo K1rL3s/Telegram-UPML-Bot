@@ -1,5 +1,4 @@
 import datetime as dt
-from typing import Optional
 
 from sqlalchemy import Boolean, ForeignKey, Integer, String, Time
 from sqlalchemy.orm import column_property, Mapped, mapped_column, relationship
@@ -26,11 +25,15 @@ class Settings(UserRelatedModel):
     )
 
     # Класс, 10 или 11
-    grade: Mapped[Optional[str]] = mapped_column(String(2), default=None, nullable=True)
+    grade: Mapped[str | None] = mapped_column(String(2), default=None, nullable=True)
     # Буква класса, русская
-    letter: Mapped[Optional[str]] = mapped_column(String(1), default=None, nullable=True)
+    letter: Mapped[str | None] = mapped_column(
+        String(1),
+        default=None,
+        nullable=True,
+    )
     # grade + letter, например, "10Б", "11А" итп
-    class_: Mapped[Optional[str]] = column_property(grade + letter)
+    class_: Mapped[str | None] = column_property(grade + letter)
 
     # Включены ли уведомления об обновлении расписания
     lessons_notify: Mapped[bool] = mapped_column(
@@ -59,12 +62,12 @@ class Settings(UserRelatedModel):
     )
 
     # До скольки по времени стирается бельё
-    washing_time: Mapped[Optional[dt.time]] = mapped_column(
+    washing_time: Mapped[dt.time | None] = mapped_column(
         Time(timezone=False),
         nullable=True,
     )
     # До скольки по времени сушится бельё
-    drying_time: Mapped[Optional[dt.time]] = mapped_column(
+    drying_time: Mapped[dt.time | None] = mapped_column(
         Time(timezone=False),
         nullable=True,
     )

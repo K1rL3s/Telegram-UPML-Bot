@@ -86,10 +86,10 @@ async def edit_laundry_time_func(
     try:
         if ":" in text:
             time = time_by_format(text)
-            text = await edit_laundry_by_time(time, user_id, attr, repo)
+            text = await _edit_time_laundry(time, user_id, attr, repo)
         else:
             time = laundry_limit_min_max(hours_minutes_to_minutes(text))
-            text = await edit_laundry_by_minutes(time, user_id, attr, repo)
+            text = await _edit_minutes_laundry(time, user_id, attr, repo)
     except ValueError:
         return DONT_UNDERSTAND_TIMER, cancel_state_keyboard
 
@@ -99,35 +99,54 @@ async def edit_laundry_time_func(
     return text, keyboard
 
 
-async def edit_laundry_by_minutes(
+async def _edit_time_laundry(
+    time: "dt.time",
+    user_id: int,
+    attr: Literal["washing", "drying"],
+    repo: "SettingsRepository",
+) -> str:
+    """
+    Сохраняет значение time в базу данных для таймера прачечной в определённое время.
+
+    :param time: Объект времени.
+    :param user_id: ТГ Айди.
+    :param attr: Начало названия колонки.
+    :param repo: Репозиторий настроек пользователей.
+    :return: Текст пользователю.
+    """
+    await repo.save_or_update_to_db(user_id, **{f"{attr}_time": time})
+
+    return (
+        f"{YES} <b>{LAUNDRY_ENG_TO_RU[attr].capitalize()}</b> "
+        f"установлено на {format_time(time)}."
+    )
+
+
+async def _edit_minutes_laundry(
     minutes: int,
     user_id: int,
     attr: Literal["washing", "drying"],
     repo: "SettingsRepository",
 ) -> str:
+    """
+    Сохраняет значение minutes в базу данных для таймера прачечной в минутах.
+
+    :param minutes: Минуты.
+    :param user_id: ТГ Айди.
+    :param attr: Начало названия колонки.
+    :param repo: Репозиторий настроек пользователей.
+    :return: Текст пользователю.
+    """
     await repo.save_or_update_to_db(
-        user_id, **{
+        user_id,
+        **{
             f"{attr}_minutes": minutes,
             f"{attr}_time": None,
-        }
+        },
     )
 
     hours, minutes = minutes_to_hours_minutes(minutes)
     return (
         f"{YES} <b>{LAUNDRY_ENG_TO_RU[attr].capitalize()}</b> "
         f"установлено на <b>{hours} часов, {minutes} минут</b>."
-    )
-
-
-async def edit_laundry_by_time(
-    time: "dt.time",
-    user_id: int,
-    attr: Literal["washing", "drying"],
-    repo: "SettingsRepository",
-) -> str:
-    await repo.save_or_update_to_db(user_id, **{f"{attr}_time": time})
-
-    return (
-        f"{YES} <b>{LAUNDRY_ENG_TO_RU[attr].capitalize()}</b> "
-        f"установлено на {format_time(time)}."
     )

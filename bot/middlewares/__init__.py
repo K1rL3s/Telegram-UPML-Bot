@@ -15,10 +15,10 @@ if TYPE_CHECKING:
     from aiogram import Bot, Dispatcher
 
 
-__all__ = ("setup_middlewares",)
+__all__ = ("setup_global_middlewares",)
 
 
-def setup_middlewares(
+def setup_global_middlewares(
     bot: "Bot",
     dp: "Dispatcher",
     session_maker: "async_sessionmaker[AsyncSession]",

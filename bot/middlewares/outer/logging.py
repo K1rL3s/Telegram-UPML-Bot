@@ -1,6 +1,6 @@
 from typing import Any, TYPE_CHECKING
 
-from aiogram.dispatcher.event.bases import UNHANDLED
+from aiogram.dispatcher.event.bases import REJECTED, UNHANDLED
 from loguru import logger
 
 from bot.middlewares.base import BaseInfoMiddleware
@@ -20,8 +20,10 @@ class LoggingMiddleware(BaseInfoMiddleware):
     ) -> None:
         """Лог при получении callback'а."""
         logger.debug(
-            f'Получен callback "{callback.data}" '
-            f"[{await self.get_short_info(callback)}]",
+            'Get callback={id} "{data}" [{short_info}]',
+            id=callback.id,
+            data=callback.data,
+            short_info=self.get_short_info(callback),
         )
 
     async def post_callbackquery(
@@ -31,31 +33,43 @@ class LoggingMiddleware(BaseInfoMiddleware):
     ) -> None:
         """Лог после обработки callback'а."""
         logger.debug(
-            f'Отработан={is_handled} callback "{callback.data}" '
-            f"[{await self.get_short_info(callback)}]",
+            'Over={is_handled} callback={id} "{data}" [{short_info}]',
+            is_handled=is_handled,
+            id=callback.id,
+            data=callback.data,
+            short_info=self.get_short_info(callback),
         )
 
     async def pre_message(self, message: "Message") -> None:
         """Лог при получении сообщения."""
-        if message.text:
-            logger.debug(
-                f'Получено message "{" ".join(message.text.split())}" '
-                f"[{await self.get_short_info(message)}]",
-            )
-        elif message.photo:
-            logger.debug(f"Получен photo [{await self.get_short_info(message)}]")
+        if message.photo:
+            log = 'Get photo={id} "{text}" [{short_info}]'
+            text = " ".join(message.caption.split())
+        else:
+            log = 'Get message={id} "{text}" [{short_info}]'
+            text = " ".join(message.text.split())
+        logger.debug(
+            log,
+            id=message.message_id,
+            text=text,
+            short_info=self.get_short_info(message),
+        )
 
     async def post_message(self, message: "Message", is_handled: bool) -> None:
         """Лог после обработки сообщения."""
-        if message.text:
-            logger.debug(
-                f'Отработан={is_handled} message "{" ".join(message.text.split())}" '
-                f"[{await self.get_short_info(message)}]",
-            )
-        elif message.photo:
-            logger.debug(
-                f"Отработан={is_handled} photo [{await self.get_short_info(message)}]",
-            )
+        if message.photo:
+            log = 'Over={is_handled} photo={id} "{text}" [{short_info}]'
+            text = " ".join(message.caption.split())
+        else:
+            log = 'Over={is_handled} message={id} "{text}" [{short_info}]'
+            text = " ".join(message.text.split())
+        logger.debug(
+            log,
+            is_handled=is_handled,
+            id=message.message_id,
+            text=text,
+            short_info=self.get_short_info(message),
+        )
 
     async def __call__(
         self,
@@ -67,6 +81,8 @@ class LoggingMiddleware(BaseInfoMiddleware):
 
         await getattr(self, f"pre_{class_name}")(event)
         result = await handler(event, data)
-        await getattr(self, f"post_{class_name}")(event, not (result == UNHANDLED))
-
+        await getattr(self, f"post_{class_name}")(
+            event,
+            result not in (UNHANDLED, REJECTED),
+        )
         return result

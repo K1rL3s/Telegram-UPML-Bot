@@ -20,4 +20,8 @@ async def update_cafe_menu(
             return
 
         status, message = await process_cafe_menu(repo, timeout)
-        logger.info(f"Обновление меню - {status}, {message}")
+        logger.info(
+            "Обновление меню - {status}, {message}",
+            status=status,
+            message=message,
+        )

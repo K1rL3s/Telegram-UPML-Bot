@@ -5,7 +5,6 @@ from aiogram.filters import StateFilter
 from aiogram.types import InputMediaPhoto
 
 from bot.custom_types import Album
-from bot.filters import IsAdmin
 from bot.funcs.admin.admin_lessons import (
     all_good_lessons_func,
     choose_dates_func,
@@ -33,7 +32,7 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(F.data == AdminCallback.UPLOAD_LESSONS, IsAdmin())
+@router.callback_query(F.data == AdminCallback.UPLOAD_LESSONS)
 async def start_process_lessons_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
@@ -49,7 +48,6 @@ async def start_process_lessons_handler(
     StateFilter(LoadingLessons.image),
     ~F.media_group_id,
     F.content_type.in_({"photo"}),
-    IsAdmin(),
 )
 async def process_lessons_handler(
     message: "Message",
@@ -72,7 +70,6 @@ async def process_lessons_handler(
     StateFilter(LoadingLessons.image),
     F.media_group_id,
     F.content_type.in_({"photo"}),
-    IsAdmin(),
 )
 async def process_lessons_album_handler(
     message: "Message",
@@ -96,7 +93,6 @@ async def process_lessons_album_handler(
 @router.callback_query(
     StateFilter(LoadingLessons.all_good),
     F.data == AdminCallback.CONFIRM,
-    IsAdmin(),
 )
 async def all_good_lessons_handler(
     callback: "CallbackQuery",
@@ -120,12 +116,10 @@ async def all_good_lessons_handler(
 @router.callback_query(
     StateFilter(LoadingLessons.all_good),
     F.data == AdminCallback.NOT_CONFIRM,
-    IsAdmin(),
 )
 @router.callback_query(
     StateFilter(LoadingLessons.something_bad),
     F.data == AdminCallback.CONFIRM,
-    IsAdmin(),
 )
 async def start_choose_grades_handler(
     callback: "CallbackQuery",
@@ -152,7 +146,6 @@ async def start_choose_grades_handler(
             AdminCallback.UPLOAD_LESSONS_FOR_11,
         },
     ),
-    IsAdmin(),
 )
 async def choose_grades_handler(
     callback: "CallbackQuery",
@@ -171,7 +164,7 @@ async def choose_grades_handler(
     )
 
 
-@router.message(StateFilter(LoadingLessons.choose_date), IsAdmin())
+@router.message(StateFilter(LoadingLessons.choose_date))
 async def choose_dates_handler(
     message: "Message",
     state: "FSMContext",
@@ -192,7 +185,6 @@ async def choose_dates_handler(
 @router.callback_query(
     StateFilter(LoadingLessons.confirm),
     F.data == AdminCallback.CONFIRM,
-    IsAdmin(),
 )
 async def confirm_edit_lessons_handler(
     callback: "CallbackQuery",

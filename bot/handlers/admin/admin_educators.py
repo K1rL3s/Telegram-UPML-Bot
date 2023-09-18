@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import StateFilter
 
-from bot.filters import IsAdmin
 from bot.funcs.admin.admin_educators import (
     edit_educators_confirm_func,
     edit_educators_date_func,
@@ -25,7 +24,7 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(F.data == AdminCallback.EDIT_EDUCATORS, IsAdmin())
+@router.callback_query(F.data == AdminCallback.EDIT_EDUCATORS)
 async def edit_educators_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
@@ -42,7 +41,7 @@ async def edit_educators_handler(
     await callback.message.edit_text(text=text, reply_markup=cancel_state_keyboard)
 
 
-@router.message(StateFilter(EditingEducators.choose_date), IsAdmin())
+@router.message(StateFilter(EditingEducators.choose_date))
 async def edit_educators_date_handler(
     message: "Message",
     state: "FSMContext",
@@ -60,7 +59,7 @@ async def edit_educators_date_handler(
     )
 
 
-@router.message(StateFilter(EditingEducators.writing), IsAdmin())
+@router.message(StateFilter(EditingEducators.writing))
 async def edit_educators_text_handler(
     message: "Message",
     state: "FSMContext",
@@ -80,7 +79,7 @@ async def edit_educators_text_handler(
     )
 
 
-@router.callback_query(StateFilter(EditingEducators.writing), IsAdmin())
+@router.callback_query(StateFilter(EditingEducators.writing))
 async def edit_educators_confirm_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
