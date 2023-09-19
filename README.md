@@ -24,9 +24,12 @@
     POSTGRES_DB=<str>
     POSTGRES_USER=<str>
     POSTGRES_PASSWORD=<str>
-    ```
 
-<br>
+    REDIS_HOST=<ip>
+    REDIS_HOST_PORT=<int>
+    REDIS_OUTSIDE_PORT=<int>
+    REDIS_PASSWORD=<str>
+    ```
 
 - ### Docker:
 
