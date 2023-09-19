@@ -40,7 +40,7 @@ async def auto_update_cafe_menu_handler(
 
     Загружает и обрабатывает PDF расписание еды с сайта лицея.
     """
-    _, text = await process_cafe_menu(repo.menu, settings.other.TIMEOUT)
+    _, text = await process_cafe_menu(repo.menu, settings.other.timeout)
 
     await callback.message.edit_text(
         text=text,

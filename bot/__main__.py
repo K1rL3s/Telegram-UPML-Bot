@@ -3,7 +3,7 @@ import contextlib
 
 from loguru import logger
 
-from bot.database import database_init
+from bot.database import database_init, redis_init
 from bot.middlewares import setup_global_middlewares
 from bot.setup import make_bot, make_dispatcher, setup_logs
 from bot.schedule import run_schedule_jobs
@@ -19,7 +19,6 @@ from bot.settings import get_settings
 5. Проверить и исправить, что слои database – logic – view сильно не перемешаны.
 6. Использовать Callback фабрики.
 7. Сделать удаление расписаний уроков.
-8. Сделать редис.
 9. Вынести оповещения о прачечной и обновление расписания еды в отдельный скрипт.
 """
 
@@ -30,13 +29,16 @@ async def main() -> None:
     settings = get_settings()
 
     session_maker = await database_init(settings.db)
+    redis = redis_init(settings.redis)
 
-    bot = await make_bot(settings.bot.BOT_TOKEN)
-    dp = make_dispatcher(settings, session_maker)
+    bot = await make_bot(settings.bot.token)
+    dp = make_dispatcher(settings, session_maker, redis)
 
     setup_global_middlewares(bot, dp, session_maker)
 
-    asyncio.create_task(run_schedule_jobs(bot, session_maker, settings.other.TIMEOUT))
+    schedule_task = asyncio.create_task(
+        run_schedule_jobs(bot, session_maker, settings.other.timeout),
+    )
 
     user = await bot.me()  # Copypaste from aiogram
     logger.info(
@@ -49,7 +51,7 @@ async def main() -> None:
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(
         bot,
-        polling_timeout=settings.other.TIMEOUT,
+        polling_timeout=settings.other.timeout,
         allowed_updates=dp.resolve_used_update_types(),
     )
 
@@ -59,6 +61,8 @@ async def main() -> None:
         id=user.id,
         full_name=user.full_name,
     )
+
+    schedule_task.cancel()
 
 
 if __name__ == "__main__":

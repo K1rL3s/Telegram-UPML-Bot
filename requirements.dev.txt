@@ -1,8 +1,7 @@
 flake8==6.1.0
 pylint==2.17.5
-black==23.7.0
+black==23.9.1
 dlint==0.14.1
-vulture==2.9.1
 tryceratops==2.3.2
 pep8-naming==0.13.3
 pydoclint==0.3.2
@@ -11,7 +10,7 @@ flake8-blind-except==0.2.1
 flake8-mutable==1.2.0
 flake8-polyfill==1.0.2
 flake8-print==5.0.0
-flake8-bugbear==23.7.10
+flake8-bugbear==23.9.16
 flake8-simplify==0.20.0
 flake8-async==22.11.14
 flake8-encodings==0.5.0

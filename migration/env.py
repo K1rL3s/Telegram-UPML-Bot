@@ -16,15 +16,15 @@ config = context.config
 db_settings = get_settings().db
 
 section = config.config_ini_section
-config.set_section_option(section, "POSTGRES_HOST", db_settings.POSTGRES_HOST)
+config.set_section_option(section, "POSTGRES_HOST", db_settings.host)
 config.set_section_option(
     section,
     "POSTGRES_HOST_PORT",
-    str(db_settings.POSTGRES_HOST_PORT),
+    str(db_settings.host_port),
 )
-config.set_section_option(section, "POSTGRES_DB", db_settings.POSTGRES_DB)
-config.set_section_option(section, "POSTGRES_USER", db_settings.POSTGRES_USER)
-config.set_section_option(section, "POSTGRES_PASSWORD", db_settings.POSTGRES_PASSWORD)
+config.set_section_option(section, "POSTGRES_DB", db_settings.db)
+config.set_section_option(section, "POSTGRES_USER", db_settings.user)
+config.set_section_option(section, "POSTGRES_PASSWORD", db_settings.password)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

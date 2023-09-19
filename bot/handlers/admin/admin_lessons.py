@@ -82,7 +82,7 @@ async def process_lessons_album_handler(
         album,
         message.bot,
         state,
-        settings.other.TESSERACT_PATH,
+        settings.other.tesseract_path,
     )
     await message.reply(
         text=text,

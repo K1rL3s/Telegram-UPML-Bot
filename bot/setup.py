@@ -1,10 +1,11 @@
+import datetime as dt
 from pathlib import Path
 from typing import Final, TYPE_CHECKING
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
-from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand, BotCommandScopeAllPrivateChats
+from aiogram.fsm.storage.redis import RedisStorage
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from sqlalchemy.orm import close_all_sessions
 from loguru import logger
@@ -14,6 +15,8 @@ from bot.utils.enums import SlashCommands
 
 
 if TYPE_CHECKING:
+    from redis.asyncio import Redis
+
     from bot.settings import Settings
 
 
@@ -52,11 +55,19 @@ async def set_commands(bot: "Bot") -> bool:
 def make_dispatcher(
     settings: "Settings",
     session_maker: "async_sessionmaker[AsyncSession]",
+    redis: "Redis",
     settings_key: str = SETTINGS_KEY,
     session_maker_key: str = SESSION_MAKER_KEY,
 ) -> "Dispatcher":
     """Создаёт диспетчер и регистрирует все роуты."""
-    dp = Dispatcher(storage=MemoryStorage(), name="__main__")
+    dp = Dispatcher(
+        storage=RedisStorage(
+            redis=redis,
+            state_ttl=dt.timedelta(hours=24),
+            data_ttl=dt.timedelta(hours=24),
+        ),
+        name="__main__",
+    )
 
     dp[settings_key] = settings
     dp[session_maker_key] = session_maker
@@ -87,8 +98,8 @@ def setup_logs() -> None:
 
     logger.add(
         workdir_path / "logs" / "logs.log",
-        format="{time:YYYY-MM-DD HH:mm:ss.SSS} {level:<7} {message}",
         level="DEBUG",
-        rotation="00:00",
+        format="{time:YYYY-MM-DD HH:mm:ss.SSS} {level:<7} {message}",
+        rotation="1 week",
         compression="zip",
     )

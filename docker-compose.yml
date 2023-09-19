@@ -5,8 +5,9 @@ services:
   database:
     image: postgres:15.3-alpine3.18
     container_name: upml-bot-database
+    restart: unless-stopped
     volumes:
-      - upml-bot-database-volume:/var/lib/postgresql/data
+      - "/var/lib/upml-bot/database:/var/lib/postgresql/data"
     ports:
       - "${POSTGRES_OUTSIDE_PORT}:5432"
     environment:
@@ -14,29 +15,43 @@ services:
       POSTGRES_USER: "${POSTGRES_USER}"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
       PGDATA: "/var/lib/postgresql/data/pgdata"
-
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
-    restart: unless-stopped
+
+  redis:
+    image: redis:7.2.1
+    container_name: upml-bot-redis
+    restart: "unless-stopped"
+    volumes:
+      - "/var/lib/upml-bot/redis:/data"
+    ports:
+      - "${REDIS_OUTSIDE_PORT}:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    command: "redis-server --save 60 1 --loglevel warning --requirepass ${REDIS_PASSWORD}"
 
   upml-bot:
     image: upml-bot-image
     container_name: upml-bot
+    restart: unless-stopped
     build:
       context: .
       dockerfile: Dockerfile
-    restart: unless-stopped
     deploy:
       resources:
         limits:
           cpus: "2"
           memory: "256M"
     volumes:
-      - upml-bot-logs-volume:/app/logs
+      - "/var/log/upml-bot:/app/logs"
     env_file: .env
     environment:
       TESSERACT_PATH: "/usr/bin/tesseract"
@@ -44,8 +59,4 @@ services:
       PYTHONDONTWRITEBYTECODE: 1
     links:
       - database
-
-
-volumes:
-  upml-bot-database-volume:
-  upml-bot-logs-volume:
+      - redis
