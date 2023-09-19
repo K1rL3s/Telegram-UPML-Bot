@@ -44,7 +44,7 @@ class LoggingMiddleware(BaseInfoMiddleware):
         """Лог при получении сообщения."""
         if message.photo:
             log = 'Get photo={id} "{text}" [{short_info}]'
-            text = " ".join(message.caption.split())
+            text = " ".join(message.caption.split()) if message.caption else ""
         else:
             log = 'Get message={id} "{text}" [{short_info}]'
             text = " ".join(message.text.split())
@@ -59,7 +59,7 @@ class LoggingMiddleware(BaseInfoMiddleware):
         """Лог после обработки сообщения."""
         if message.photo:
             log = 'Over={is_handled} photo={id} "{text}" [{short_info}]'
-            text = " ".join(message.caption.split())
+            text = " ".join(message.caption.split()) if message.caption else ""
         else:
             log = 'Over={is_handled} message={id} "{text}" [{short_info}]'
             text = " ".join(message.text.split())

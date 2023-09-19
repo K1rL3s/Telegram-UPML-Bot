@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 
 from bot.middlewares.session.request import RetryRequestMiddleware
 from bot.middlewares.outer.logging import LoggingMiddleware
-from bot.middlewares.outer.callbacks_answer import CallbackAnswerMiddleware
+from bot.middlewares.outer.callback_answer import CallbackAnswerMiddleware
 from bot.middlewares.outer.throttling import ThrottlingMiddleware
 from bot.middlewares.outer.repository import RepositoryMiddleware
 from bot.middlewares.inner.album import AlbumMiddleware
