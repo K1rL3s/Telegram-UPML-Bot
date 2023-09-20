@@ -1,3 +1,5 @@
+import base64
+from io import BytesIO
 from typing import TYPE_CHECKING, Union
 from uuid import uuid1
 
@@ -5,8 +7,6 @@ from aiocache import cached
 from aiogram.types import BufferedInputFile
 
 if TYPE_CHECKING:
-    from io import BytesIO
-
     from aiogram import Bot
     from aiogram.types import CallbackQuery, Message
 
@@ -36,7 +36,7 @@ async def bytes_io_to_image_id(
 
 async def multi_bytes_to_ids(
     chat_id: int,
-    images: list["BytesIO"],
+    images: "list[BytesIO | str]",
     bot: "Bot",
 ) -> list[str]:
     """
@@ -47,7 +47,14 @@ async def multi_bytes_to_ids(
     :param bot: ТГ Бот.
     :return: Айдишник полного расписания и айдишники отдельных расписаний.
     """
-    return [await bytes_io_to_image_id(chat_id, image, bot) for image in images]
+    return [
+        await bytes_io_to_image_id(
+            chat_id,
+            image if isinstance(image, BytesIO) else BytesIO(base64.b64decode(image)),
+            bot,
+        )
+        for image in images
+    ]
 
 
 @cached(ttl=60 * 60)

@@ -33,7 +33,7 @@ async def edit_cafe_menu_date_func(
         )
         keyboard = choose_meal_keyboard
         await state.set_state(EditingMenu.choose_meal)
-        await state.update_data(edit_date=edit_date)
+        await state.update_data(edit_date=format_date(edit_date))
     else:
         text = f"{NO} Не удалось понять это как дату, попробуйте ещё раз."
         keyboard = cancel_state_keyboard
@@ -55,7 +55,7 @@ async def edit_cafe_menu_meal_func(
     :return: Сообщение пользователю.
     """
     edit_meal = callback_data.split("_")[-1]
-    edit_date = (await state.get_data())["edit_date"]
+    edit_date = date_by_format((await state.get_data())["edit_date"])
     await state.update_data(edit_meal=edit_meal)
 
     meal = CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()
@@ -87,8 +87,8 @@ async def edit_cafe_menu_text_func(
     """
     data = await state.get_data()
     start_id = data["start_id"]
-    edit_date = data["edit_date"]
     edit_meal = data["edit_meal"]
+    edit_date = date_by_format(data["edit_date"])
 
     new_ids = data.get("new_ids", []) + [message_id]
     await state.update_data(new_menu=html_text, new_ids=new_ids)
@@ -120,7 +120,7 @@ async def edit_cafe_menu_confirm_func(
     :return: Сообщение пользователю и айдишники его сообщений с изменениями.
     """
     data = await state.get_data()
-    edit_date = data["edit_date"]
+    edit_date = date_by_format(data["edit_date"])
     edit_meal = data["edit_meal"]
     new_menu = data["new_menu"]
     new_ids = data["new_ids"]

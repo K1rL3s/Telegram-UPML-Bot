@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from bot.settings import Settings
 
 
+REDIS_KEY: Final[str] = "redis"
 SETTINGS_KEY: Final[str] = "settings"
 SESSION_MAKER_KEY: Final[str] = "session_maker"
 
@@ -29,8 +30,9 @@ async def on_startup() -> None:
     pass
 
 
-async def on_shutdown() -> None:
+async def on_shutdown(redis: "Redis") -> None:
     """Код, отрабатывающий при выключении бота."""
+    await redis.close()
     close_all_sessions()
 
 
@@ -56,21 +58,20 @@ def make_dispatcher(
     settings: "Settings",
     session_maker: "async_sessionmaker[AsyncSession]",
     redis: "Redis",
-    settings_key: str = SETTINGS_KEY,
-    session_maker_key: str = SESSION_MAKER_KEY,
 ) -> "Dispatcher":
     """Создаёт диспетчер и регистрирует все роуты."""
     dp = Dispatcher(
         storage=RedisStorage(
             redis=redis,
-            state_ttl=dt.timedelta(hours=24),
-            data_ttl=dt.timedelta(hours=24),
+            state_ttl=dt.timedelta(days=1),
+            data_ttl=dt.timedelta(days=1),
         ),
         name="__main__",
     )
 
-    dp[settings_key] = settings
-    dp[session_maker_key] = session_maker
+    dp[REDIS_KEY] = redis
+    dp[SETTINGS_KEY] = settings
+    dp[SESSION_MAKER_KEY] = session_maker
 
     include_routers(dp)
 

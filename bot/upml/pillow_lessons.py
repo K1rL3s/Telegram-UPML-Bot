@@ -53,6 +53,7 @@ def parse_one_lessons_file(
     bytesio_classes: list[BytesIO] = []
     for class_image in classes:
         class_image.save(buffer := BytesIO(), format="PNG")
+        buffer.seek(0)
         bytesio_classes.append(buffer)
 
     return grade, lessons_date, bytesio_classes

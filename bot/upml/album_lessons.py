@@ -1,3 +1,4 @@
+import base64
 import datetime as dt
 from io import BytesIO
 from typing import TYPE_CHECKING
@@ -52,9 +53,12 @@ async def tesseract_album_lessons_func(
                         f"на <b>{format_date(date)}</b> ({weekday_by_date(date)})"
                     ),
                     status=True,
-                    class_photos=class_lessons,
+                    class_photos=[
+                        base64.b64encode(lessons.read()).decode()
+                        for lessons in class_lessons
+                    ],
                     grade=grade,
-                    date=date,
+                    date=format_date(date),
                 ),
             )
 

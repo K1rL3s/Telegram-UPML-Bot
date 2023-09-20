@@ -5,6 +5,7 @@ from sqlalchemy import delete, select
 from bot.database.models.class_lessons import ClassLessons
 from bot.database.models.full_lessons import FullLessons
 from bot.database.repository.base_repo import BaseRepository
+from bot.utils.datehelp import date_by_format
 
 if TYPE_CHECKING:
     import datetime as dt
@@ -87,13 +88,13 @@ class LessonsRepository(BaseRepository):
         """
         await self.save_or_update_to_db(
             lessons.full_photo_id,
-            lessons.date,
+            date_by_format(lessons.date),
             lessons.grade,
         )
         for class_photo_id, letter in zip(lessons.class_photo_ids, "АБВ"):
             await self.save_or_update_to_db(
                 class_photo_id,
-                lessons.date,
+                date_by_format(lessons.date),
                 lessons.grade,
                 letter,
             )

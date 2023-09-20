@@ -40,7 +40,7 @@ async def process_lessons_album_func(
     :return: Сообщение и клавиатура для пользователя.
     """
     lessons = await tesseract_album_lessons_func(bot, album, tesseract_path)
-    await state.update_data(lessons=lessons)
+    await state.update_data(lessons=[lesson.model_dump() for lesson in lessons])
 
     if all(lesson.status for lesson in lessons):  # Всё успешно обработалось
         await state.set_state(LoadingLessons.all_good)
@@ -69,7 +69,9 @@ async def all_good_lessons_func(
     :param repo: Репозиторий расписаний уроков.
     :return: Сообщение и клавиатура для пользователя.
     """
-    lessons: list["LessonsAlbum"] = (await state.get_data())["lessons"]
+    lessons: list["LessonsAlbum"] = [
+        LessonsAlbum(**kwargs) for kwargs in (await state.get_data())["lessons"]
+    ]
 
     for lesson in lessons:
         lesson.class_photo_ids = await multi_bytes_to_ids(
@@ -93,8 +95,9 @@ async def start_choose_grades_func(
     :param state: Состояние пользователя.
     :return: Сообщение пользователю и текущее расписаний.
     """
-    data = await state.get_data()
-    lessons: list["LessonsAlbum"] = data["lessons"]
+    lessons: list["LessonsAlbum"] = [
+        LessonsAlbum(**kwargs) for kwargs in (await state.get_data())["lessons"]
+    ]
 
     if await state.get_state() == LoadingLessons.all_good:
         for i, lesson in enumerate(lessons):
@@ -102,14 +105,12 @@ async def start_choose_grades_func(
                 text=lesson.text,
                 full_photo_id=lesson.full_photo_id,
             )
-        await state.update_data(lessons=lessons)
+        await state.update_data(lessons=[lesson.model_dump() for lesson in lessons])
 
-    current_lesson = lessons[0]
-    await state.update_data(current_lesson=current_lesson)
     await state.set_state(LoadingLessons.choose_grade)
 
     # Начало выбора классов
-    return "Для каких классов это расписание?", current_lesson
+    return "Для каких классов это расписание?", lessons[0]
 
 
 async def choose_grades_func(
@@ -125,29 +126,26 @@ async def choose_grades_func(
              Если не всё, то медиа с одним изображением и выбором класса.
     """
     data = await state.get_data()
-    lessons: list[LessonsAlbum] = data["lessons"]
-    current_lesson: LessonsAlbum = data["current_lesson"]
+    lessons = [LessonsAlbum(**kwargs) for kwargs in data["lessons"]]
+    no_grade_lessons = [lesson for lesson in lessons if lesson.grade is None]
 
-    current_lesson.grade = callback_data.split("_")[-1]
+    no_grade_lessons[0].grade = callback_data.split("_")[-1]
+    await state.update_data(lessons=[lesson.model_dump() for lesson in lessons])
 
-    if no_grade_lessons := [lesson for lesson in lessons if lesson.grade is None]:
-        current_lesson = no_grade_lessons[0]
-        await state.update_data(current_lesson=current_lesson)
+    # Если есть ещё уроки без класса
+    if len(no_grade_lessons) > 1:
         return (
             "Для каких классов это расписание?",
             choose_grade_parallel_keyboard,
-            current_lesson,
+            no_grade_lessons[1],
         )
 
     # Начало ввода дат
-    current_lesson = data["lessons"][0]
-    await state.update_data(current_lesson=current_lesson)
-
     text = "Введите дату расписания в формате <b>ДД.ММ.ГГГГ</b>"
     keyboard = cancel_state_keyboard
     await state.set_state(LoadingLessons.choose_date)
 
-    return text, keyboard, current_lesson
+    return text, keyboard, lessons[0]
 
 
 async def choose_dates_func(
@@ -164,31 +162,30 @@ async def choose_dates_func(
              Если не всё, то медиа с одним изображением и вводом датой.
     """
     data = await state.get_data()
-    lessons: list[LessonsAlbum] = data["lessons"]
-    current_lesson: LessonsAlbum = data["current_lesson"]
+    lessons = [LessonsAlbum(**kwargs) for kwargs in data["lessons"]]
+    no_date_lessons = [lesson for lesson in lessons if lesson.date is None]
 
     if not (date := date_by_format(text)):
         return (
             DONT_UNDERSTAND_DATE,
             cancel_state_keyboard,
-            [InputMediaPhoto(media=current_lesson.full_photo_id)],
+            [InputMediaPhoto(media=no_date_lessons[0].full_photo_id)],
         )
 
-    current_lesson.date = date
+    no_date_lessons[0].date = format_date(date)
+    await state.update_data(lessons=[lesson.model_dump() for lesson in lessons])
 
-    if no_date_lessons := [lesson for lesson in lessons if lesson.date is None]:
-        current_lesson = no_date_lessons[0]
-
+    # Если есть ещё уроки без даты
+    if len(no_date_lessons) > 1:
         text = "Введите дату расписания в формате <b>ДД.ММ.ГГГГ</b>"
         keyboard = cancel_state_keyboard
-        media = [InputMediaPhoto(media=current_lesson.full_photo_id)]
-        await state.update_data(current_lesson=current_lesson)
+        media = [InputMediaPhoto(media=no_date_lessons[1].full_photo_id)]
 
     else:
         text = "\n".join(
             f"Расписание для <b>{good_lessons.grade}-х классов</b> "
-            f"на <b>{format_date(good_lessons.date)}</b> "
-            f"({weekday_by_date(good_lessons.date)})"
+            f"на <b>{good_lessons.date}</b> "
+            f"({weekday_by_date(date_by_format(good_lessons.date))})"
             for good_lessons in lessons
         )
         keyboard = confirm_cancel_keyboard
@@ -199,23 +196,31 @@ async def choose_dates_func(
 
 
 async def confirm_edit_lessons_func(
+    chat_id: int,
+    bot: "Bot",
     state: "FSMContext",
     repo: "LessonsRepository",
 ) -> str:
     """
     Обработка подтверждения сохранения нераспознанных расписаний.
 
+    :param chat_id: Куда отправлять фото для сохранения айдишников.
+    :param bot: ТГ Бот.
     :param state: Состояние пользователя.
     :param repo: Репозиторий расписаний уроков.
     :return: Сообщение пользователю.
     """
-    data = await state.get_data()
-
-    for lesson in data["lessons"]:
-        lesson: LessonsAlbum
+    for lesson in [
+        LessonsAlbum(**kwargs) for kwargs in (await state.get_data())["lessons"]
+    ]:
         await repo.delete_class_lessons(
-            lesson.date,
+            date_by_format(lesson.date),
             lesson.grade,
+        )
+        lesson.class_photo_ids = await multi_bytes_to_ids(
+            chat_id,
+            lesson.class_photos,
+            bot,
         )
         await repo.save_prepared_to_db(lesson)
 

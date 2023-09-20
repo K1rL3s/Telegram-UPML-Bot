@@ -192,7 +192,12 @@ async def confirm_edit_lessons_handler(
     repo: "Repository",
 ) -> None:
     """Обработка подтверждения сохранения нераспознанных расписаний."""
-    text = await confirm_edit_lessons_func(state, repo.lessons)
+    text = await confirm_edit_lessons_func(
+        callback.message.chat.id,
+        callback.bot,
+        state,
+        repo.lessons,
+    )
 
     await callback.message.answer(
         text=text,

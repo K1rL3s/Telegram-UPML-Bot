@@ -33,7 +33,7 @@ async def edit_educators_date_func(
             "изменённую версию."
         )
         await state.set_state(EditingEducators.writing)
-        await state.update_data(edit_date=edit_date)
+        await state.update_data(edit_date=format_date(edit_date))
     else:
         text = DONT_UNDERSTAND_DATE
 
@@ -55,7 +55,7 @@ async def edit_educators_text_func(
     """
     data = await state.get_data()
     start_id = data["start_id"]
-    edit_date = data["edit_date"]
+    edit_date = date_by_format(data["edit_date"])
 
     new_text = html_text.strip()
     new_ids = data.get("new_ids", []) + [message_id]
@@ -85,9 +85,9 @@ async def edit_educators_confirm_func(
     :return: Сообщение пользователю и айдишники его сообщений с изменениями.
     """
     data = await state.get_data()
-    edit_date = data["edit_date"]
     new_text = data["new_text"]
     new_ids = data["new_ids"]
+    edit_date = date_by_format(data["edit_date"])
 
     await state.clear()
 

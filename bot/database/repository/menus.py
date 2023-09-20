@@ -42,7 +42,7 @@ class MenuRepository(BaseRepository):
         :param date: Дата меня.
         :param fields: Ключ - колонка, значение - новое значение.
         """
-        edit_by = fields.get("edit_by")
+        edit_by = fields.pop("edit_by")
 
         if menu := await self.get(date):
             for k, v in fields.items():
