@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from aiogram.types import InlineKeyboardMarkup, InputMediaPhoto
 
-from bot.custom_types import LessonsAlbum
+from bot.custom_types import LessonsCollection
 from bot.keyboards import (
     cancel_state_keyboard,
     choose_grade_parallel_keyboard,
@@ -69,8 +69,8 @@ async def all_good_lessons_func(
     :param repo: Репозиторий расписаний уроков.
     :return: Сообщение и клавиатура для пользователя.
     """
-    lessons: list["LessonsAlbum"] = [
-        LessonsAlbum(**kwargs) for kwargs in (await state.get_data())["lessons"]
+    lessons: list["LessonsCollection"] = [
+        LessonsCollection(**kwargs) for kwargs in (await state.get_data())["lessons"]
     ]
 
     for lesson in lessons:
@@ -88,20 +88,20 @@ async def all_good_lessons_func(
 
 async def start_choose_grades_func(
     state: "FSMContext",
-) -> tuple[str, "LessonsAlbum"]:
+) -> tuple[str, "LessonsCollection"]:
     """
     Обработка кнопки "Подтвердить" для ручного ввода информации о расписании.
 
     :param state: Состояние пользователя.
     :return: Сообщение пользователю и текущее расписаний.
     """
-    lessons: list["LessonsAlbum"] = [
-        LessonsAlbum(**kwargs) for kwargs in (await state.get_data())["lessons"]
+    lessons: list["LessonsCollection"] = [
+        LessonsCollection(**kwargs) for kwargs in (await state.get_data())["lessons"]
     ]
 
     if await state.get_state() == LoadingLessons.all_good:
         for i, lesson in enumerate(lessons):
-            lessons[i] = LessonsAlbum(
+            lessons[i] = LessonsCollection(
                 text=lesson.text,
                 full_photo_id=lesson.full_photo_id,
             )
@@ -116,7 +116,7 @@ async def start_choose_grades_func(
 async def choose_grades_func(
     callback_data: str,
     state: "FSMContext",
-) -> tuple[str, "InlineKeyboardMarkup", "LessonsAlbum"]:
+) -> tuple[str, "InlineKeyboardMarkup", "LessonsCollection"]:
     """Обработчик кнопок "10 классы" и "11 классы" для нераспознанных расписаний.
 
     :param callback_data: Сообщение пользователя, дата.
@@ -126,7 +126,7 @@ async def choose_grades_func(
              Если не всё, то медиа с одним изображением и выбором класса.
     """
     data = await state.get_data()
-    lessons = [LessonsAlbum(**kwargs) for kwargs in data["lessons"]]
+    lessons = [LessonsCollection(**kwargs) for kwargs in data["lessons"]]
     no_grade_lessons = [lesson for lesson in lessons if lesson.grade is None]
 
     no_grade_lessons[0].grade = callback_data.split("_")[-1]
@@ -162,7 +162,7 @@ async def choose_dates_func(
              Если не всё, то медиа с одним изображением и вводом датой.
     """
     data = await state.get_data()
-    lessons = [LessonsAlbum(**kwargs) for kwargs in data["lessons"]]
+    lessons = [LessonsCollection(**kwargs) for kwargs in data["lessons"]]
     no_date_lessons = [lesson for lesson in lessons if lesson.date is None]
 
     if not (date := date_by_format(text)):
@@ -211,7 +211,7 @@ async def confirm_edit_lessons_func(
     :return: Сообщение пользователю.
     """
     for lesson in [
-        LessonsAlbum(**kwargs) for kwargs in (await state.get_data())["lessons"]
+        LessonsCollection(**kwargs) for kwargs in (await state.get_data())["lessons"]
     ]:
         await repo.delete_class_lessons(
             date_by_format(lesson.date),

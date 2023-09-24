@@ -38,7 +38,7 @@ async def main() -> None:
 
     schedule_task = asyncio.create_task(
         run_schedule_jobs(bot, session_maker, settings.other.timeout),
-    )
+    )  # bruh
 
     user = await bot.me()  # Copypaste from aiogram
     logger.info(
@@ -46,7 +46,7 @@ async def main() -> None:
         username=user.username,
         id=user.id,
         full_name=user.full_name,
-    )
+    )  # Copypaste from aiogram
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(
@@ -62,7 +62,7 @@ async def main() -> None:
         full_name=user.full_name,
     )
 
-    schedule_task.cancel()
+    schedule_task.cancel()  # bruh
 
 
 if __name__ == "__main__":

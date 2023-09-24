@@ -1,11 +1,10 @@
 import base64
-import datetime as dt
 from io import BytesIO
 from typing import TYPE_CHECKING
 
 from loguru import logger
 
-from bot.custom_types import Album, LessonsAlbum
+from bot.custom_types import Album, LessonsCollection, LessonsProcess
 from bot.upml.pillow_lessons import parse_one_lessons_file
 from bot.utils.datehelp import format_date, weekday_by_date
 
@@ -18,7 +17,7 @@ async def tesseract_album_lessons_func(
     bot: "Bot",
     album: "Album",
     tesseract_path: str,
-) -> list["LessonsAlbum"]:
+) -> list["LessonsCollection"]:
     """
     Приниматель альбома для поочерёдной обработки каждой фотографии расписания.
 
@@ -27,26 +26,25 @@ async def tesseract_album_lessons_func(
     :param bot: Текущий ТГ Бот.
     :return: Склейка итогов обработки расписаний.
     """
-    results: list["LessonsAlbum"] = []
+    results: list["LessonsCollection"] = []
 
     for photo in album.photo:
         photo_id = photo.file_id
         photo = await bot.get_file(photo_id)
         await bot.download_file(photo.file_path, image := BytesIO())
 
-        result = await _tesseract_one_lessons_func(image, tesseract_path)
+        lessons_process = await _tesseract_one_lessons_func(image, tesseract_path)
 
-        if isinstance(result, str):
+        if lessons_process.grade is None and lessons_process.date is None:
             results.append(
-                LessonsAlbum(
+                LessonsCollection(
                     full_photo_id=photo_id,
-                    text=result,
                 ),
             )
         else:
-            grade, date, class_lessons = result
+            date, grade = lessons_process.date, lessons_process.grade
             results.append(
-                LessonsAlbum(
+                LessonsCollection(
                     full_photo_id=photo_id,
                     text=(
                         f"Расписание для <b>{grade}-х классов</b> "
@@ -55,7 +53,7 @@ async def tesseract_album_lessons_func(
                     status=True,
                     class_photos=[
                         base64.b64encode(lessons.read()).decode()
-                        for lessons in class_lessons
+                        for lessons in lessons_process.class_lessons
                     ],
                     grade=grade,
                     date=format_date(date),
@@ -68,7 +66,7 @@ async def tesseract_album_lessons_func(
 async def _tesseract_one_lessons_func(
     image: "BytesIO",
     tesseract_path: str,
-) -> tuple[str, "dt.date", list["BytesIO"]] | str:
+) -> "LessonsProcess":
     """
     Передача расписания в обработчик и сохранение результата в базу данных.
 
@@ -76,11 +74,14 @@ async def _tesseract_one_lessons_func(
     :param tesseract_path: Путь до exeшника тессеракта.
     :return: Паралелль и дата, если окей, иначе текст ошибки.
     """
+    lessons_process = LessonsProcess()
     try:
-        return parse_one_lessons_file(
+        parse_one_lessons_file(
+            lessons_process,
             image,
             tesseract_path,
         )
     except ValueError as e:
-        logger.warning(text := f"Ошибка при загрузке расписания: {repr(e)}")
-        return text
+        logger.warning(f"Ошибка при обработке расписания: {repr(e)}")
+
+    return lessons_process

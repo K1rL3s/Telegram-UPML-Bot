@@ -57,6 +57,7 @@ ignore=
 
 per-file-ignores=
     migration/env.py:F401, F403,
+    bot/custom_types/*:TC003,
     bot/database/models/**:TC003, A003,
     bot/filters/**:D102,
     bot/middlewares/**:D102,

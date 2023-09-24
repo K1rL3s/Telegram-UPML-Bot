@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
     from sqlalchemy.ext.asyncio import AsyncSession
 
-    from bot.custom_types import LessonsAlbum
+    from bot.custom_types import LessonsCollection
 
 
 class LessonsRepository(BaseRepository):
@@ -79,7 +79,7 @@ class LessonsRepository(BaseRepository):
 
     async def save_prepared_to_db(
         self,
-        lessons: "LessonsAlbum",
+        lessons: "LessonsCollection",
     ) -> None:
         """
         Сохранение готовых изображений расписаний уроков на дату для параллели.

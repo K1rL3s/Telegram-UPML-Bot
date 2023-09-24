@@ -1,7 +1,7 @@
 import asyncio
 from typing import TYPE_CHECKING
 
-from aiogram.exceptions import TelegramForbiddenError, TelegramRetryAfter
+from aiogram.exceptions import TelegramForbiddenError
 from loguru import logger
 
 from bot.utils.consts import NOTIFIES_PER_BATCH
@@ -21,7 +21,6 @@ async def one_notify(
     user: "User",
     text: str,
     keyboard: "InlineKeyboardMarkup" = None,
-    try_count: int = 1,
 ) -> bool:
     """
     Делатель одного уведомления.
@@ -31,21 +30,17 @@ async def one_notify(
     :param user: Информация о пользователе.
     :param text: Сообщение в уведомлении.
     :param keyboard: Клавиатура на сообщении с уведомлением.
-    :param try_count: Попытка отправки (для повтора при превышении rps).
     """
     try:
         await bot.send_message(text=text, chat_id=user.user_id, reply_markup=keyboard)
         logger.debug(
-            'Уведомление "{text}" успешно для {short_info}',
+            'Уведомление "{text}" успешно [{short_info}]',
             text=" ".join(text.split()),
             short_info=user.short_info(),
         )
     except TelegramForbiddenError:
         await repo.update(user.user_id, is_active=False)
         return True
-    except TelegramRetryAfter:
-        await asyncio.sleep(try_count**2)
-        return await one_notify(bot, repo, user, text, keyboard, try_count + 1)
     except Exception as e:
         logger.warning(
             "Ошибка при уведомлении: {err} [{short_info}]",

@@ -10,20 +10,25 @@ from bot.utils.datehelp import date_today
 if TYPE_CHECKING:
     from PIL.PyAccess import PyAccess
 
+    from bot.custom_types import LessonsProcess
+
 
 GRADE_CHARS = "01"
+BLACK_BORDER = 100
+WHITE_BORDER = 190
 
 
 def parse_one_lessons_file(
+    lessons_process: "LessonsProcess",
     image: "BytesIO",
     tesseract_path: str,
-) -> tuple[str, "dt.date", list["BytesIO"]]:
+) -> None:
     """
     Основная функция в файле, выполняет всю работу, вызывая другие функции.
 
+    :param lessons_process: Пустой объект, в который будут заполняться данные.
     :param image: Исходник расписания.
     :param tesseract_path: Путь до exeшника тессеракта.
-    :return: Дата, класс, полное расписание, расписания по классам.
     """
     pytesseract.pytesseract.tesseract_cmd = tesseract_path
 
@@ -33,12 +38,17 @@ def parse_one_lessons_file(
     prefix_end_x = _x_prefix_for_lessons(lessons, first_line_y + 2)
 
     prefix_image = _crop_prefix(lessons, prefix_end_x)
+
+    grade_image = _crop_grade(lessons, prefix_end_x, first_line_y)
+    lessons_process.grade = _tesseract_grade(grade_image)
+
     date_image, preffix_up_y, prefix_down_y = _crop_date(
         lessons,
         prefix_end_x,
         first_line_y,
     )
-    lessons_date = _tesseract_date(date_image)
+    lessons_process.date = _tesseract_date(date_image)
+
     classes = _combine_prefix_classes_date(
         _crop_lessons_by_class(lessons, prefix_end_x, first_line_y),
         prefix_image,
@@ -47,26 +57,20 @@ def parse_one_lessons_file(
         prefix_down_y,
     )
 
-    grade_image = _crop_grade(lessons, prefix_end_x, first_line_y)
-    grade = _tesseract_grade(grade_image)
-
-    bytesio_classes: list[BytesIO] = []
     for class_image in classes:
         class_image.save(buffer := BytesIO(), format="PNG")
         buffer.seek(0)
-        bytesio_classes.append(buffer)
-
-    return grade, lessons_date, bytesio_classes
+        lessons_process.class_lessons.append(buffer)
 
 
 def _is_pixel_black(pixel: tuple[int, int, int]) -> bool:
     """Чёрный ли пиксель. Граница подобрана опытным путём."""
-    return all(color <= 80 for color in pixel)
+    return all(color <= BLACK_BORDER for color in pixel)
 
 
 def _is_pixel_white(pixel: tuple[int, int, int]) -> bool:
     """Белый ли пиксель. Граница подобрана опытным путём."""
-    return all(color >= 200 for color in pixel)
+    return all(color >= WHITE_BORDER for color in pixel)
 
 
 def _y_first_horizontal_line(image: "Image.Image") -> int:
@@ -153,10 +157,10 @@ def _crop_date(image: "Image.Image", x: int, y: int) -> tuple["Image.Image", int
 
     down_y = y - 1
 
-    left_x, right_x = None, None
+    left_x, right_x = 0, width
 
     start_x = width // 3
-    while left_x is None and start_x < width // 3 * 2 + 1:
+    while left_x == 0 and start_x < width // 3 * 2 + 1:
         for height_y in range(up_y, down_y + 1):
             if _is_pixel_black(pixels[start_x, height_y]):
                 left_x = start_x
@@ -164,7 +168,7 @@ def _crop_date(image: "Image.Image", x: int, y: int) -> tuple["Image.Image", int
         start_x += 1
 
     end_x = width // 3 * 2
-    while right_x is None and end_x > left_x - 1:
+    while right_x == width and end_x > left_x - 1:
         for height_y in range(up_y, down_y + 1):
             if _is_pixel_black(pixels[end_x, height_y]):
                 right_x = end_x
@@ -172,10 +176,9 @@ def _crop_date(image: "Image.Image", x: int, y: int) -> tuple["Image.Image", int
         end_x -= 1
 
     if (
-        left_x is None
-        or right_x is None
+        left_x == 0
+        or right_x == width
         or abs(left_x - right_x) <= 1
-        or abs(right_x - down_y) <= 1
         or abs(up_y - down_y) <= 1
     ):
         raise ValueError("Не удалось получить дату с расписания")
