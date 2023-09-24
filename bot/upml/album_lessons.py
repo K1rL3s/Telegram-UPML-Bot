@@ -35,7 +35,7 @@ async def tesseract_album_lessons_func(
 
         lessons_process = await _tesseract_one_lessons_func(image, tesseract_path)
 
-        if lessons_process.grade is None and lessons_process.date is None:
+        if lessons_process.grade is None or lessons_process.date is None:
             results.append(
                 LessonsCollection(
                     full_photo_id=photo_id,
