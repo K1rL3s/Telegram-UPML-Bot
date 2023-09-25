@@ -37,7 +37,6 @@ async def main() -> None:
             full_name=user.full_name,
         )
 
-        await scheduler.start()
         try:
             while True:
                 await asyncio.sleep(5)
