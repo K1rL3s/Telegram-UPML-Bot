@@ -74,7 +74,8 @@ async def laundry_cancel_timer_handler(
 ) -> None:
     """Обработчик кнопки "Отменить таймер"."""
     await laundry_cancel_timer_func(repo.laundry, callback.from_user.id)
+
     text = "Таймер отменён."
-    keyboard = go_to_main_menu_keyboard
+    _, keyboard = await laundry_both_handler(callback.from_user.id, repo.laundry)
 
     await callback.message.edit_text(text=text, reply_markup=keyboard)

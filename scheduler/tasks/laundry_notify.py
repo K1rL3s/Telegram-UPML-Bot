@@ -38,9 +38,11 @@ async def check_laundry_timers(
                 await laundry_cancel_timer_func(repo.laundry, laundry.user.user_id)
             else:
                 now = datetime_now()
+                end_time = now + dt.timedelta(minutes=LAUNDRY_REPEAT)
                 await repo.laundry.save_or_update_to_db(
                     laundry.user.user_id,
                     rings=rings + 1,
                     start_time=now,
-                    end_time=now + dt.timedelta(minutes=LAUNDRY_REPEAT),
+                    # Обнуление секунд
+                    end_time=end_time.replace(second=0, microsecond=0),
                 )

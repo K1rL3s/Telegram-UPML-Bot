@@ -9,7 +9,7 @@ from bot.middlewares.outer.logging import LoggingMiddleware
 from bot.middlewares.outer.callback_answer import CallbackAnswerMiddleware
 from bot.middlewares.outer.throttling import ThrottlingMiddleware
 from bot.middlewares.outer.repository import RepositoryMiddleware
-from bot.middlewares.inner.album import AlbumMiddleware
+from bot.middlewares.outer.album import AlbumMiddleware
 
 if TYPE_CHECKING:
     from aiogram import Bot, Dispatcher

@@ -6,7 +6,6 @@ from loguru import logger
 from bot.database import database_init, redis_init
 from bot.middlewares import setup_global_middlewares
 from bot.setup import make_bot, make_dispatcher, setup_logs
-from bot.schedule import run_schedule_jobs
 from bot.settings import get_settings
 
 
@@ -19,7 +18,6 @@ from bot.settings import get_settings
 5. Проверить и исправить, что слои database – logic – view сильно не перемешаны.
 6. Использовать Callback фабрики.
 7. Сделать удаление расписаний уроков.
-9. Вынести оповещения о прачечной и обновление расписания еды в отдельный скрипт.
 """
 
 
@@ -29,16 +27,12 @@ async def main() -> None:
     settings = get_settings()
 
     session_maker = await database_init(settings.db)
-    redis = redis_init(settings.redis)
+    redis = await redis_init(settings.redis)
 
     bot = await make_bot(settings.bot.token)
     dp = make_dispatcher(settings, session_maker, redis)
 
     setup_global_middlewares(bot, dp, session_maker)
-
-    schedule_task = asyncio.create_task(
-        run_schedule_jobs(bot, session_maker, settings.other.timeout),
-    )  # bruh
 
     user = await bot.me()  # Copypaste from aiogram
     logger.info(
@@ -61,8 +55,6 @@ async def main() -> None:
         id=user.id,
         full_name=user.full_name,
     )
-
-    schedule_task.cancel()  # bruh
 
 
 if __name__ == "__main__":

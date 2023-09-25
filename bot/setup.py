@@ -5,7 +5,7 @@ from typing import Final, TYPE_CHECKING
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.types import BotCommand, BotCommandScopeAllPrivateChats
-from aiogram.fsm.storage.redis import RedisEventIsolation, RedisStorage
+from aiogram.fsm.storage.redis import RedisStorage
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from sqlalchemy.orm import close_all_sessions
 from loguru import logger
@@ -66,7 +66,6 @@ def make_dispatcher(
             state_ttl=dt.timedelta(days=1),
             data_ttl=dt.timedelta(days=1),
         ),
-        events_isolation=RedisEventIsolation(redis=redis),
         name="__main__",
     )
 

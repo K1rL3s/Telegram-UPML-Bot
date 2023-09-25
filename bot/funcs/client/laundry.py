@@ -81,7 +81,7 @@ async def laundry_start_timer_func(
     else:
         timedelta = dt.timedelta(minutes=getattr(settings, f"{attr}_minutes"))
 
-    end_time = start_time + timedelta
+    end_time = (start_time + timedelta).replace(second=0, microsecond=0)
 
     await laundry_repo.save_or_update_to_db(
         user_id,

@@ -10,7 +10,7 @@ async def update_cafe_menu(
     session_maker: "async_sessionmaker[AsyncSession]",
     timeout: int,
 ) -> None:
-    """Автоматическое обновление расписание столовой, используется в aioschedule."""
+    """Автоматическое обновление расписание столовой, используется в apscheduler."""
     async with session_maker() as session:
         repo = Repository(session).menu
 

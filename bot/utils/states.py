@@ -19,7 +19,7 @@ class EditingEducators(StatesGroup):
 class LoadingLessons(StatesGroup):
     """Админское состояние для отправки расписания уроков."""
 
-    image = State()
+    input_images = State()
     all_good = State()
     something_bad = State()
     choose_grade = State()
@@ -41,6 +41,6 @@ class DoNotify(StatesGroup):
 
 
 class EditingSettings(StatesGroup):
-    """Пользовательское состояние для редактирования настроек, требующий ввода."""
+    """Пользовательское состояние для редактирования настроек, требующих ввода."""
 
     writing = State()

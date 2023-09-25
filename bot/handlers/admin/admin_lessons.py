@@ -38,14 +38,14 @@ async def start_process_lessons_handler(
     state: "FSMContext",
 ) -> None:
     """Обработчик кнопки "Загрузить уроки"."""
-    await state.set_state(LoadingLessons.image)
+    await state.set_state(LoadingLessons.input_images)
     text = "Отправьте изображение(-я) расписания уроков"
 
     await callback.message.edit_text(text=text, reply_markup=cancel_state_keyboard)
 
 
 @router.message(
-    StateFilter(LoadingLessons.image),
+    StateFilter(LoadingLessons.input_images),
     ~F.media_group_id,
     F.content_type.in_({"photo"}),
 )
@@ -67,7 +67,7 @@ async def process_lessons_handler(
 
 
 @router.message(
-    StateFilter(LoadingLessons.image),
+    StateFilter(LoadingLessons.input_images),
     F.media_group_id,
     F.content_type.in_({"photo"}),
 )

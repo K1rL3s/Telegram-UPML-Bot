@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from loguru import logger
 from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession, create_async_engine
 from redis.asyncio.client import Redis
@@ -17,6 +18,7 @@ __all__ = (
 )
 
 
+@logger.catch(reraise=True)
 async def database_init(db_settings: "DBSettings") -> async_sessionmaker[AsyncSession]:
     """
     Иницализация подключения к базе данных.
@@ -32,7 +34,12 @@ async def database_init(db_settings: "DBSettings") -> async_sessionmaker[AsyncSe
         port=db_settings.host_port,
         database=db_settings.db,
     )
+
     async_engine = create_async_engine(database_url)
+
+    # Проверка подключения к базе данных
+    async with async_engine.begin():
+        pass
 
     return async_sessionmaker(
         bind=async_engine,
@@ -42,15 +49,20 @@ async def database_init(db_settings: "DBSettings") -> async_sessionmaker[AsyncSe
     )
 
 
-def redis_init(redis_settings: "RedisSettings") -> "Redis":
+@logger.catch(reraise=True)
+async def redis_init(redis_settings: "RedisSettings") -> "Redis":
     """
     Создание подключения к редису.
 
     :param redis_settings: Настройки редиса.
     :return: Редис.
     """
-    return Redis(
+    redis = Redis(
         host=redis_settings.host,
         port=redis_settings.host_port,
         password=redis_settings.password,
     )
+    # Проверка подключения к редису
+    await redis.ping()
+
+    return redis

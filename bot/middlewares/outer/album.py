@@ -19,8 +19,8 @@ ALBUM_KEY: Final[str] = "album"
 class AlbumMiddleware(BaseInfoMiddleware):
     """Мидлварь для обработки группы сообщений с файлами (альбомом)."""
 
-    DEFAULT_LATENCY = 2
-    DEFAULT_TTL = 4
+    DEFAULT_LATENCY = 1
+    DEFAULT_TTL = 2
 
     def __init__(
         self,
