@@ -9,13 +9,13 @@ from sqlalchemy.orm import close_all_sessions
 
 from bot.database import database_init
 from bot.settings import get_settings
-from bot.setup import setup_logs
+from bot.setup import configure_logs
 from scheduler.tasks import add_schedule_jobs
 
 
 async def main() -> None:
     """Регистратор и запускатор действий по расписанию."""
-    setup_logs()
+    configure_logs()
     settings = get_settings()
     session_maker = await database_init(settings.db)
     scheduler = AsyncIOScheduler()

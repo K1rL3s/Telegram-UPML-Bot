@@ -1,7 +1,7 @@
 FROM python:3.11.5-slim-bullseye as builder
 
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
 WORKDIR /app
 
@@ -14,14 +14,13 @@ RUN apt-get update && \
 
 FROM python:3.11.5-slim-bullseye
 
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV TESSERACT_PATH="/usr/bin/tesseract"
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    TESSERACT_PATH="/usr/bin/tesseract"
 
 WORKDIR /app
 
 COPY --from=builder /app/wheels /wheels
-COPY --from=builder /app/requirements.txt .
 
 # Апдейт здесь из-за установки тессеракта :(
 RUN apt-get update && \
@@ -29,7 +28,7 @@ RUN apt-get update && \
     pip install --no-cache-dir /wheels/*
 
 COPY ./bot ./bot
-COPY ./migration ./migration
+COPY ./migrations ./migrations
 COPY ./alembic.ini ./alembic.ini
 
 CMD ["python", "-m", "bot"]

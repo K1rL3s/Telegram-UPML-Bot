@@ -38,7 +38,7 @@ services:
       start_period: 10s
     command: "redis-server --save 60 1 --loglevel warning --requirepass ${REDIS_PASSWORD}"
 
-  upml-bot:
+  bot:
     image: upml-bot-image
     container_name: upml-bot
     restart: unless-stopped
@@ -71,4 +71,4 @@ services:
       PYTHONDONTWRITEBYTECODE: 1
     links:
       - database
-      - upml-bot
+      - bot

@@ -1,11 +1,9 @@
 import asyncio
 import contextlib
 
-from loguru import logger
-
 from bot.database import database_init, redis_init
 from bot.middlewares import setup_global_middlewares
-from bot.setup import make_bot, make_dispatcher, setup_logs
+from bot.setup import configure_logs, make_bot, make_dispatcher
 from bot.settings import get_settings
 
 
@@ -23,37 +21,22 @@ from bot.settings import get_settings
 
 async def main() -> None:
     """И поехали! :)."""
-    setup_logs()
-    settings = get_settings()
+    configure_logs()
 
-    session_maker = await database_init(settings.db)
+    settings = get_settings()
     redis = await redis_init(settings.redis)
+    session_maker = await database_init(settings.db)
 
     bot = await make_bot(settings.bot.token)
-    dp = make_dispatcher(settings, session_maker, redis)
+    dp = make_dispatcher(settings, redis)
 
     setup_global_middlewares(bot, dp, session_maker)
-
-    user = await bot.me()  # Copypaste from aiogram
-    logger.info(
-        "Start polling for bot @{username} id={id} - '{full_name}'",
-        username=user.username,
-        id=user.id,
-        full_name=user.full_name,
-    )  # Copypaste from aiogram
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(
         bot,
         polling_timeout=settings.other.timeout,
         allowed_updates=dp.resolve_used_update_types(),
-    )
-
-    logger.info(
-        "Stop polling for bot @{username} id={id} - '{full_name}'",
-        username=user.username,
-        id=user.id,
-        full_name=user.full_name,
     )
 
 

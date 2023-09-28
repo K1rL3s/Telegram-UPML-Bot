@@ -1,12 +1,11 @@
 import datetime as dt
 from pathlib import Path
-from typing import Final, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.types import BotCommand, BotCommandScopeAllPrivateChats
 from aiogram.fsm.storage.redis import RedisStorage
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from sqlalchemy.orm import close_all_sessions
 from loguru import logger
 
@@ -20,20 +19,29 @@ if TYPE_CHECKING:
     from bot.settings import Settings
 
 
-REDIS_KEY: Final[str] = "redis"
-SETTINGS_KEY: Final[str] = "settings"
-SESSION_MAKER_KEY: Final[str] = "session_maker"
-
-
-async def on_startup() -> None:
+async def on_startup(bot: "Bot") -> None:
     """Код, отрабатывающий при запуске бота."""
-    pass
+    user = await bot.me()  # Copypaste from aiogram
+    logger.info(
+        "Start polling for bot @{username} id={id} - '{full_name}'",
+        username=user.username,
+        id=user.id,
+        full_name=user.full_name,
+    )  # Copypaste from aiogram
 
 
-async def on_shutdown(redis: "Redis") -> None:
+async def on_shutdown(bot: "Bot", redis: "Redis") -> None:
     """Код, отрабатывающий при выключении бота."""
     await redis.close()
     close_all_sessions()
+
+    user = await bot.me()
+    logger.info(
+        "Stop polling for bot @{username} id={id} - '{full_name}'",
+        username=user.username,
+        id=user.id,
+        full_name=user.full_name,
+    )
 
 
 async def set_commands(bot: "Bot") -> bool:
@@ -56,7 +64,6 @@ async def set_commands(bot: "Bot") -> bool:
 
 def make_dispatcher(
     settings: "Settings",
-    session_maker: "async_sessionmaker[AsyncSession]",
     redis: "Redis",
 ) -> "Dispatcher":
     """Создаёт диспетчер и регистрирует все роуты."""
@@ -66,15 +73,12 @@ def make_dispatcher(
             state_ttl=dt.timedelta(days=1),
             data_ttl=dt.timedelta(days=1),
         ),
+        redis=redis,
+        settings=settings,
         name="__main__",
     )
 
-    dp[REDIS_KEY] = redis
-    dp[SETTINGS_KEY] = settings
-    dp[SESSION_MAKER_KEY] = session_maker
-
     include_routers(dp)
-
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
 
@@ -93,7 +97,7 @@ async def make_bot(bot_token: str, parse_mode: str = ParseMode.HTML) -> "Bot":
     return bot
 
 
-def setup_logs() -> None:
+def configure_logs() -> None:
     """Задаёт формат логов и указывает путь записи."""
     workdir_path = Path(__file__).parent.parent.absolute()
 

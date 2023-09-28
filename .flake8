@@ -17,7 +17,7 @@ dictionaries=en_US,python,technical
 exclude=
     .idea,
     .git,
-    migration,
+    migrations,
     venv,
     __pycache__,
 
@@ -56,7 +56,7 @@ ignore=
     TRY400,
 
 per-file-ignores=
-    migration/env.py:F401, F403,
+    migrations/env.py:F401, F403,
     bot/custom_types/*:TC003,
     bot/database/models/**:TC003, A003,
     bot/filters/**:D102,

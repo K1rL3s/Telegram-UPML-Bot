@@ -44,5 +44,5 @@
 3. После запуска сделать миграцию базы данных:
 
     ```
-    docker compose exec upml-bot alembic upgrade head
+    docker compose exec bot alembic upgrade head
     ```

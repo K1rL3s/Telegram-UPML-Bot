@@ -6,7 +6,7 @@ ignore-paths=
     .idea,
     .git,
     venv,
-    migration,
+    migrations,
     __pycache__,
 
 # Pickle collected data for later comparisons.
