@@ -26,7 +26,7 @@ async def main() -> None:
         disable_web_page_preview=True,
     ).context() as bot:
         bot: "Bot"
-        add_schedule_jobs(scheduler, bot, session_maker)
+        add_schedule_jobs(scheduler, bot, session_maker, settings.other.timeout)
         scheduler.start()
 
         user = await bot.me()

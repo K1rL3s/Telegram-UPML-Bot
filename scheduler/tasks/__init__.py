@@ -16,6 +16,7 @@ def add_schedule_jobs(
     scheduler: "AsyncIOScheduler",
     bot: "Bot",
     session_maker: "async_sessionmaker[AsyncSession]",
+    timeout: int,
 ) -> None:
     """
     Добавление задач в расписание.
@@ -23,11 +24,12 @@ def add_schedule_jobs(
     :param scheduler: Шедулер.
     :param bot: ТГ Бот.
     :param session_maker: Пул сессий.
+    :param timeout: Таймаут в ожидании запроса на расписание еды.
     """
     scheduler.add_job(
         update_cafe_menu,
         trigger="cron",
-        args=[bot, session_maker],
+        args=[session_maker, timeout],
         hour="7-16",
     )
     scheduler.add_job(
