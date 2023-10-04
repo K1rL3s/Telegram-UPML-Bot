@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import Union
+from typing import Optional, Union
 
 from bot.settings import get_settings
 from bot.utils.consts import TODAY
@@ -33,7 +33,7 @@ def format_datetime(datetime: "dt.datetime") -> str:
 
 def date_by_format(
     date: str,
-    timezone_offset: int = default_timezone_offset,
+    timezone_offset: int | float = default_timezone_offset,
 ) -> "Union[dt.date, bool]":
     """
     Конвертация отформатированной строки в дату.
@@ -58,7 +58,7 @@ def date_by_format(
     return date_obj
 
 
-def time_by_format(time: str) -> "dt.time":
+def time_by_format(time: str) -> "Union[dt.time, bool]":
     """
     Конвертация строки формата "{часы}:{минуты}" в объект времени.
 
@@ -69,7 +69,7 @@ def time_by_format(time: str) -> "dt.time":
     return dt.time(hour=hours, minute=minutes)
 
 
-def format_time(time: "dt.time") -> str:
+def format_time(time: "Union[dt.time, dt.datetime]") -> str:
     """
     Формат объекта времени в вид "HH:MM" с лидирующими нулями.
 
@@ -116,14 +116,14 @@ def hours_minutes_to_minutes(text: str) -> int:
 
 def minutes_to_hours_minutes(minutes: int) -> tuple[int, int]:
     """
-    Формат минут в часы и минуты.
+    Конвертация минут в часы и минуты.
 
     :param minutes: Минуты.
     :return: Часы и минуты.
     """
-    hours = minutes // 60
-    minutes -= hours * 60
-    return hours, minutes
+    if minutes < 0:
+        raise ValueError("minutes must be greater than or equal to 0")
+    return minutes // 60, minutes % 60
 
 
 def weekday_by_date(date: "dt.date") -> str:
@@ -144,18 +144,25 @@ def weekday_by_date(date: "dt.date") -> str:
     )[date.weekday()]
 
 
-def get_this_week_monday(timezone_offset: int = default_timezone_offset) -> "dt.date":
+def get_monday_of_week(
+    date: "Optional[dt.date]" = None,
+    timezone_offset: int | float = default_timezone_offset,
+) -> "dt.date":
     """
-    Возвращает объект date с понедельником текущей недели.
+    Возвращает объект date с понедельником недели.
 
+    :param date: Дата, понедельник недели которой надо вернуть.
     :param timezone_offset: Смещение часового пояса в часах.
     :return: date.
     """
-    today = date_today(timezone_offset)
-    return today - dt.timedelta(days=today.weekday())
+    if date is None:
+        date = date_today(timezone_offset)
+    return date - dt.timedelta(days=date.weekday())
 
 
-def datetime_now(timezone_offset: int = default_timezone_offset) -> "dt.datetime":
+def datetime_now(
+    timezone_offset: int | float = default_timezone_offset,
+) -> "dt.datetime":
     """
     Функция datetime.datetime.now, но в указанной в ``.env`` временной зоне.
 
@@ -167,7 +174,7 @@ def datetime_now(timezone_offset: int = default_timezone_offset) -> "dt.datetime
     ).replace(tzinfo=None)
 
 
-def date_today(timezone_offset: int = default_timezone_offset) -> "dt.date":
+def date_today(timezone_offset: int | float = default_timezone_offset) -> "dt.date":
     """
     Функция datetime.date.today, но в указанной в ``.env`` временной зоне.
 

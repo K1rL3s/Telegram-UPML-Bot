@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 
 from bot.database.repository.repository import Repository
 from bot.upml.save_cafe_menu import process_cafe_menu
-from bot.utils.datehelp import date_today, get_this_week_monday
+from bot.utils.datehelp import date_today, get_monday_of_week
 
 
 async def update_cafe_menu(
@@ -14,7 +14,7 @@ async def update_cafe_menu(
     async with session_maker() as session:
         repo = Repository(session).menu
 
-        monday = await repo.get(get_this_week_monday())
+        monday = await repo.get(get_monday_of_week())
         today = await repo.get(date_today())
         if monday or today:
             return

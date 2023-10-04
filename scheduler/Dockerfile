@@ -20,7 +20,6 @@ ENV PYTHONUNBUFFERED=1 \
 WORKDIR /app
 
 COPY --from=builder /app/wheels /wheels
-COPY --from=builder /app/requirements.txt .
 
 RUN pip install --no-cache-dir /wheels/*
 

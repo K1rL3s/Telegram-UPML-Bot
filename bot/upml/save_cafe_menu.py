@@ -8,7 +8,7 @@ from loguru import logger
 from pypdf import PdfReader
 
 from bot.utils.consts import CAFE_MENU_ENG_TO_RU
-from bot.utils.datehelp import format_date, get_this_week_monday
+from bot.utils.datehelp import format_date, get_monday_of_week
 
 if TYPE_CHECKING:
     from bot.database.repository import MenuRepository
@@ -97,7 +97,7 @@ async def _get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
         "Menyu_{0:0>2}_{1:0>2}_{2}_krugl.pdf"
     )
 
-    menu_date = get_this_week_monday() - dt.timedelta(days=1)
+    menu_date = get_monday_of_week() - dt.timedelta(days=1)
 
     # Ищем в воскресенье, понедельник, вторник и среду.
     # Число и месяц изменяются сами, поэтому ссылка будет корректной.
@@ -122,7 +122,7 @@ def _compare_pdf_date(pdf_reader: "PdfReader") -> "Union[dt.date, str]":
     :param pdf_reader: PDF файл.
     :return: Дата начала расписания еды или текст ошибки.
     """
-    menu_date = get_this_week_monday()
+    menu_date = get_monday_of_week()
     add_counter = 0
 
     menu = " ".join(pdf_reader.pages[0].extract_text().split())

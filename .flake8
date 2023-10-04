@@ -56,12 +56,15 @@ ignore=
     TRY400,
 
 per-file-ignores=
-    migrations/env.py:F401, F403,
     bot/custom_types/*:TC003,
-    bot/database/models/**:TC003, A003,
-    bot/filters/**:D102,
+    bot/database/models/*:TC003, A003,
+    bot/filters/*:D102,
     bot/middlewares/**:D102,
     bot/middlewares/outer/logging.py:D102, R504,
     bot/upml/**:CCR001,
     bot/utils/notify.py:B902,
     bot/utils/datehelp.py:FNE008,
+
+    migrations/env.py:F401, F403,
+
+    tests/**:D101, D102, D103, SCS108, SCS109,
