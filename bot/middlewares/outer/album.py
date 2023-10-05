@@ -6,7 +6,7 @@ from typing import Any, Final, TYPE_CHECKING
 from aiogram.types import Message, TelegramObject
 from cachetools import TTLCache
 
-from bot.custom_types import Album, Media
+from bot.types import Album, Media
 from bot.middlewares.base import BaseInfoMiddleware
 
 if TYPE_CHECKING:
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 ALBUM_KEY: Final[str] = "album"
 
 
-class AlbumMiddleware(BaseInfoMiddleware):
+class AlbumsMiddleware(BaseInfoMiddleware):
     """Мидлварь для обработки группы сообщений с файлами (альбомом)."""
 
     DEFAULT_LATENCY = 1

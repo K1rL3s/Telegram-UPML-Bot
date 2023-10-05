@@ -9,7 +9,7 @@ from bot.middlewares.outer.logging import LoggingMiddleware
 from bot.middlewares.outer.callback_answer import CallbackAnswerMiddleware
 from bot.middlewares.outer.throttling import ThrottlingMiddleware
 from bot.middlewares.outer.repository import RepositoryMiddleware
-from bot.middlewares.outer.album import AlbumMiddleware
+from bot.middlewares.outer.album import AlbumsMiddleware
 
 if TYPE_CHECKING:
     from aiogram import Bot, Dispatcher
@@ -31,7 +31,7 @@ def setup_global_middlewares(
 
     dp.callback_query.outer_middleware(CallbackAnswerMiddleware())
 
-    dp.message.outer_middleware(AlbumMiddleware())
+    dp.message.outer_middleware(AlbumsMiddleware())
 
     dp.message.outer_middleware(ThrottlingMiddleware())
     dp.callback_query.outer_middleware(ThrottlingMiddleware())

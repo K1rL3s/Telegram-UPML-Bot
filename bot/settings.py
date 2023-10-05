@@ -1,12 +1,6 @@
 import os
-from typing import Optional, TYPE_CHECKING, Union
-
-from dotenv import load_dotenv
 
 from pydantic import BaseModel
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 
 class DBSettings(BaseModel):
@@ -50,15 +44,12 @@ class Settings(BaseModel):
     other: OtherSettings
 
 
-def get_settings(path_to_env: "Optional[Union[str, Path]]" = None) -> Settings:
+def get_settings() -> Settings:
     """
-    Загрузка переменных из .env и создание настроек.
+    Создание настроек из переменных среды.
 
-    :param path_to_env: Путь до .env файла.
     :return: Настройки.
     """
-    load_dotenv(path_to_env, override=True)
-
     db = DBSettings(
         host=os.environ["POSTGRES_HOST"],
         host_port=int(os.environ["POSTGRES_HOST_PORT"]),
@@ -80,9 +71,4 @@ def get_settings(path_to_env: "Optional[Union[str, Path]]" = None) -> Settings:
         timezone_offset=int(os.getenv("TIMEZONE_OFFSET") or 0),
     )
 
-    return Settings(
-        db=db,
-        redis=redis,
-        bot=bot,
-        other=other,
-    )
+    return Settings(db=db, redis=redis, bot=bot, other=other)

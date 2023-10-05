@@ -1,6 +1,6 @@
 import asyncio
-from io import BytesIO
 import datetime as dt
+from io import BytesIO
 from typing import Optional, TYPE_CHECKING, Union
 
 from httpx import AsyncClient
@@ -91,18 +91,17 @@ async def _get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
 
     :return: PdfReader если файл существует, иначе None
     """
-    # Передавать число, месяц, год - print(pdf_url(2, 5, 2023))
+    # В формат передавать число, месяц, год
     pdf_url = (
         "https://yufmli.gosuslugi.ru/netcat_files/47/515/"
         "Menyu_{0:0>2}_{1:0>2}_{2}_krugl.pdf"
     )
 
     menu_date = get_this_week_monday() - dt.timedelta(days=1)
-
-    # Ищем в воскресенье, понедельник, вторник и среду.
-    # Число и месяц изменяются сами, поэтому ссылка будет корректной.
+    # Поиск с воскресенья по воскресенье
+    # Число и месяц изменяются сами, поэтому ссылка будет корректной
     async_session = AsyncClient(timeout=timeout)
-    for _ in range(7):  # С понедельника до воскресенья
+    for _ in range(7):
         response = await async_session.get(
             pdf_url.format(menu_date.day, menu_date.month, menu_date.year),
         )

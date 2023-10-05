@@ -12,7 +12,6 @@ from loguru import logger
 from bot.handlers import include_routers
 from bot.utils.enums import SlashCommands
 
-
 if TYPE_CHECKING:
     from redis.asyncio import Redis
 
@@ -99,10 +98,8 @@ async def make_bot(bot_token: str, parse_mode: str = ParseMode.HTML) -> "Bot":
 
 def configure_logs() -> None:
     """Задаёт формат логов и указывает путь записи."""
-    workdir_path = Path(__file__).parent.parent.absolute()
-
     logger.add(
-        workdir_path / "logs" / "logs.log",
+        Path().cwd().absolute() / "logs" / "logs.log",
         level="DEBUG",
         format="{time:YYYY-MM-DD HH:mm:ss.SSS} {level:<7} {message}",
         rotation="1 week",

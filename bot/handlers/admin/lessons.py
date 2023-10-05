@@ -4,7 +4,7 @@ from aiogram import F, Router
 from aiogram.filters import StateFilter
 from aiogram.types import InputMediaPhoto
 
-from bot.custom_types import Album
+from bot.types import Album
 from bot.funcs.admin.admin_lessons import (
     all_good_lessons_func,
     choose_dates_func,
@@ -15,9 +15,9 @@ from bot.funcs.admin.admin_lessons import (
 )
 from bot.keyboards import (
     cancel_state_keyboard,
+    choose_grade_parallel_keyboard,
     go_to_main_menu_keyboard,
 )
-from bot.keyboards.admin.admin_lessons import choose_grade_parallel_keyboard
 from bot.utils.enums import AdminCallback
 from bot.utils.states import LoadingLessons
 

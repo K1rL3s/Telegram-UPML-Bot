@@ -12,7 +12,6 @@ aiojobs==1.2.0
 cachetools==5.3.1
 loguru==0.7.2
 pathlib==1.0.1
-python-dotenv==1.0.0
 pypdf==3.16.2
 Pillow==10.0.1
 pytesseract==0.3.10

@@ -16,14 +16,13 @@ router = Router(name=__name__)
     ExceptionTypeFilter(TelegramBadRequest),
     F.exception.message.contains("is not modified"),
 )
-async def not_modified_error(_: "ErrorEvent") -> bool:
+async def not_modified_error(_: "ErrorEvent") -> None:
     """
     Сообщение не было изменено.
 
     Возникает, если нажать "сегодня" при просмотре расписаний на сегодня.
     """
     logger.debug("Message is not modified")
-    return True
 
 
 @router.errors()

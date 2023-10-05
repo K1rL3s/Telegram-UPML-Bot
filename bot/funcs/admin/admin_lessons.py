@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from aiogram.types import InlineKeyboardMarkup, InputMediaPhoto
 
-from bot.custom_types import LessonsCollection
+from bot.types import Album, LessonsCollection
 from bot.keyboards import (
     cancel_state_keyboard,
     choose_grade_parallel_keyboard,
@@ -20,7 +20,6 @@ if TYPE_CHECKING:
     from aiogram import Bot
     from aiogram.fsm.context import FSMContext
 
-    from bot.custom_types import Album
     from bot.database.repository import LessonsRepository
 
 

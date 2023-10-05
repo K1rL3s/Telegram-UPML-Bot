@@ -10,7 +10,7 @@ from bot.utils.datehelp import date_today
 if TYPE_CHECKING:
     from PIL.PyAccess import PyAccess
 
-    from bot.custom_types import LessonsProcess
+    from bot.types import LessonsProcess
 
 
 GRADE_CHARS = "01"

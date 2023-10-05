@@ -71,4 +71,3 @@ services:
       PYTHONDONTWRITEBYTECODE: 1
     links:
       - database
-      - bot

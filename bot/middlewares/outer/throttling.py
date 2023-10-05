@@ -1,5 +1,5 @@
 """Source: https://github.com/wakaree/simple_echo_bot."""
-from typing import Any, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING, Union
 
 from cachetools import TTLCache
 
@@ -22,7 +22,7 @@ class ThrottlingMiddleware(BaseInfoMiddleware):
     async def __call__(
         self,
         handler: "Callable[[Message | CallbackQuery, dict[str, Any]], Awaitable[Any]]",
-        event: "Message | CallbackQuery",
+        event: "Union[Message, CallbackQuery]",
         data: dict[str, Any],
     ) -> Any:
         if (user := data.get("event_from_user")) is not None:

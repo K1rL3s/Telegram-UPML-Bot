@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from loguru import logger
 
-from bot.custom_types import Album, LessonsCollection, LessonsProcess
+from bot.types import Album, LessonsCollection, LessonsProcess
 from bot.upml.pillow_lessons import parse_one_lessons_file
 from bot.utils.datehelp import format_date, weekday_by_date
 
@@ -36,11 +36,7 @@ async def tesseract_album_lessons_func(
         lessons_process = await _tesseract_one_lessons_func(image, tesseract_path)
 
         if lessons_process.grade is None or lessons_process.date is None:
-            results.append(
-                LessonsCollection(
-                    full_photo_id=photo_id,
-                ),
-            )
+            results.append(LessonsCollection(full_photo_id=photo_id))
         else:
             date, grade = lessons_process.date, lessons_process.grade
             results.append(

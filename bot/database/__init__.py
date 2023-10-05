@@ -34,7 +34,6 @@ async def database_init(db_settings: "DBSettings") -> async_sessionmaker[AsyncSe
         port=db_settings.host_port,
         database=db_settings.db,
     )
-
     async_engine = create_async_engine(database_url)
 
     # Проверка подключения к базе данных
