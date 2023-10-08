@@ -27,7 +27,7 @@ async def get_format_educators_by_date(
     schedule = await repo.get(date)
 
     return (
-        f"😵 <b>Воспитатели на {format_date(date)} "
+        f"👩 <b>Воспитатели на {format_date(date)} "
         f"({weekday_by_date(date)})</b>:\n\n"
         f"{getattr(schedule, 'schedule', None) or NO_DATA}"
     )

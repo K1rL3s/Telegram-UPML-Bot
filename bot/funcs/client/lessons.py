@@ -96,7 +96,7 @@ async def get_lessons_for_user(
         )
     else:
         text = (
-            f"🛏 Расписание на <b>{format_date(date)}</b> ({weekday_by_date(date)}) "
+            f"💤 Расписание на <b>{format_date(date)}</b> ({weekday_by_date(date)}) "
             f"для <b>{for_class}</b> класса не найдено :(."
         )
 

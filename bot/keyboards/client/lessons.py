@@ -13,8 +13,7 @@ if TYPE_CHECKING:
 def lessons_keyboard(date: "dt.date" = None) -> "InlineKeyboardMarkup":
     """Клавиатура для расписания уроков с перемоткой влево-вправо по дня."""
     return _keyboard_for_left_right_menu(
-        open_smt_on_callback=UserCallback.OPEN_LESSONS_ON_,
-        open_smt_today_callback=UserCallback.OPEN_LESSONS_TODAY,
+        open_smt_on_=UserCallback.OPEN_LESSONS_ON_,
         today_smile="📓",
         date=date,
     )
