@@ -1,21 +1,20 @@
 FROM python:3.11.5-slim-bullseye as builder
 
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
 COPY ./requirements.txt .
 
-RUN apt-get update && \
-    pip install --no-cache-dir --upgrade pip && \
+RUN pip install --no-cache-dir --upgrade pip && \
     pip wheel --no-cache-dir --no-deps --wheel-dir=/app/wheels -r ./requirements.txt
 
 
 FROM python:3.11.5-slim-bullseye
 
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
     TESSERACT_PATH="/usr/bin/tesseract"
 
 WORKDIR /app
