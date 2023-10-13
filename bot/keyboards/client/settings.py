@@ -6,6 +6,7 @@ from aiogram.utils.keyboard import (
     InlineKeyboardMarkup,
 )
 
+from bot.callbacks import OpenMenu, SettingsData
 from bot.keyboards.universal import go_to_main_menu_button
 from bot.utils.consts import GRADES
 from bot.utils.datehelp import format_time
@@ -39,15 +40,21 @@ async def settings_keyboard(
             [
                 InlineKeyboardButton(
                     text=USER_CLASS(settings.class_ if settings.class_ else QUESTION),
-                    callback_data=UserCallback.CHANGE_GRADE_TO_,
+                    callback_data=SettingsData(action=UserCallback.CHANGE_GRADE).pack(),
                 ),
                 InlineKeyboardButton(
                     text=LESSONS_NOTIFY(YES if settings.lessons_notify else NO),
-                    callback_data=UserCallback.SWITCH_LESSONS_NOTIFY,
+                    callback_data=SettingsData(
+                        action=UserCallback.SWITCH,
+                        attr=UserCallback.LESSONS_NOTIFY,
+                    ).pack(),
                 ),
                 InlineKeyboardButton(
                     text=NEWS_NOTIFY(YES if settings.news_notify else NO),
-                    callback_data=UserCallback.SWITCH_NEWS_NOTIFY,
+                    callback_data=SettingsData(
+                        action=UserCallback.SWITCH,
+                        attr=UserCallback.NEWS_NOTIFY,
+                    ).pack(),
                 ),
             ],
             [
@@ -57,7 +64,10 @@ async def settings_keyboard(
                         if settings.washing_time is None
                         else format_time(settings.washing_time),
                     ),
-                    callback_data=UserCallback.EDIT_WASHING_TIME,
+                    callback_data=SettingsData(
+                        action=UserCallback.EDIT,
+                        attr=UserCallback.WASHING,
+                    ).pack(),
                 ),
                 InlineKeyboardButton(
                     text=DRYING(
@@ -65,7 +75,10 @@ async def settings_keyboard(
                         if settings.drying_time is None
                         else format_time(settings.drying_time),
                     ),
-                    callback_data=UserCallback.EDIT_DRYING_TIME,
+                    callback_data=SettingsData(
+                        action=UserCallback.EDIT,
+                        attr=UserCallback.DRYING,
+                    ).pack(),
                 ),
             ],
             [go_to_main_menu_button],
@@ -79,17 +92,23 @@ choose_grade_keyboard: "InlineKeyboardMarkup" = (
         *(
             InlineKeyboardButton(
                 text=grade_letter,
-                callback_data=UserCallback.CHANGE_GRADE_TO_ + grade_letter,
+                callback_data=SettingsData(
+                    action=UserCallback.CHANGE_GRADE,
+                    attr=grade_letter,
+                ).pack(),
             )
             for grade_letter in GRADES
         ),
         InlineKeyboardButton(
             text=BACK_TO_SETTINGS,
-            callback_data=UserCallback.OPEN_SETTINGS,
+            callback_data=OpenMenu(menu=UserCallback.SETTINGS).pack(),
         ),
         InlineKeyboardButton(
             text=RESET_CLASS,
-            callback_data=UserCallback.CHANGE_GRADE_TO_ + "None",  # xd
+            callback_data=SettingsData(
+                action=UserCallback.CHANGE_GRADE,
+                attr=UserCallback.EMPTY,
+            ).pack(),
         ),
     )
     .adjust(3, 3, 2)

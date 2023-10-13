@@ -1,7 +1,5 @@
 from enum import Enum
 
-from bot.utils.consts import TODAY
-
 
 class SlashCommands(str, Enum):
     """Слэш команды бота."""
@@ -49,32 +47,26 @@ class NotifyTypes(str, Enum):
 class UserCallback(str, Enum):
     """Callback дата, которую используют все пользователей."""
 
-    OPEN_MAIN_MENU = "open_main_menu"
-    OPEN_SETTINGS = "open_settings"
-    OPEN_LAUNDRY = "open_laundry"
-    OPEN_EDUCATORS = "open_educators"
-    OPEN_ELECTIVES = "open_electives"
-    OPEN_CAFE_MENU_ON_ = "open_cafe_menu_on_"
-    OPEN_CAFE_MENU_TODAY = OPEN_CAFE_MENU_ON_ + TODAY
-    OPEN_LESSONS_ON_ = "open_lessons_on_"
-    OPEN_LESSONS_TODAY = OPEN_LESSONS_ON_ + TODAY
-    OPEN_EDUCATORS_ON_ = "open_educators_on_"
-    OPEN_EDUCATORS_TODAY = OPEN_EDUCATORS_ON_ + TODAY
+    MAIN_MENU = "main_menu"
+    SETTINGS = "settings"
+    LAUNDRY = "laundry"
+    EDUCATORS = "educators"
+    ELECTIVES = "electives"
+    CAFE_MENU = "cafe_menu"
+    LESSONS = "open_lessons_on_"
 
-    CHANGE_GRADE_TO_ = "change_grade_to_"
-    PREFIX_SWITCH = "switch_"
-    SWITCH_LESSONS_NOTIFY = PREFIX_SWITCH + "lessons_notify"
-    SWITCH_NEWS_NOTIFY = PREFIX_SWITCH + "news_notify"
-    EDIT_SETTINGS_PREFIX = "edit_settings_"
-    EDIT_WASHING_TIME = EDIT_SETTINGS_PREFIX + "washing"
-    EDIT_DRYING_TIME = EDIT_SETTINGS_PREFIX + "drying"
+    START = "start"
+    SWITCH = "switch"
+    EDIT = "edit"
+    CANCEL = "cancel"
 
-    START_LAUNDRY_PREFIX = "start_laundry_"
-    START_WASHING_TIMER = START_LAUNDRY_PREFIX + "washing"
-    START_DRYING_TIMER = START_LAUNDRY_PREFIX + "drying"
-    CANCEL_LAUNDRY_TIMER = "cancel_laundry_timer"
+    WASHING = "washing"
+    DRYING = "drying"
+    EMPTY = "empty"
 
-    CANCEL_STATE = "cancel_state"
+    CHANGE_GRADE = "change_grade"
+    LESSONS_NOTIFY = "lessons_notify"
+    NEWS_NOTIFY = "news_notify"
 
 
 class AdminCallback(str, Enum):

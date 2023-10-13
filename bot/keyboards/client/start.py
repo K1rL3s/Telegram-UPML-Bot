@@ -2,18 +2,19 @@ from typing import TYPE_CHECKING
 
 from aiogram.utils.keyboard import (
     InlineKeyboardBuilder,
-    InlineKeyboardButton,
     InlineKeyboardMarkup,
     KeyboardButton,
     ReplyKeyboardBuilder,
     ReplyKeyboardMarkup,
 )
 
+from bot.callbacks import OpenMenu
 from bot.keyboards.universal import (
     go_to_admin_panel_button,
     go_to_main_menu_button,
     go_to_settings_button,
 )
+from bot.utils.consts import TODAY
 from bot.utils.enums import Roles, TextCommands, UserCallback
 
 
@@ -42,15 +43,16 @@ async def main_menu_inline_keyboard(
             TextCommands.EDUCATORS,
         ),
         (
-            UserCallback.OPEN_CAFE_MENU_TODAY,
-            UserCallback.OPEN_LESSONS_TODAY,
-            UserCallback.OPEN_LAUNDRY,
-            UserCallback.OPEN_ELECTIVES,
-            UserCallback.OPEN_EDUCATORS_TODAY,
+            OpenMenu(menu=UserCallback.CAFE_MENU, date=TODAY),
+            OpenMenu(menu=UserCallback.LESSONS, date=TODAY),
+            OpenMenu(menu=UserCallback.LAUNDRY),
+            OpenMenu(menu=UserCallback.ELECTIVES, date=TODAY),
+            OpenMenu(menu=UserCallback.EDUCATORS, date=TODAY),
         ),
     ):
-        keyboard.add(
-            InlineKeyboardButton(text=button_text, callback_data=callback_data),
+        keyboard.button(
+            text=button_text,
+            callback_data=callback_data.pack(),
         )
 
     keyboard.add(go_to_settings_button)

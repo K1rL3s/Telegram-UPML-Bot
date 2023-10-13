@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import Command, CommandStart, StateFilter
 
+from bot.callbacks import OpenMenu, StateData
 from bot.keyboards import main_menu_inline_keyboard
 from bot.keyboards.client.start import start_reply_keyboard
 from bot.middlewares.inner.save_user import SaveUpdateUserMiddleware
@@ -35,7 +36,7 @@ async def start_handler(
     )
 
 
-@router.callback_query(F.data == UserCallback.OPEN_MAIN_MENU)
+@router.callback_query(OpenMenu.filter(F.menu == UserCallback.MAIN_MENU))
 async def main_menu_callback_handler(
     callback: "CallbackQuery",
     repo: "Repository",
@@ -63,7 +64,10 @@ async def help_handler(message: "Message") -> None:
     await message.reply("Помощь!")
 
 
-@router.callback_query(F.data == UserCallback.CANCEL_STATE, StateFilter("*"))
+@router.callback_query(
+    StateData.filter(F.action == UserCallback.CANCEL),
+    StateFilter("*"),
+)
 async def cancel_callback_state(
     callback: "CallbackQuery",
     state: "FSMContext",
