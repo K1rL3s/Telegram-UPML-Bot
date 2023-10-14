@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import StateFilter
 
+from bot.callbacks import AdminEditData, EditMealData, StateData
 from bot.funcs.admin.admin_cafe_menu import (
     edit_cafe_menu_confirm_func,
     edit_cafe_menu_date_func,
@@ -15,7 +16,7 @@ from bot.keyboards import (
     confirm_cancel_keyboard,
 )
 from bot.upml.save_cafe_menu import process_cafe_menu
-from bot.utils.enums import AdminCallback
+from bot.utils.enums import Actions, Meals, Menus
 from bot.utils.datehelp import date_today, format_date
 from bot.utils.states import EditingMenu
 
@@ -30,7 +31,7 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(F.data == AdminCallback.AUTO_UPDATE_CAFE_MENU)
+@router.callback_query(EditMealData.filter(F.meal == Meals.AUTO_ALL))
 async def auto_update_cafe_menu_handler(
     callback: "CallbackQuery",
     settings: "Settings",
@@ -48,7 +49,7 @@ async def auto_update_cafe_menu_handler(
     )
 
 
-@router.callback_query(F.data == AdminCallback.EDIT_CAFE_MENU)
+@router.callback_query(AdminEditData.filter(F.menu == Menus.CAFE_MENU))
 async def edit_cafe_menu_start_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
@@ -82,14 +83,15 @@ async def edit_cafe_menu_date_handler(
     )
 
 
-@router.callback_query(StateFilter(EditingMenu.choose_meal))
+@router.callback_query(StateFilter(EditingMenu.choose_meal), EditMealData.filter())
 async def edit_cafe_menu_meal_handler(
     callback: "CallbackQuery",
+    callback_data: "EditMealData",
     state: "FSMContext",
     repo: "Repository",
 ) -> None:
     """Обработчик кнопки с выбором приёма пищи для изменения."""
-    text = await edit_cafe_menu_meal_func(callback.data, state, repo.menu)
+    text = await edit_cafe_menu_meal_func(callback_data.meal, state, repo.menu)
     await callback.message.edit_text(text=text, reply_markup=cancel_state_keyboard)
 
 
@@ -112,7 +114,10 @@ async def edit_cafe_menu_text_handler(
     )
 
 
-@router.callback_query(StateFilter(EditingMenu.writing))
+@router.callback_query(
+    StateFilter(EditingMenu.writing),
+    StateData.filter(F.action == Actions.CONFIRM),
+)
 async def edit_cafe_menu_confirm_handler(
     callback: "CallbackQuery",
     state: "FSMContext",

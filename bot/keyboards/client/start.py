@@ -15,7 +15,7 @@ from bot.keyboards.universal import (
     go_to_settings_button,
 )
 from bot.utils.consts import TODAY
-from bot.utils.enums import Roles, TextCommands, UserCallback
+from bot.utils.enums import Menus, Roles, TextCommands
 
 
 if TYPE_CHECKING:
@@ -43,11 +43,11 @@ async def main_menu_inline_keyboard(
             TextCommands.EDUCATORS,
         ),
         (
-            OpenMenu(menu=UserCallback.CAFE_MENU, date=TODAY),
-            OpenMenu(menu=UserCallback.LESSONS, date=TODAY),
-            OpenMenu(menu=UserCallback.LAUNDRY),
-            OpenMenu(menu=UserCallback.ELECTIVES, date=TODAY),
-            OpenMenu(menu=UserCallback.EDUCATORS, date=TODAY),
+            OpenMenu(menu=Menus.CAFE_MENU, date=TODAY),
+            OpenMenu(menu=Menus.LESSONS, date=TODAY),
+            OpenMenu(menu=Menus.LAUNDRY),
+            OpenMenu(menu=Menus.ELECTIVES, date=TODAY),
+            OpenMenu(menu=Menus.EDUCATORS, date=TODAY),
         ),
     ):
         keyboard.button(

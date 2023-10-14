@@ -10,7 +10,7 @@ from bot.callbacks import OpenMenu, SettingsData
 from bot.keyboards.universal import go_to_main_menu_button
 from bot.utils.consts import GRADES
 from bot.utils.datehelp import format_time
-from bot.utils.enums import UserCallback
+from bot.utils.enums import Actions, Menus, UserCallback
 from bot.utils.phrases import NO, QUESTION, YES
 
 
@@ -45,14 +45,14 @@ async def settings_keyboard(
                 InlineKeyboardButton(
                     text=LESSONS_NOTIFY(YES if settings.lessons_notify else NO),
                     callback_data=SettingsData(
-                        action=UserCallback.SWITCH,
+                        action=Actions.SWITCH,
                         attr=UserCallback.LESSONS_NOTIFY,
                     ).pack(),
                 ),
                 InlineKeyboardButton(
                     text=NEWS_NOTIFY(YES if settings.news_notify else NO),
                     callback_data=SettingsData(
-                        action=UserCallback.SWITCH,
+                        action=Actions.SWITCH,
                         attr=UserCallback.NEWS_NOTIFY,
                     ).pack(),
                 ),
@@ -65,7 +65,7 @@ async def settings_keyboard(
                         else format_time(settings.washing_time),
                     ),
                     callback_data=SettingsData(
-                        action=UserCallback.EDIT,
+                        action=Actions.EDIT,
                         attr=UserCallback.WASHING,
                     ).pack(),
                 ),
@@ -76,7 +76,7 @@ async def settings_keyboard(
                         else format_time(settings.drying_time),
                     ),
                     callback_data=SettingsData(
-                        action=UserCallback.EDIT,
+                        action=Actions.EDIT,
                         attr=UserCallback.DRYING,
                     ).pack(),
                 ),
@@ -101,7 +101,7 @@ choose_grade_keyboard: "InlineKeyboardMarkup" = (
         ),
         InlineKeyboardButton(
             text=BACK_TO_SETTINGS,
-            callback_data=OpenMenu(menu=UserCallback.SETTINGS).pack(),
+            callback_data=OpenMenu(menu=Menus.SETTINGS).pack(),
         ),
         InlineKeyboardButton(
             text=RESET_CLASS,

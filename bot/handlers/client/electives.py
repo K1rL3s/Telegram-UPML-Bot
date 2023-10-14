@@ -5,7 +5,7 @@ from aiogram.filters import Command
 
 from bot.callbacks import OpenMenu
 from bot.keyboards import main_menu_inline_keyboard
-from bot.utils.enums import SlashCommands, TextCommands, UserCallback
+from bot.utils.enums import Menus, SlashCommands, TextCommands
 
 
 if TYPE_CHECKING:
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(OpenMenu.filter(F.menu == UserCallback.ELECTIVES))
+@router.callback_query(OpenMenu.filter(F.menu == Menus.ELECTIVES))
 async def electives_callback_handler(
     callback: "CallbackQuery",
 ) -> None:

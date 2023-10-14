@@ -8,34 +8,39 @@ from aiogram.utils.keyboard import (
 
 from bot.callbacks import OpenMenu, StateData
 from bot.utils.consts import TODAY
-from bot.utils.enums import AdminCallback, TextCommands, UserCallback
+from bot.utils.enums import Actions, Menus, TextCommands
 from bot.utils.datehelp import date_today, format_date
 from bot.utils.phrases import NO, YES
 
 
 MAIN_MENU = "🏠Главное меню"
-CANCEL = NOT_CONFIRM = f"{NO}Отмена"
+CANCEL = f"{NO}Отмена"
 CONFIRM = f"{YES}Подтвердить"
 
 
 go_to_main_menu_button = InlineKeyboardButton(
     text=MAIN_MENU,
-    callback_data=OpenMenu(menu=UserCallback.MAIN_MENU).pack(),
+    callback_data=OpenMenu(menu=Menus.MAIN_MENU).pack(),
 )
 
 go_to_settings_button = InlineKeyboardButton(
     text=TextCommands.SETTINGS,
-    callback_data=OpenMenu(menu=UserCallback.SETTINGS).pack(),
+    callback_data=OpenMenu(menu=Menus.SETTINGS).pack(),
 )
 
 go_to_admin_panel_button = InlineKeyboardButton(
     text=TextCommands.ADMIN_PANEL,
-    callback_data=AdminCallback.OPEN_ADMIN_PANEL,
+    callback_data=OpenMenu(menu=Menus.ADMIN_PANEL).pack(),
+)
+
+confirm_state_button = InlineKeyboardButton(
+    text=CONFIRM,
+    callback_data=StateData(action=Actions.CONFIRM).pack(),
 )
 
 cancel_state_button = InlineKeyboardButton(
     text=CANCEL,
-    callback_data=StateData(action=UserCallback.CANCEL).pack(),
+    callback_data=StateData(action=Actions.CANCEL).pack(),
 )
 
 cancel_state_keyboard = InlineKeyboardMarkup(inline_keyboard=[[cancel_state_button]])
@@ -43,10 +48,7 @@ cancel_state_keyboard = InlineKeyboardMarkup(inline_keyboard=[[cancel_state_butt
 confirm_cancel_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [
-            InlineKeyboardButton(
-                text=CONFIRM,
-                callback_data=AdminCallback.CONFIRM,
-            ),
+            confirm_state_button,
             cancel_state_button,
         ],
     ],

@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import StateFilter
 
+from bot.callbacks import DoNotifyData, OpenMenu, StateData
 from bot.funcs.admin.admin_notifies import (
     notify_confirm_func,
     notify_for_who_func,
@@ -13,7 +14,7 @@ from bot.keyboards import (
     confirm_cancel_keyboard,
     notify_panel_keyboard,
 )
-from bot.utils.enums import AdminCallback
+from bot.utils.enums import Actions, Menus
 from bot.utils.states import DoNotify
 
 if TYPE_CHECKING:
@@ -26,7 +27,7 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(F.data == AdminCallback.DO_A_NOTIFY_FOR_)
+@router.callback_query(OpenMenu.filter(F.menu == Menus.NOTIFY))
 async def notify_panel_handler(callback: "CallbackQuery") -> None:
     """Обработчик кнопки "Уведомление"."""
     text = """
@@ -40,14 +41,16 @@ async def notify_panel_handler(callback: "CallbackQuery") -> None:
     await callback.message.edit_text(text=text, reply_markup=notify_panel_keyboard)
 
 
-@router.callback_query(F.data.startswith(AdminCallback.DO_A_NOTIFY_FOR_))
+@router.callback_query(DoNotifyData.filter())
 async def notify_for_who_handler(
     callback: "CallbackQuery",
+    callback_data: "DoNotifyData",
     state: "FSMContext",
 ) -> None:
     """Обработчик нажатия одной из кнопок уведомления в панели уведомлений."""
     text, keyboard = await notify_for_who_func(
-        callback.data,
+        callback_data.notify_type,
+        callback_data.for_who,
         callback.message.message_id,
         state,
     )
@@ -74,7 +77,7 @@ async def notify_message_handler(
 
 
 @router.callback_query(
-    F.data == AdminCallback.CONFIRM,
+    StateData.filter(F.action == Actions.CONFIRM),
     StateFilter(DoNotify.writing),
 )
 async def notify_confirm_handler(

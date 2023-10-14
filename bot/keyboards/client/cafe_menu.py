@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from bot.keyboards.universal import _left_right_keyboard_navigation
-from bot.utils.enums import UserCallback
+from bot.utils.enums import Menus
 
 
 if TYPE_CHECKING:
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 def cafe_menu_keyboard(date: "dt.date" = None) -> "InlineKeyboardMarkup":
     """Клавиатура для расписания столовой с перемоткой влево-вправо по дня."""
     return _left_right_keyboard_navigation(
-        menu=UserCallback.CAFE_MENU,
+        menu=Menus.CAFE_MENU,
         today_smile="🍴",
         date=date,
     )

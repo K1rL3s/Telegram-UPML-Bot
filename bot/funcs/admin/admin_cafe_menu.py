@@ -42,25 +42,24 @@ async def edit_cafe_menu_date_func(
 
 
 async def edit_cafe_menu_meal_func(
-    callback_data: str,
+    edit_meal: str,
     state: "FSMContext",
     repo: "MenuRepository",
 ) -> str:
     """
     Обработчик кнопки с выбором приёма пищи для изменения.
 
-    :param callback_data: Callback строка.
+    :param edit_meal: Какой приём пищи изменяется.
     :param state: Состояние пользователя.
     :param repo: Репозиторий расписаний столовой.
     :return: Сообщение пользователю.
     """
-    edit_meal = callback_data.split("_")[-1]
     edit_date = date_by_format((await state.get_data())["edit_date"])
-    await state.update_data(edit_meal=edit_meal)
-
     meal = CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()
     menu = await get_meal_by_date(repo, edit_meal, edit_date)
+
     await state.set_state(EditingMenu.writing)
+    await state.update_data(edit_meal=edit_meal)
 
     return (
         f"<b>Дата</b>: <code>{format_date(edit_date)}</code> "

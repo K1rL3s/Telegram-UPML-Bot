@@ -2,14 +2,14 @@ from aiogram.filters.callback_data import CallbackData
 
 
 class LaundryData(CallbackData, prefix="laundry"):
-    """CallbackData для таймеров прачечной."""
+    """Фабрика для запуска и отмены таймеров прачечной."""
 
     action: str
     attr: str | None = None
 
 
 class SettingsData(CallbackData, prefix="settings"):
-    """CallbackData для настроек."""
+    """Фабрика для изменения настроек."""
 
     action: str
     attr: str | None = None

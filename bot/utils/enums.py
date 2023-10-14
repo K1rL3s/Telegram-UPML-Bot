@@ -44,8 +44,15 @@ class NotifyTypes(str, Enum):
     GRADE_11 = "grade_11"
 
 
-class UserCallback(str, Enum):
-    """Callback дата, которую используют все пользователей."""
+class Grades(str, Enum):
+    """Учебные параллели."""
+
+    GRADE_10 = "10"
+    GRADE_11 = "11"
+
+
+class Menus(str, Enum):
+    """Callback'и для менюшек бота."""
 
     MAIN_MENU = "main_menu"
     SETTINGS = "settings"
@@ -53,12 +60,26 @@ class UserCallback(str, Enum):
     EDUCATORS = "educators"
     ELECTIVES = "electives"
     CAFE_MENU = "cafe_menu"
-    LESSONS = "open_lessons_on_"
+    LESSONS = "lessons"
+    ADMIN_PANEL = "admin_panel"
+    NOTIFY = "notify"
 
+
+class Actions(str, Enum):
+    """Callback'и для действий пользователей."""
+
+    CONFIRM = "confirm"
     START = "start"
+    ADD = "add"
+    CHECK = "check"
     SWITCH = "switch"
     EDIT = "edit"
+    REMOVE = "remove"
     CANCEL = "cancel"
+
+
+class UserCallback(str, Enum):
+    """Callback'и, которую используют все пользователей."""
 
     WASHING = "washing"
     DRYING = "drying"
@@ -69,38 +90,15 @@ class UserCallback(str, Enum):
     NEWS_NOTIFY = "news_notify"
 
 
-class AdminCallback(str, Enum):
-    """Callback дата, которую используют админы."""
+class Meals(str, Enum):
+    """Callback'и для названий приёмов пищи."""
 
-    OPEN_ADMIN_PANEL = "open_admin_panel"
-
-    AUTO_UPDATE_CAFE_MENU = "auto_update_cafe_menu"
-    EDIT_CAFE_MENU = "edit_cafe_menu"
-    EDIT_BREAKFAST = "edit_breakfast"
-    EDIT_LUNCH = "edit_lunch"
-    EDIT_DINNER = "edit_dinner"
-    EDIT_SNACK = "edit_snack"
-    EDIT_SUPPER = "edit_supper"
-    EDIT_EDUCATORS = "edit_educators"
-
-    UPLOAD_LESSONS = "upload_lessons_"
-    UPLOAD_LESSONS_FOR_10 = UPLOAD_LESSONS + "for_10"
-    UPLOAD_LESSONS_FOR_11 = UPLOAD_LESSONS + "for_11"
-
-    DO_A_NOTIFY_FOR_ = "do_a_notify_for_"
-    NOTIFY_FOR_ALL = DO_A_NOTIFY_FOR_ + NotifyTypes.ALL
-    NOTIFY_FOR_GRADE = DO_A_NOTIFY_FOR_ + NotifyTypes.GRADE
-    NOTIFY_FOR_CLASS = DO_A_NOTIFY_FOR_ + NotifyTypes.CLASS
-
-    OPEN_ADMINS_LIST_PAGE_ = "open_admins_list_page_"
-    CHECK_ADMIN_ = "check_admin_"
-    REMOVE_ADMIN_ = "remove_admin_"
-    REMOVE_ADMIN_SURE_ = REMOVE_ADMIN_ + "sure_"
-    ADD_NEW_ADMIN = "add_new_admin"
-    ADD_NEW_ADMIN_SURE = "add_new_admin_sure"
-
-    CONFIRM = "confirm_in_state"
-    NOT_CONFIRM = "not_confirm_in_state"
+    AUTO_ALL = "auto_all"
+    BREAKFAST = "breakfast"
+    LUNCH = "lunch"
+    DINNER = "dinner"
+    SNACK = "snack"
+    SUPPER = "supper"
 
 
 class Roles(str, Enum):

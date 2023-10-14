@@ -4,8 +4,9 @@ from aiogram.utils.keyboard import (
     InlineKeyboardMarkup,
 )
 
+from bot.callbacks import AdminListData, AdminManageData
 from bot.keyboards.universal import go_to_admin_panel_button
-from bot.utils.enums import AdminCallback
+from bot.utils.enums import Actions
 
 
 ADMIN_LIST = "👮‍♀️Список админов"
@@ -18,11 +19,11 @@ REMOVE_ROLE_SURE = "🚫Точно снять роль"
 
 open_admins_list_button = InlineKeyboardButton(
     text=ADMIN_LIST,
-    callback_data=AdminCallback.OPEN_ADMINS_LIST_PAGE_,
+    callback_data=AdminListData(page=0).pack(),
 )
 add_new_admin_button = InlineKeyboardButton(
     text=ADD_ADMIN,
-    callback_data=AdminCallback.ADD_NEW_ADMIN,
+    callback_data=AdminManageData(action=Actions.ADD).pack(),
 )
 
 
@@ -40,27 +41,25 @@ def admins_list_keyboard(
     keyboard = InlineKeyboardBuilder()
 
     for name, user_id in users[page * upp : page * upp + upp]:
-        keyboard.add(
-            InlineKeyboardButton(
-                text=name,
-                callback_data=AdminCallback.CHECK_ADMIN_ + f"{user_id}_{page}",
+        keyboard.button(
+            text=name,
+            callback_data=AdminManageData(
+                action=Actions.CHECK,
+                user_id=user_id,
+                page=page,
             ),
         )
 
     if page > 0:
-        keyboard.add(
-            InlineKeyboardButton(
-                text=PAGE_BACK,
-                callback_data=AdminCallback.OPEN_ADMINS_LIST_PAGE_ + f"{page - 1}",
-            ),
+        keyboard.button(
+            text=PAGE_BACK,
+            callback_data=AdminListData(page=page - 1),
         )
 
     if page * upp + upp < len(users):
-        keyboard.add(
-            InlineKeyboardButton(
-                text=PAGE_FORWARD,
-                callback_data=AdminCallback.OPEN_ADMINS_LIST_PAGE_ + f"{page + 1}",
-            ),
+        keyboard.button(
+            text=PAGE_FORWARD,
+            callback_data=AdminListData(page=page + 1),
         )
 
     keyboard.add(
@@ -76,33 +75,29 @@ def admins_list_keyboard(
 def check_admin_keyboard(
     user_id: int,
     page: int,
-    sure: bool = False,
+    is_sure: bool = False,
 ) -> "InlineKeyboardMarkup":
     """
     Клавиатура просмотра одного админа.
 
     :param user_id: ТГ Айди.
     :param page: Страница списка админов.
-    :param sure: Уверенность в снятии роли.
+    :param is_sure: Уверенность в снятии роли.
     """
-    remove_button = InlineKeyboardButton(
-        text=REMOVE_ROLE_SURE if sure else REMOVE_ROLE,
-        callback_data=(
-            AdminCallback.REMOVE_ADMIN_SURE_ + f"{user_id}_{page}"
-            if sure
-            else AdminCallback.REMOVE_ADMIN_ + f"{user_id}_{page}"
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(
+        text=REMOVE_ROLE_SURE if is_sure else REMOVE_ROLE,
+        callback_data=AdminManageData(
+            action=Actions.REMOVE,
+            user_id=user_id,
+            is_sure=is_sure,
+            page=page,
         ),
     )
-    return (
-        InlineKeyboardBuilder()
-        .add(remove_button)
-        .add(
-            go_to_admin_panel_button,
-            InlineKeyboardButton(
-                text=ADMIN_LIST,
-                callback_data=AdminCallback.OPEN_ADMINS_LIST_PAGE_ + f"{page}",
-            ),
-        )
-        .adjust(1, 2)
-        .as_markup()
+    keyboard.button(
+        text=ADMIN_LIST,
+        callback_data=AdminListData(page=page),
     )
+    keyboard.add(go_to_admin_panel_button)
+
+    return keyboard.adjust(1, 2).as_markup()

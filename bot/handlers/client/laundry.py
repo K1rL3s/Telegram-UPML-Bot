@@ -10,7 +10,7 @@ from bot.funcs.client.laundry import (
     laundry_start_timer_func,
 )
 from bot.keyboards import go_to_main_menu_keyboard
-from bot.utils.enums import SlashCommands, TextCommands, UserCallback
+from bot.utils.enums import Actions, Menus, SlashCommands, TextCommands
 from bot.utils.datehelp import format_datetime
 
 if TYPE_CHECKING:
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(OpenMenu.filter(F.menu == UserCallback.LAUNDRY))
+@router.callback_query(OpenMenu.filter(F.menu == Menus.LAUNDRY))
 async def laundry_callback_handler(
     callback: "CallbackQuery",
     repo: "Repository",
@@ -45,7 +45,7 @@ async def laundry_message_handler(
     await message.answer(text=text, reply_markup=keyboard)
 
 
-@router.callback_query(LaundryData.filter(F.action == UserCallback.START))
+@router.callback_query(LaundryData.filter(F.action == Actions.START))
 async def laundry_start_timer_handler(
     callback: "CallbackQuery",
     callback_data: "LaundryData",
@@ -69,7 +69,7 @@ async def laundry_start_timer_handler(
     await callback.message.edit_text(text=text, reply_markup=keyboard)
 
 
-@router.callback_query(LaundryData.filter(F.action == UserCallback.CANCEL))
+@router.callback_query(LaundryData.filter(F.action == Actions.CANCEL))
 async def laundry_cancel_timer_handler(
     callback: "CallbackQuery",
     repo: "Repository",

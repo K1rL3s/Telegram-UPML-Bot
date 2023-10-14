@@ -3,24 +3,26 @@ from aiogram.utils.keyboard import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
 )
+
+from bot.callbacks import EditMealData
 from bot.keyboards.universal import cancel_state_button
 from bot.utils.consts import BEAUTIFY_MEALS
-from bot.utils.enums import AdminCallback
+from bot.utils.enums import Meals
 
 
 choose_meal_keyboard: "InlineKeyboardMarkup" = (
     InlineKeyboardBuilder()
     .add(
         *(
-            InlineKeyboardButton(text=dish, callback_data=callback_data)
+            InlineKeyboardButton(text=dish, callback_data=callback_data.pack())
             for dish, callback_data in zip(
                 BEAUTIFY_MEALS,
                 (
-                    AdminCallback.EDIT_BREAKFAST,
-                    AdminCallback.EDIT_LUNCH,
-                    AdminCallback.EDIT_DINNER,
-                    AdminCallback.EDIT_SNACK,
-                    AdminCallback.EDIT_SUPPER,
+                    EditMealData(meal=Meals.BREAKFAST),
+                    EditMealData(meal=Meals.LUNCH),
+                    EditMealData(meal=Meals.DINNER),
+                    EditMealData(meal=Meals.SNACK),
+                    EditMealData(meal=Meals.SUPPER),
                 ),
             )
         ),

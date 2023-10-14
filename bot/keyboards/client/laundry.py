@@ -7,7 +7,7 @@ from bot.keyboards.universal import (
     go_to_main_menu_button,
     go_to_settings_button,
 )
-from bot.utils.enums import UserCallback
+from bot.utils.enums import Actions, UserCallback
 from bot.utils.phrases import NO
 
 
@@ -31,14 +31,14 @@ async def laundry_keyboard(
     keyboard.button(
         text=START_WASHING,
         callback_data=LaundryData(
-            action=UserCallback.START,
+            action=Actions.START,
             attr=UserCallback.WASHING,
         ),
     )
     keyboard.button(
         text=START_DRYING,
         callback_data=LaundryData(
-            action=UserCallback.START,
+            action=Actions.START,
             attr=UserCallback.DRYING,
         ),
     )
@@ -46,7 +46,7 @@ async def laundry_keyboard(
     if add_cancel_button and laundry.is_active:
         keyboard.button(
             text=CANCEL_TIMER,
-            callback_data=LaundryData(action=UserCallback.CANCEL),
+            callback_data=LaundryData(action=Actions.CANCEL),
         )
 
     keyboard.add(go_to_main_menu_button, go_to_settings_button)

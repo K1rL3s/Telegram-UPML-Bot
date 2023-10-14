@@ -43,7 +43,7 @@ async def edit_bool_settings_func(
 async def edit_grade_setting_func(
     repo: "SettingsRepository",
     user_id: int,
-    grade: str,
+    grade: str | None,
 ) -> bool:
     """
     Обработчик нажатия кнопки смены класса (выбор класса).

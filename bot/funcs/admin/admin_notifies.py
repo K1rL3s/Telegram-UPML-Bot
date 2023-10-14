@@ -7,7 +7,7 @@ from bot.keyboards import (
     notify_for_grade_keyboard,
 )
 from bot.utils.consts import NOTIFIES_ENG_TO_RU
-from bot.utils.enums import AdminCallback
+from bot.utils.enums import NotifyTypes
 from bot.utils.notify import do_admin_notifies
 from bot.utils.states import DoNotify
 
@@ -20,36 +20,37 @@ if TYPE_CHECKING:
 
 
 async def notify_for_who_func(
-    callback_data: str,
+    notify_type: str,
+    for_who: str,
     message_id: int,
     state: "FSMContext",
 ) -> tuple[str, "InlineKeyboardMarkup"]:
     """
     Обработчик нажатия одной из кнопок уведомления в панели уведомлений.
 
-    :param callback_data: Callback строка.
+    :param notify_type: Тип уведомления.
+    :param for_who: Для кого уведомление.
     :param message_id: Айди начального сообщения бота.
     :param state: Состояние пользователя.
     :return: Сообщение и клавиатура для пользователя.
     """
-    if callback_data == AdminCallback.NOTIFY_FOR_GRADE:
+    if notify_type == NotifyTypes.GRADE:
         text = "Выберите, каким классам сделать уведомление"
         keyboard = notify_for_grade_keyboard
-    elif callback_data == AdminCallback.NOTIFY_FOR_CLASS:
+    elif notify_type == NotifyTypes.CLASS:
         text = "Выберите, какому классу сделать уведомление"
         keyboard = notify_for_class_keyboard
     else:
-        notify_type = callback_data.replace(AdminCallback.DO_A_NOTIFY_FOR_, "")
         await state.set_state(DoNotify.writing)
         await state.set_data(
             {
                 "start_id": message_id,
                 # all, grade_10, grade_11, 10А, 10Б, 10В, 11А, 11Б, 11В
-                "notify_type": notify_type,
+                "for_who": for_who,
             },
         )
         text = (
-            f"Тип: <code>{NOTIFIES_ENG_TO_RU.get(notify_type, notify_type)}</code>\n"
+            f"Тип: <code>{NOTIFIES_ENG_TO_RU.get(for_who, for_who)}</code>\n"
             "Напишите сообщение, которое будет в уведомлении"
         )
         keyboard = cancel_state_keyboard
@@ -72,14 +73,14 @@ async def notify_message_func(
     """
     data = await state.get_data()
     start_id = data["start_id"]
-    notify_type = data["notify_type"]
+    for_who = data["for_who"]
 
     messages_ids = data.get("messages_ids", [])
     messages_ids.append(message_id)
     await state.update_data(message_text=html_text, messages_ids=messages_ids)
 
     text = (
-        f"Тип: <code>{NOTIFIES_ENG_TO_RU.get(notify_type, notify_type)}</code>\n"
+        f"Тип: <code>{NOTIFIES_ENG_TO_RU.get(for_who, for_who)}</code>\n"
         f"Сообщение:\n{html_text}\n\n"
         "Для отправки нажмите кнопку. Если хотите изменить, "
         "отправьте сообщение повторно."
@@ -104,19 +105,19 @@ async def notify_confirm_func(
     :return: Сообщение пользователю и айдишники его сообщений с изменениями.
     """
     data = await state.get_data()
-    notify_type = data["notify_type"]
+    for_who = data["for_who"]
     message_text = data["message_text"]
     messages_ids = data["messages_ids"]
     await state.clear()
 
-    users = await get_users_for_notify(repo, notify_type, is_news=True)
+    users = await get_users_for_notify(repo, for_who, is_news=True)
     await do_admin_notifies(
         bot,
         repo,
         message_text,
         users,
         user_id,
-        NOTIFIES_ENG_TO_RU.get(notify_type, notify_type),
+        NOTIFIES_ENG_TO_RU.get(for_who, for_who),
     )
 
     return "Рассылка завершена!", messages_ids

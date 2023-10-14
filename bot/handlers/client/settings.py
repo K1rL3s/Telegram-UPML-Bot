@@ -15,7 +15,7 @@ from bot.keyboards import (
     settings_keyboard,
 )
 from bot.middlewares.inner.save_user import SaveUpdateUserMiddleware
-from bot.utils.enums import SlashCommands, TextCommands, UserCallback
+from bot.utils.enums import Actions, Menus, SlashCommands, TextCommands, UserCallback
 from bot.utils.states import EditingSettings
 
 if TYPE_CHECKING:
@@ -39,7 +39,7 @@ SETTINGS_WELCOME_TEXT = """
 """.strip()
 
 
-@router.callback_query(OpenMenu.filter(F.menu == UserCallback.SETTINGS))
+@router.callback_query(OpenMenu.filter(F.menu == Menus.SETTINGS))
 async def settings_callback_handler(
     callback: "CallbackQuery",
     repo: "Repository",
@@ -65,7 +65,7 @@ async def settings_message_handler(
     await message.answer(text=SETTINGS_WELCOME_TEXT, reply_markup=keyboard)
 
 
-@router.callback_query(SettingsData.filter(F.action == UserCallback.SWITCH))
+@router.callback_query(SettingsData.filter(F.action == Actions.SWITCH))
 async def edit_bool_settings_handler(
     callback: "CallbackQuery",
     callback_data: "SettingsData",
@@ -105,7 +105,7 @@ async def edit_grade_settings_handler(
         )
 
 
-@router.callback_query(SettingsData.filter(F.action == UserCallback.EDIT))
+@router.callback_query(SettingsData.filter(F.action == Actions.EDIT))
 async def edit_laundry_start_handler(
     callback: "CallbackQuery",
     callback_data: "SettingsData",

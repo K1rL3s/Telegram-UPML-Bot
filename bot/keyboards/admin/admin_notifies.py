@@ -1,21 +1,22 @@
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 
+from bot.callbacks import DoNotifyData
 from bot.keyboards.universal import go_to_admin_panel_button
 from bot.utils.consts import GRADES
-from bot.utils.enums import AdminCallback, NotifyTypes
+from bot.utils.enums import NotifyTypes
 
 
 notify_panel_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [
-            InlineKeyboardButton(text=for_who, callback_data=callback_data)
+            InlineKeyboardButton(text=for_who, callback_data=callback_data.pack())
             for for_who, callback_data in zip(
                 ("Всем", "Поток", "Класс"),
                 (
-                    AdminCallback.NOTIFY_FOR_ALL,
-                    AdminCallback.NOTIFY_FOR_GRADE,
-                    AdminCallback.NOTIFY_FOR_CLASS,
+                    DoNotifyData(for_who=NotifyTypes.ALL),
+                    DoNotifyData(notify_type=NotifyTypes.GRADE),
+                    DoNotifyData(notify_type=NotifyTypes.CLASS),
                 ),
             )
         ],
@@ -28,11 +29,11 @@ notify_for_grade_keyboard = InlineKeyboardMarkup(
         [
             InlineKeyboardButton(
                 text="10 классы",
-                callback_data=AdminCallback.DO_A_NOTIFY_FOR_ + NotifyTypes.GRADE_10,
+                callback_data=DoNotifyData(for_who=NotifyTypes.GRADE_10).pack(),
             ),
             InlineKeyboardButton(
                 text="11 классы",
-                callback_data=AdminCallback.DO_A_NOTIFY_FOR_ + NotifyTypes.GRADE_11,
+                callback_data=DoNotifyData(for_who=NotifyTypes.GRADE_11).pack(),
             ),
         ],
         [go_to_admin_panel_button],  # сделать переход в панель уведомлений?
@@ -45,7 +46,7 @@ notify_for_class_keyboard: "InlineKeyboardMarkup" = (
         *(
             InlineKeyboardButton(
                 text=grade_letter,
-                callback_data=AdminCallback.DO_A_NOTIFY_FOR_ + grade_letter,
+                callback_data=DoNotifyData(for_who=grade_letter).pack(),
             )
             for grade_letter in GRADES
         ),

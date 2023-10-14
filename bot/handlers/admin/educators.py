@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import StateFilter
 
+from bot.callbacks import AdminEditData, StateData
 from bot.funcs.admin.admin_educators import (
     edit_educators_confirm_func,
     edit_educators_date_func,
@@ -10,7 +11,7 @@ from bot.funcs.admin.admin_educators import (
 )
 from bot.keyboards import cancel_state_keyboard, confirm_cancel_keyboard
 from bot.keyboards.admin.admin import admin_panel_keyboard
-from bot.utils.enums import AdminCallback
+from bot.utils.enums import Actions, Menus
 from bot.utils.datehelp import date_today, format_date
 from bot.utils.states import EditingEducators
 
@@ -24,7 +25,7 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(F.data == AdminCallback.EDIT_EDUCATORS)
+@router.callback_query(AdminEditData.filter(F.menu == Menus.EDUCATORS))
 async def edit_educators_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
@@ -79,7 +80,10 @@ async def edit_educators_text_handler(
     )
 
 
-@router.callback_query(StateFilter(EditingEducators.writing))
+@router.callback_query(
+    StateFilter(EditingEducators.writing),
+    StateData.filter(F.action == Actions.CONFIRM),
+)
 async def edit_educators_confirm_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
