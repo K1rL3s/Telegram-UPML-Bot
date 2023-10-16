@@ -108,8 +108,8 @@ async def _get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
                 if response.headers.get("content-type") == "application/pdf":
                     return PdfReader(BytesIO(await response.read()))
 
-        menu_date += dt.timedelta(days=1)
-        await asyncio.sleep(0.25)  # На случай, чтобы госуслуги не легли от нагрузки
+            menu_date += dt.timedelta(days=1)
+            await asyncio.sleep(0.25)  # На случай, чтобы госуслуги не легли от нагрузки
 
     return None
 
