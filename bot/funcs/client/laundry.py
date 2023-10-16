@@ -1,10 +1,9 @@
 import datetime as dt
 from math import ceil
-from typing import TYPE_CHECKING
+from typing import Literal, TYPE_CHECKING
 
 from bot.keyboards import laundry_keyboard
 from bot.utils.consts import LAUNDRY_REPEAT
-from bot.utils.enums import UserCallback
 from bot.utils.datehelp import datetime_now, datetime_time_delta
 
 if TYPE_CHECKING:
@@ -12,6 +11,7 @@ if TYPE_CHECKING:
 
     from bot.database.models.laundries import Laundry
     from bot.database.repository import LaundryRepository, SettingsRepository
+    from bot.utils.enums import UserCallback
 
 
 async def laundry_both_handler(
@@ -62,7 +62,7 @@ async def laundry_start_timer_func(
     settings_repo: "SettingsRepository",
     laundry_repo: "LaundryRepository",
     user_id: int,
-    callback_data: str,
+    attr: "Literal[UserCallback.WASHING, UserCallback.DRYING]",
 ) -> tuple[int, "dt.datetime"]:
     """
     Логика обработки кнопок "Запустить стирку" и "Запустить сушку".
@@ -70,11 +70,10 @@ async def laundry_start_timer_func(
     :param settings_repo: Репозиторий настроек.
     :param laundry_repo: Репозиторий таймеров прачечной.
     :param user_id: ТГ Айди.
-    :param callback_data: Дата из кнопки для определения - стирка или сушка.
+    :param attr: Cтирка или сушка.
     """
     settings = await settings_repo.get(user_id)
 
-    attr = callback_data.replace(UserCallback.START_LAUNDRY_PREFIX, "")
     start_time = datetime_now()
     if time := getattr(settings, f"{attr}_time"):
         timedelta = datetime_time_delta(start_time, time)
@@ -91,7 +90,7 @@ async def laundry_start_timer_func(
         rings=0,
     )
 
-    return timedelta.seconds // 60, end_time
+    return int(timedelta.total_seconds() // 60), end_time
 
 
 async def laundry_cancel_timer_func(repo: "LaundryRepository", user_id: int) -> None:

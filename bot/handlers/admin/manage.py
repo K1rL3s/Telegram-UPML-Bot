@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import StateFilter
 
+from bot.callbacks import AdminListData, AdminManageData, StateData
 from bot.funcs.admin.admin_manage import (
     admin_add_confirm_func,
     admin_add_username_func,
@@ -14,7 +15,7 @@ from bot.keyboards import (
     admin_panel_keyboard,
     cancel_state_keyboard,
 )
-from bot.utils.enums import AdminCallback
+from bot.utils.enums import Actions
 from bot.utils.states import AddingNewAdmin
 
 if TYPE_CHECKING:
@@ -27,22 +28,21 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(F.data.startswith(AdminCallback.OPEN_ADMINS_LIST_PAGE_))
+@router.callback_query(AdminListData.filter())
 async def admins_list_handler(
     callback: "CallbackQuery",
+    callback_data: "AdminListData",
     repo: "Repository",
-    callback_data: str = None,
 ) -> None:
     """Обработчик кнопки "Список админов"."""
     text, keyboard = await admins_list_func(
-        callback_data or callback.data,
-        callback.bot,
+        callback_data.page,
         repo.user,
     )
     await callback.message.edit_text(text=text, reply_markup=keyboard)
 
 
-@router.callback_query(F.data == AdminCallback.ADD_NEW_ADMIN)
+@router.callback_query(AdminManageData.filter(F.action == Actions.ADD))
 async def admin_add_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
@@ -66,7 +66,7 @@ async def admin_add_username_handler(
 
 
 @router.callback_query(
-    F.data == AdminCallback.CONFIRM,
+    StateData.filter(F.action == Actions.CONFIRM),
     StateFilter(AddingNewAdmin.confirm),
 )
 async def admin_add_confirm_handler(
@@ -82,18 +82,32 @@ async def admin_add_confirm_handler(
     )
 
 
-@router.callback_query(F.data.startswith(AdminCallback.CHECK_ADMIN_))
-async def admin_check_handler(callback: "CallbackQuery") -> None:
+@router.callback_query(AdminManageData.filter(F.action == Actions.CHECK))
+async def admin_check_handler(
+    callback: "CallbackQuery",
+    callback_data: "AdminManageData",
+) -> None:
     """Обработчик кнопки с юзернеймом админа в списке админов."""
-    text, keyboard = await admin_check_func(callback.data, callback.bot)
+    text, keyboard = await admin_check_func(
+        callback_data.user_id,
+        callback_data.page,
+        callback.bot,
+    )
     await callback.message.edit_text(text=text, reply_markup=keyboard)
 
 
-@router.callback_query(F.data.startswith(AdminCallback.REMOVE_ADMIN_))
+@router.callback_query(AdminManageData.filter(F.action == Actions.REMOVE))
 async def admin_remove_handler(
     callback: "CallbackQuery",
+    callback_data: "AdminManageData",
     repo: "Repository",
 ) -> None:
     """Обработчик кнопкок "Снять роль админа" и "Точно снять роль"."""
-    text, keyboard = await admin_remove_func(callback.data, callback.bot, repo)
+    text, keyboard = await admin_remove_func(
+        callback_data.user_id,
+        callback_data.is_sure,
+        callback_data.page,
+        callback.bot,
+        repo,
+    )
     await callback.message.edit_text(text=text, reply_markup=keyboard)

@@ -9,7 +9,6 @@ from bot.keyboards import (
     confirm_cancel_keyboard,
     go_to_main_menu_keyboard,
 )
-from bot.keyboards.admin.admin import confirm_unconfirm_keyboard
 from bot.upml.album_lessons import tesseract_album_lessons_func
 from bot.utils.datehelp import date_by_format, format_date, weekday_by_date
 from bot.utils.funcs import multi_bytes_to_ids
@@ -43,7 +42,7 @@ async def process_lessons_album_func(
 
     if all(lesson.status for lesson in lessons):  # Всё успешно обработалось
         await state.set_state(LoadingLessons.all_good)
-        return "\n".join(lesson.text for lesson in lessons), confirm_unconfirm_keyboard
+        return "\n".join(lesson.text for lesson in lessons), confirm_cancel_keyboard
 
     await state.set_state(LoadingLessons.something_bad)
     text = (
@@ -113,12 +112,12 @@ async def start_choose_grades_func(
 
 
 async def choose_grades_func(
-    callback_data: str,
+    grade: str,
     state: "FSMContext",
 ) -> tuple[str, "InlineKeyboardMarkup", "LessonsCollection"]:
     """Обработчик кнопок "10 классы" и "11 классы" для нераспознанных расписаний.
 
-    :param callback_data: Сообщение пользователя, дата.
+    :param grade: Параллель, 10 или 11.
     :param state: Состояние пользователя.
     :return: Сообщение и клавиатура пользователю.
              Если всё, то первое медиа и вводом даты.
@@ -128,7 +127,7 @@ async def choose_grades_func(
     lessons = [LessonsCollection(**kwargs) for kwargs in data["lessons"]]
     no_grade_lessons = [lesson for lesson in lessons if lesson.grade is None]
 
-    no_grade_lessons[0].grade = callback_data.split("_")[-1]
+    no_grade_lessons[0].grade = grade
     await state.update_data(lessons=[lesson.model_dump() for lesson in lessons])
 
     # Если есть ещё уроки без класса

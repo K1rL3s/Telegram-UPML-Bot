@@ -6,35 +6,41 @@ from aiogram.utils.keyboard import (
     InlineKeyboardMarkup,
 )
 
+from bot.callbacks import OpenMenu, StateData
 from bot.utils.consts import TODAY
-from bot.utils.enums import AdminCallback, TextCommands, UserCallback
+from bot.utils.enums import Actions, Menus, TextCommands
 from bot.utils.datehelp import date_today, format_date
 from bot.utils.phrases import NO, YES
 
 
 MAIN_MENU = "🏠Главное меню"
-CANCEL = NOT_CONFIRM = f"{NO}Отмена"
+CANCEL = f"{NO}Отмена"
 CONFIRM = f"{YES}Подтвердить"
 
 
 go_to_main_menu_button = InlineKeyboardButton(
     text=MAIN_MENU,
-    callback_data=UserCallback.OPEN_MAIN_MENU,
+    callback_data=OpenMenu(menu=Menus.MAIN_MENU).pack(),
 )
 
 go_to_settings_button = InlineKeyboardButton(
     text=TextCommands.SETTINGS,
-    callback_data=UserCallback.OPEN_SETTINGS,
+    callback_data=OpenMenu(menu=Menus.SETTINGS).pack(),
 )
 
 go_to_admin_panel_button = InlineKeyboardButton(
     text=TextCommands.ADMIN_PANEL,
-    callback_data=AdminCallback.OPEN_ADMIN_PANEL,
+    callback_data=OpenMenu(menu=Menus.ADMIN_PANEL).pack(),
+)
+
+confirm_state_button = InlineKeyboardButton(
+    text=CONFIRM,
+    callback_data=StateData(action=Actions.CONFIRM).pack(),
 )
 
 cancel_state_button = InlineKeyboardButton(
     text=CANCEL,
-    callback_data=UserCallback.CANCEL_STATE,
+    callback_data=StateData(action=Actions.CANCEL).pack(),
 )
 
 cancel_state_keyboard = InlineKeyboardMarkup(inline_keyboard=[[cancel_state_button]])
@@ -42,24 +48,21 @@ cancel_state_keyboard = InlineKeyboardMarkup(inline_keyboard=[[cancel_state_butt
 confirm_cancel_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [
-            InlineKeyboardButton(
-                text=CONFIRM,
-                callback_data=AdminCallback.CONFIRM,
-            ),
+            confirm_state_button,
             cancel_state_button,
         ],
     ],
 )
 
 
-def _keyboard_for_left_right_menu(
-    open_smt_on_: str,
+def _left_right_keyboard_navigation(
+    menu: str,
     today_smile: str,
     date: "dt.date" = None,
 ) -> "InlineKeyboardMarkup":
     """Клавиатура для меню с навигацией влево-вправо по датам.
 
-    :param open_smt_on_: Строка формата "open_{smt}_on_".
+    :param menu: Какое меню открывается.
     :param today_smile: Смайлик на кнопке "Сегодня".
     :param date: Дата, на которой открыта навигация. None - сегодня.
     :return: Клавиатура меню навигации влево-вправо.
@@ -79,26 +82,20 @@ def _keyboard_for_left_right_menu(
     keyboard = InlineKeyboardBuilder()
 
     if abs((today - yesterday).days) < 7:
-        keyboard.add(
-            InlineKeyboardButton(
-                text=f"⬅️ {yesterday_str}",
-                callback_data=open_smt_on_ + yesterday_data,
-            ),
+        keyboard.button(
+            text=f"⬅️ {yesterday_str}",
+            callback_data=OpenMenu(menu=menu, date=yesterday_data),
         )
 
-    keyboard.add(
-        InlineKeyboardButton(
-            text=f"{today_smile}Сегодня",
-            callback_data=open_smt_on_ + TODAY,
-        ),
+    keyboard.button(
+        text=f"{today_smile}Сегодня",
+        callback_data=OpenMenu(menu=menu, date=TODAY),
     )
 
     if abs((today - tomorrow).days) < 7:
-        keyboard.add(
-            InlineKeyboardButton(
-                text=f"{tomorrow_str} ➡️",
-                callback_data=open_smt_on_ + tomorrow_data,
-            ),
+        keyboard.button(
+            text=f"{tomorrow_str} ➡️",
+            callback_data=OpenMenu(menu=menu, date=tomorrow_data),
         )
 
     keyboard.row(go_to_main_menu_button)

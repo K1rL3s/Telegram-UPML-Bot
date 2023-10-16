@@ -3,13 +3,14 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import Command
 
+from bot.callbacks import LaundryData, OpenMenu
 from bot.funcs.client.laundry import (
     laundry_both_handler,
     laundry_cancel_timer_func,
     laundry_start_timer_func,
 )
 from bot.keyboards import go_to_main_menu_keyboard
-from bot.utils.enums import SlashCommands, TextCommands, UserCallback
+from bot.utils.enums import Actions, Menus, SlashCommands, TextCommands
 from bot.utils.datehelp import format_datetime
 
 if TYPE_CHECKING:
@@ -20,7 +21,7 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(F.data == UserCallback.OPEN_LAUNDRY)
+@router.callback_query(OpenMenu.filter(F.menu == Menus.LAUNDRY))
 async def laundry_callback_handler(
     callback: "CallbackQuery",
     repo: "Repository",
@@ -44,9 +45,10 @@ async def laundry_message_handler(
     await message.answer(text=text, reply_markup=keyboard)
 
 
-@router.callback_query(F.data.startswith(UserCallback.START_LAUNDRY_PREFIX))
+@router.callback_query(LaundryData.filter(F.action == Actions.START))
 async def laundry_start_timer_handler(
     callback: "CallbackQuery",
+    callback_data: "LaundryData",
     repo: "Repository",
 ) -> None:
     """Обработчик кнопок "Запустить стирку", "Запустить сушку"."""
@@ -54,7 +56,7 @@ async def laundry_start_timer_handler(
         repo.settings,
         repo.laundry,
         callback.from_user.id,
-        callback.data,
+        callback_data.attr,
     )
 
     text = (
@@ -67,7 +69,7 @@ async def laundry_start_timer_handler(
     await callback.message.edit_text(text=text, reply_markup=keyboard)
 
 
-@router.callback_query(F.data == UserCallback.CANCEL_LAUNDRY_TIMER)
+@router.callback_query(LaundryData.filter(F.action == Actions.CANCEL))
 async def laundry_cancel_timer_handler(
     callback: "CallbackQuery",
     repo: "Repository",

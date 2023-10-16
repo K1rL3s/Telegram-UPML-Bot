@@ -48,7 +48,7 @@ async def get_educators_schedule_by_date(
 
 async def get_users_for_notify(
     repo: "UserRepository",
-    notify_type: str,  # all, grade_10, grade_11, 10А, 10Б, 10В, 11А, 11Б, 11В
+    for_who: str,  # all, grade_10, grade_11, 10А, 10Б, 10В, 11А, 11Б, 11В
     is_lessons: bool = False,
     is_news: bool = False,
 ) -> list["User"]:
@@ -57,7 +57,7 @@ async def get_users_for_notify(
     Преобразует notify_type из `async def notify_for_who_handler` в условия для фильтра.
 
     :param repo: Репозиторий пользователей.
-    :param notify_type: Тип уведомления.
+    :param for_who: Кому уведомление.
     :param is_lessons: Уведомление об изменении расписания.
     :param is_news: Уведомление о новостях (ручная рассылка).
     """
@@ -68,13 +68,13 @@ async def get_users_for_notify(
     if is_news:
         conditions.append((Settings.news_notify, True))
 
-    if notify_type.startswith("grade"):
-        conditions.append((Settings.grade, notify_type.split("_")[-1]))
+    if for_who.startswith("grade"):
+        conditions.append((Settings.grade, for_who.split("_")[-1]))
     elif (
-        len(notify_type) == 3
-        and any(notify_type.startswith(grade) for grade in ("10", "11"))
-        and any(notify_type.endswith(letter) for letter in "АБВ")
+        len(for_who) == 3
+        and any(for_who.startswith(grade) for grade in ("10", "11"))
+        and any(for_who.endswith(letter) for letter in "АБВ")
     ):  # XD
-        conditions.append((Settings.class_, notify_type))
+        conditions.append((Settings.class_, for_who))
 
     return await repo.get_by_conditions(conditions)

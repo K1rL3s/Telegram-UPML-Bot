@@ -1,10 +1,9 @@
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardButton
 
-from bot.keyboards.universal import (
-    cancel_state_button,
-)
-from bot.utils.enums import AdminCallback
+from bot.callbacks import EditLessonsData
+from bot.keyboards.universal import cancel_state_button
+from bot.utils.enums import Grades
 
 
 GRADE_10 = "10 классы"
@@ -15,14 +14,14 @@ choose_grade_parallel_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [
             InlineKeyboardButton(
-                text=f"{grade}",
-                callback_data=callback_data,
+                text=grade,
+                callback_data=callback_data.pack(),
             )
             for grade, callback_data in zip(
                 (GRADE_10, GRADE_11),
                 (
-                    AdminCallback.UPLOAD_LESSONS_FOR_10,
-                    AdminCallback.UPLOAD_LESSONS_FOR_11,
+                    EditLessonsData(grade=Grades.GRADE_10),
+                    EditLessonsData(grade=Grades.GRADE_11),
                 ),
             )
         ],

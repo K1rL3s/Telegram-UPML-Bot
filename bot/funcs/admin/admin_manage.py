@@ -6,7 +6,7 @@ from bot.keyboards import (
     check_admin_keyboard,
     confirm_cancel_keyboard,
 )
-from bot.utils.enums import AdminCallback, Roles
+from bot.utils.enums import Roles
 from bot.utils.funcs import name_link, username_by_user_id
 from bot.utils.states import AddingNewAdmin
 
@@ -20,23 +20,18 @@ if TYPE_CHECKING:
 
 
 async def admins_list_func(
-    callback_data: str,
-    bot: "Bot",
+    page: int,
     repo: "UserRepository",
 ) -> tuple[str, "InlineKeyboardMarkup"]:
     """
     Обработчик кнопки "Список админов".
 
-    :param callback_data: Callback строка.
-    :param bot: ТГ Бот.
+    :param page: Страница.
     :param repo: Репозиторий пользователей.
     :return: Сообщение и клавиатура пользователю.
     """
-    page = int(callback_data.replace(AdminCallback.OPEN_ADMINS_LIST_PAGE_, "") or 0)
-
     admins = [
-        (await username_by_user_id(bot, user.user_id), user.user_id)
-        for user in await repo.get_with_role(Roles.ADMIN)
+        (user.username, user.user_id) for user in await repo.get_with_role(Roles.ADMIN)
     ]
 
     text = "Список админов:"
@@ -88,64 +83,54 @@ async def admin_add_confirm_func(
 
 
 async def admin_check_func(
-    callback_data: str,
+    user_id: int,
+    page: int,
     bot: "Bot",
 ) -> tuple[str, "InlineKeyboardMarkup"]:
     """
     Обработчик кнопки с юзернеймом админа в списке админов.
 
-    :param callback_data: Callback строка.
+    :param user_id: Айди админа, которого смотрят.
+    :param page: Страница, на которой был админ.
     :param bot: ТГ Бот.
     :return: Сообщение и клавиатура пользователю.
     """
-    user_id, page = map(
-        int,
-        callback_data.replace(AdminCallback.CHECK_ADMIN_, "").split("_"),
-    )
-
     username = await username_by_user_id(bot, user_id)
 
     text = f"Телеграм - {name_link(username, user_id)}"
-    keyboard = check_admin_keyboard(user_id, page, sure=False)
+    keyboard = check_admin_keyboard(user_id, page, is_sure=False)
 
     return text, keyboard
 
 
 async def admin_remove_func(
-    callback_data: str,
+    user_id: int,
+    is_sure: bool,
+    page: int,
     bot: "Bot",
     repo: "Repository",
 ) -> tuple[str, "InlineKeyboardMarkup"]:
     """
     Обработчик кнопкок "Снять роль админа" и "Точно снять роль".
 
-    :param callback_data: Callback строка.
+    :param user_id: Айди админа.
+    :param is_sure: Точно ли удалить админа.
+    :param page: Страница, на которой был админ.
     :param bot: ТГ Бот.
     :param repo: Доступ к базе данных.
     :return: Сообщение и клавиатура пользователю.
     """
-    if callback_data.startswith(AdminCallback.REMOVE_ADMIN_SURE_):
-        user_id, page = map(
-            int,
-            callback_data.replace(AdminCallback.REMOVE_ADMIN_SURE_, "").split("_"),
-        )
-
+    if is_sure:
         await repo.remove_role_from_user(user_id, Roles.ADMIN)
 
         return await admins_list_func(
-            AdminCallback.OPEN_ADMINS_LIST_PAGE_ + f"{page}",
-            bot,
+            page,
             repo.user,
         )
-
-    user_id, page = map(
-        int,
-        callback_data.replace(AdminCallback.REMOVE_ADMIN_, "").split("_"),
-    )
 
     username = await username_by_user_id(bot, user_id)
 
     text = f"Вы точно хотите удалить из админов {name_link(username, user_id)}?"
-    keyboard = check_admin_keyboard(user_id, page, sure=True)
+    keyboard = check_admin_keyboard(user_id, page, is_sure=True)
 
     return text, keyboard

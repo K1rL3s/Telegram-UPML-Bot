@@ -3,11 +3,12 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import Command, CommandStart, StateFilter
 
+from bot.callbacks import OpenMenu, StateData
 from bot.keyboards import main_menu_inline_keyboard
 from bot.keyboards.client.start import start_reply_keyboard
 from bot.middlewares.inner.save_user import SaveUpdateUserMiddleware
 from bot.utils.phrases import MAIN_MENU_TEXT, USER_START_TEXT
-from bot.utils.enums import SlashCommands, TextCommands, UserCallback
+from bot.utils.enums import Actions, Menus, SlashCommands, TextCommands
 
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message
@@ -35,7 +36,7 @@ async def start_handler(
     )
 
 
-@router.callback_query(F.data == UserCallback.OPEN_MAIN_MENU)
+@router.callback_query(OpenMenu.filter(F.menu == Menus.MAIN_MENU))
 async def main_menu_callback_handler(
     callback: "CallbackQuery",
     repo: "Repository",
@@ -63,7 +64,10 @@ async def help_handler(message: "Message") -> None:
     await message.reply("Помощь!")
 
 
-@router.callback_query(F.data == UserCallback.CANCEL_STATE, StateFilter("*"))
+@router.callback_query(
+    StateData.filter(F.action == Actions.CANCEL),
+    StateFilter("*"),
+)
 async def cancel_callback_state(
     callback: "CallbackQuery",
     state: "FSMContext",

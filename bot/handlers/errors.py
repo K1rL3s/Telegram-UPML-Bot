@@ -28,8 +28,7 @@ async def not_modified_error(_: "ErrorEvent") -> None:
 @router.errors()
 async def all_errors(event: "ErrorEvent") -> None:
     """Логгер всех ошибок при обработке событий телеграма."""
-    logger.exception(
-        "Exception while handling: {exception} | {update}",
-        exception=event.exception,
-        update=event.update,
+    # f-строка, потому что loguru cannot pickle 'weakref.ReferenceType' object
+    logger.error(
+        f"Exception while handling: {event.exception} | {event.update}",
     )

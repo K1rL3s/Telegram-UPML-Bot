@@ -24,16 +24,15 @@ if TYPE_CHECKING:
 async def edit_bool_settings_func(
     repo: "SettingsRepository",
     user_id: int,
-    callback_data: str,
+    attr: "Literal[UserCallback.LESSONS_NOTIFY, UserCallback.NEWS_NOTIFY]",
 ) -> None:
     """
     Обработчик нажатия кнопки булевского типа.
 
     :param repo: Репозиторий настроек.
     :param user_id: Айди юзера.
-    :param callback_data: Строка из callback'а (нажатая кнопка).
+    :param attr: Атрибут модели юзера.
     """
-    attr = callback_data.replace(UserCallback.PREFIX_SWITCH, "")
     settings = await repo.get(user_id)
     await repo.save_or_update_to_db(
         user_id,
@@ -44,20 +43,20 @@ async def edit_bool_settings_func(
 async def edit_grade_setting_func(
     repo: "SettingsRepository",
     user_id: int,
-    callback_data: str,
+    grade: str | None,
 ) -> bool:
     """
     Обработчик нажатия кнопки смены класса (выбор класса).
 
     :param repo: Репозиторий настроек.
     :param user_id: Айди юзера.
-    :param callback_data: Строка из callback'а (нажатая кнопка).
+    :param grade: Выбранный класс.
     :return: Случилось ли изменение класса.
     """
-    if not (grade := callback_data.replace(UserCallback.CHANGE_GRADE_TO_, "")):
+    if not grade:
         return False
 
-    if grade.lower() == "none":
+    if grade == UserCallback.EMPTY:
         grade = letter = None
     else:
         grade, letter = grade[:2], grade[-1:]
@@ -68,7 +67,7 @@ async def edit_grade_setting_func(
 
 async def edit_laundry_time_func(
     user_id: int,
-    attr: Literal["washing", "drying"],
+    attr: "Literal[UserCallback.WASHING, UserCallback.DRYING]",
     text: str,
     state: "FSMContext",
     repo: "SettingsRepository",
@@ -102,7 +101,7 @@ async def edit_laundry_time_func(
 async def _edit_time_laundry(
     time: "dt.time",
     user_id: int,
-    attr: Literal["washing", "drying"],
+    attr: "Literal[UserCallback.WASHING, UserCallback.DRYING]",
     repo: "SettingsRepository",
 ) -> str:
     """
@@ -125,7 +124,7 @@ async def _edit_time_laundry(
 async def _edit_minutes_laundry(
     minutes: int,
     user_id: int,
-    attr: Literal["washing", "drying"],
+    attr: "Literal[UserCallback.WASHING, UserCallback.DRYING]",
     repo: "SettingsRepository",
 ) -> str:
     """

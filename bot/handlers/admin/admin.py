@@ -2,9 +2,10 @@ from typing import TYPE_CHECKING
 
 from aiogram import F, Router
 
+from bot.callbacks import OpenMenu
 from bot.keyboards.admin.admin import admin_panel_keyboard
 from bot.utils.phrases import ADMIN_START_TEXT
-from bot.utils.enums import AdminCallback, TextCommands
+from bot.utils.enums import Menus, TextCommands
 
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(F.data == AdminCallback.OPEN_ADMIN_PANEL)
+@router.callback_query(OpenMenu.filter(F.menu == Menus.ADMIN_PANEL))
 async def admin_panel_callback_handler(
     callback: "CallbackQuery",
     repo: "Repository",

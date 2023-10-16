@@ -4,6 +4,7 @@ from aiogram import F, Router
 from aiogram.filters import StateFilter
 from aiogram.types import InputMediaPhoto
 
+from bot.callbacks import AdminEditData, EditLessonsData, StateData
 from bot.types import Album
 from bot.funcs.admin.admin_lessons import (
     all_good_lessons_func,
@@ -18,7 +19,7 @@ from bot.keyboards import (
     choose_grade_parallel_keyboard,
     go_to_main_menu_keyboard,
 )
-from bot.utils.enums import AdminCallback
+from bot.utils.enums import Actions, Menus
 from bot.utils.states import LoadingLessons
 
 if TYPE_CHECKING:
@@ -32,7 +33,7 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(F.data == AdminCallback.UPLOAD_LESSONS)
+@router.callback_query(AdminEditData.filter(F.menu == Menus.LESSONS))
 async def start_process_lessons_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
@@ -92,7 +93,7 @@ async def process_lessons_album_handler(
 
 @router.callback_query(
     StateFilter(LoadingLessons.all_good),
-    F.data == AdminCallback.CONFIRM,
+    StateData.filter(F.action == Actions.CONFIRM),
 )
 async def all_good_lessons_handler(
     callback: "CallbackQuery",
@@ -115,11 +116,11 @@ async def all_good_lessons_handler(
 
 @router.callback_query(
     StateFilter(LoadingLessons.all_good),
-    F.data == AdminCallback.NOT_CONFIRM,
+    StateData.filter(F.action == Actions.CANCEL),
 )
 @router.callback_query(
     StateFilter(LoadingLessons.something_bad),
-    F.data == AdminCallback.CONFIRM,
+    StateData.filter(F.action == Actions.CONFIRM),
 )
 async def start_choose_grades_handler(
     callback: "CallbackQuery",
@@ -140,19 +141,18 @@ async def start_choose_grades_handler(
 
 @router.callback_query(
     StateFilter(LoadingLessons.choose_grade),
-    F.data.in_(
-        {
-            AdminCallback.UPLOAD_LESSONS_FOR_10,
-            AdminCallback.UPLOAD_LESSONS_FOR_11,
-        },
-    ),
+    EditLessonsData.filter(),
 )
 async def choose_grades_handler(
     callback: "CallbackQuery",
+    callback_data: "EditLessonsData",
     state: "FSMContext",
 ) -> None:
     """Обработчик кнопок "10 классы" и "11 классы" для нераспознанных расписаний."""
-    text, keyboard, current_lesson = await choose_grades_func(callback.data, state)
+    text, keyboard, current_lesson = await choose_grades_func(
+        callback_data.grade,
+        state,
+    )
 
     photo = await callback.bot.send_media_group(
         chat_id=callback.message.chat.id,
@@ -184,7 +184,7 @@ async def choose_dates_handler(
 
 @router.callback_query(
     StateFilter(LoadingLessons.confirm),
-    F.data == AdminCallback.CONFIRM,
+    StateData.filter(F.action == Actions.CONFIRM),
 )
 async def confirm_edit_lessons_handler(
     callback: "CallbackQuery",

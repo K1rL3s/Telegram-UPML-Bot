@@ -1,41 +1,21 @@
 from typing import TYPE_CHECKING
 
-from aiogram.utils.keyboard import (
-    InlineKeyboardBuilder,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-)
+from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup
 
+from bot.callbacks import AdminEditData, EditMealData, OpenMenu
 from bot.keyboards.admin.admin_manage import open_admins_list_button
-from bot.keyboards.universal import CONFIRM, go_to_main_menu_button, NOT_CONFIRM
-from bot.utils.enums import AdminCallback, Roles
-
+from bot.keyboards.universal import go_to_main_menu_button
+from bot.utils.enums import Meals, Menus, Roles
 
 if TYPE_CHECKING:
     from bot.database.repository import UserRepository
 
 
-SET_CAFE_MENU = "🍴Загрузить меню"
+AUTO_UPDATE_CAFE_MENU = "🍴Загрузить меню"
 EDIT_CAFE_MENU = "🍴Изменить меню"
-SET_LESSONS = "📓Загрузить уроки"
-NOTIFY = "🔔Уведомление"
+EDIT_LESSONS = "📓Загрузить уроки"
+DO_NOTIFY = "🔔Уведомление"
 EDIT_EDUCATORS_SCHEDULE = "👩‍✈️Изменить расписание воспитателей"
-
-
-confirm_unconfirm_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text=CONFIRM,
-                callback_data=AdminCallback.CONFIRM,
-            ),
-            InlineKeyboardButton(
-                text=NOT_CONFIRM,
-                callback_data=AdminCallback.NOT_CONFIRM,
-            ),
-        ],
-    ],
-)
 
 
 async def admin_panel_keyboard(
@@ -47,23 +27,21 @@ async def admin_panel_keyboard(
 
     for button_text, callback_data in zip(
         (
-            SET_CAFE_MENU,
+            AUTO_UPDATE_CAFE_MENU,
             EDIT_CAFE_MENU,
-            SET_LESSONS,
-            NOTIFY,
+            EDIT_LESSONS,
+            DO_NOTIFY,
             EDIT_EDUCATORS_SCHEDULE,
         ),
         (
-            AdminCallback.AUTO_UPDATE_CAFE_MENU,
-            AdminCallback.EDIT_CAFE_MENU,
-            AdminCallback.UPLOAD_LESSONS,
-            AdminCallback.DO_A_NOTIFY_FOR_,
-            AdminCallback.EDIT_EDUCATORS,
+            EditMealData(meal=Meals.AUTO_ALL),
+            AdminEditData(menu=Menus.CAFE_MENU),
+            AdminEditData(menu=Menus.LESSONS),
+            OpenMenu(menu=Menus.NOTIFY),
+            AdminEditData(menu=Menus.EDUCATORS),
         ),
     ):
-        keyboard.add(
-            InlineKeyboardButton(text=button_text, callback_data=callback_data),
-        )
+        keyboard.button(text=button_text, callback_data=callback_data)
 
     if await repo.is_has_any_role(user_id, [Roles.SUPERADMIN]):
         keyboard.add(open_admins_list_button)

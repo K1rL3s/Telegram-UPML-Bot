@@ -3,7 +3,7 @@ import datetime as dt
 from io import BytesIO
 from typing import Optional, TYPE_CHECKING, Union
 
-from aiohttp import ClientSession
+from aiohttp import ClientSession, ClientTimeout
 from loguru import logger
 from pypdf import PdfReader
 
@@ -100,13 +100,13 @@ async def _get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
     menu_date = get_this_week_monday() - dt.timedelta(days=1)
     # Поиск с воскресенья по воскресенье
     # Число и месяц изменяются сами, поэтому ссылка будет корректной
-    async_session = ClientSession(timeout=timeout)
-    for _ in range(7):
-        async with async_session.get(
-            pdf_url.format(menu_date.day, menu_date.month, menu_date.year),
-        ) as response:
-            if response.headers.get("content-type") == "application/pdf":
-                return PdfReader(BytesIO(await response.read()))
+    async with ClientSession(timeout=ClientTimeout(total=timeout)) as session:
+        for _ in range(7):
+            async with session.get(
+                pdf_url.format(menu_date.day, menu_date.month, menu_date.year),
+            ) as response:
+                if response.headers.get("content-type") == "application/pdf":
+                    return PdfReader(BytesIO(await response.read()))
 
         menu_date += dt.timedelta(days=1)
         await asyncio.sleep(0.25)  # На случай, чтобы госуслуги не легли от нагрузки
