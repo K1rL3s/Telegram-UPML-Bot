@@ -16,7 +16,7 @@ __all__ = ("include_routers",)
 def include_routers(dp: "Dispatcher") -> None:
     """Включение роутов в главный dispatcher."""
     dp.include_routers(
-        client_router,
         admin_router,
+        client_router,
         errors.router,
     )
