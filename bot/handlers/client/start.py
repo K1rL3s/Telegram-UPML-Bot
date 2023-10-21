@@ -3,12 +3,11 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import Command, CommandStart, StateFilter
 
-from bot.callbacks import OpenMenu, StateData
-from bot.keyboards import main_menu_inline_keyboard
-from bot.keyboards.client.start import start_reply_keyboard
+from bot.callbacks import OpenMenu
+from bot.keyboards import main_menu_keyboard, start_reply_keyboard
 from bot.middlewares.inner.save_user import SaveUpdateUserMiddleware
 from bot.utils.phrases import MAIN_MENU_TEXT, USER_START_TEXT
-from bot.utils.enums import Actions, Menus, SlashCommands, TextCommands
+from bot.utils.enums import Menus, SlashCommands, TextCommands
 
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message
@@ -42,7 +41,7 @@ async def main_menu_callback_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик кнопки "Главное меню"."""
-    keyboard = await main_menu_inline_keyboard(repo.user, callback.from_user.id)
+    keyboard = await main_menu_keyboard(repo.user, callback.from_user.id)
     await callback.message.edit_text(text=MAIN_MENU_TEXT, reply_markup=keyboard)
 
 
@@ -53,7 +52,7 @@ async def main_menu_message_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик команды "/menu"."""
-    keyboard = await main_menu_inline_keyboard(repo.user, message.from_user.id)
+    keyboard = await main_menu_keyboard(repo.user, message.from_user.id)
     await message.reply(text=MAIN_MENU_TEXT, reply_markup=keyboard)
 
 
@@ -62,37 +61,3 @@ async def main_menu_message_handler(
 async def help_handler(message: "Message") -> None:
     """Обработчик команды "/help"."""
     await message.reply("Помощь!")
-
-
-@router.callback_query(
-    StateData.filter(F.action == Actions.CANCEL),
-    StateFilter("*"),
-)
-async def cancel_callback_state(
-    callback: "CallbackQuery",
-    state: "FSMContext",
-    repo: "Repository",
-) -> None:
-    """Обработчик кнопок с отменой состояний."""
-    if await state.get_state() is None:
-        return
-
-    await state.clear()
-
-    await main_menu_callback_handler(callback, repo)
-
-
-@router.message(F.text == TextCommands.CANCEL, StateFilter("*"))
-@router.message(Command(SlashCommands.CANCEL, SlashCommands.STOP), StateFilter("*"))
-async def cancel_message_text(
-    message: "Message",
-    state: "FSMContext",
-    repo: "Repository",
-) -> None:
-    """Обработчик команд "/cancel", "/stop"."""
-    if await state.get_state() is None:
-        return
-
-    await state.clear()
-
-    await main_menu_message_handler(message, repo)

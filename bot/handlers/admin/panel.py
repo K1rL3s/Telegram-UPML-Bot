@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 
 from bot.callbacks import OpenMenu
-from bot.keyboards.admin.admin import admin_panel_keyboard
+from bot.keyboards import admin_panel_keyboard
 from bot.utils.phrases import ADMIN_START_TEXT
 from bot.utils.enums import Menus, TextCommands
 

@@ -9,6 +9,7 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 
+from bot.database.models import Role
 from bot.utils.enums import Roles
 
 
@@ -132,8 +133,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("user_id", "role_id", name=op.f("pk_users_to_roles")),
     )
 
-    for role in Roles:
-        op.execute(f"INSERT INTO roles (role) VALUES ('{role.value}')")  # noqa
+    conn = op.get_bind()
+    for role in Roles.all_roles():
+        conn.execute(sa.insert(Role).values(role=role))
 
     op.create_unique_constraint(op.f("uq_class_lessons_id"), "class_lessons", ["id"])
     op.create_unique_constraint(op.f("uq_full_lessons_id"), "full_lessons", ["id"])

@@ -32,8 +32,7 @@ class User(UserRelatedModel):
         nullable=False,
         index=True,
     )
-
-    # ТГ Никнейм пользователя
+    # ТГ Никнейм пользователя (64?)
     username: Mapped[str] = mapped_column(String(32), default=None)
 
     # Активный ли, False - заблокировал бота итп
@@ -43,13 +42,13 @@ class User(UserRelatedModel):
         nullable=False,
     )
 
-    # Первый заход в бота
+    # Первый заход в бота  UNUSED !!
     createad_time: Mapped[dt.datetime] = mapped_column(
         DateTime,
         default=datetime_now,
         nullable=False,
     )
-    # Обновление ника или статуса
+    # Обновление ника или статуса  UNUSED !!
     modified_time: Mapped[dt.datetime] = mapped_column(
         DateTime,
         default=datetime_now,
@@ -75,6 +74,7 @@ class User(UserRelatedModel):
         lazy="selectin",
     )
 
+    @property
     def short_info(self) -> str:
         """Краткая информация о пользователе."""
         return f"User(id={self.id}, user_id={self.user_id}, username={self.username})"

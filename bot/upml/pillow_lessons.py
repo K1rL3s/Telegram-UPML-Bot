@@ -24,7 +24,7 @@ def parse_one_lessons_file(
     tesseract_path: str,
 ) -> None:
     """
-    Основная функция в файле, выполняет всю работу, вызывая другие функции.
+    Обработка одного файла с расписанием уроков. Поиск параллели, даты и обрезка.
 
     :param lessons_process: Пустой объект, в который будут заполняться данные.
     :param image: Исходник расписания.
@@ -34,23 +34,23 @@ def parse_one_lessons_file(
 
     lessons = Image.open(image)
 
-    first_line_y = _y_first_horizontal_line(lessons)
-    prefix_end_x = _x_prefix_for_lessons(lessons, first_line_y + 2)
+    first_line_y = __y_first_horizontal_line(lessons)
+    prefix_end_x = __x_prefix_for_lessons(lessons, first_line_y + 2)
 
-    prefix_image = _crop_prefix(lessons, prefix_end_x)
+    grade_image = __crop_grade(lessons, prefix_end_x, first_line_y)
+    lessons_process.grade = __tesseract_grade(grade_image)
 
-    grade_image = _crop_grade(lessons, prefix_end_x, first_line_y)
-    lessons_process.grade = _tesseract_grade(grade_image)
-
-    date_image, preffix_up_y, prefix_down_y = _crop_date(
+    date_image, preffix_up_y, prefix_down_y = __crop_date(
         lessons,
         prefix_end_x,
         first_line_y,
     )
-    lessons_process.date = _tesseract_date(date_image)
+    lessons_process.date = __tesseract_date(date_image)
 
-    classes = _combine_prefix_classes_date(
-        _crop_lessons_by_class(lessons, prefix_end_x, first_line_y),
+    prefix_image = __crop_prefix(lessons, prefix_end_x)
+    cropped_classes = __crop_lessons_by_class(lessons, prefix_end_x, first_line_y)
+    classes = __combine_prefix_classes_date(
+        cropped_classes,
         prefix_image,
         date_image,
         preffix_up_y,
@@ -63,17 +63,17 @@ def parse_one_lessons_file(
         lessons_process.class_lessons.append(buffer)
 
 
-def _is_pixel_black(pixel: tuple[int, int, int]) -> bool:
+def __is_pixel_black(pixel: tuple[int, int, int]) -> bool:
     """Чёрный ли пиксель. Граница подобрана опытным путём."""
     return all(color <= BLACK_BORDER for color in pixel)
 
 
-def _is_pixel_white(pixel: tuple[int, int, int]) -> bool:
+def __is_pixel_white(pixel: tuple[int, int, int]) -> bool:
     """Белый ли пиксель. Граница подобрана опытным путём."""
     return all(color >= WHITE_BORDER for color in pixel)
 
 
-def _y_first_horizontal_line(image: "Image.Image") -> int:
+def __y_first_horizontal_line(image: "Image.Image") -> int:
     """
     Поиск первой горизонтальной чёрной полосы.
 
@@ -84,7 +84,7 @@ def _y_first_horizontal_line(image: "Image.Image") -> int:
     pixels: PyAccess | None = image.load()
 
     x, y = width // 2, 0
-    while y < height and not _is_pixel_black(pixels[x, y]):
+    while y < height and not __is_pixel_black(pixels[x, y]):
         y += 1
 
     if y == height:
@@ -93,7 +93,7 @@ def _y_first_horizontal_line(image: "Image.Image") -> int:
     return y
 
 
-def _x_prefix_for_lessons(image: "Image.Image", y: int) -> int:
+def __x_prefix_for_lessons(image: "Image.Image", y: int) -> int:
     """
     Поиск конца "префиксной части" расписания (та, которая "Пара Урок Время" слева).
 
@@ -110,8 +110,8 @@ def _x_prefix_for_lessons(image: "Image.Image", y: int) -> int:
         x += 1
         if (
             x > 0
-            and _is_pixel_white(pixels[x, y])
-            and _is_pixel_black(pixels[x - 1, y])
+            and __is_pixel_white(pixels[x, y])
+            and __is_pixel_black(pixels[x - 1, y])
         ):
             black_count += 1
 
@@ -121,7 +121,7 @@ def _x_prefix_for_lessons(image: "Image.Image", y: int) -> int:
     return x - 1
 
 
-def _crop_prefix(image: "Image.Image", x: int) -> "Image.Image":
+def __crop_prefix(image: "Image.Image", x: int) -> "Image.Image":
     """
     Вырезка "префиксной части" слева (та, которая "Пара Урок Время").
 
@@ -132,7 +132,7 @@ def _crop_prefix(image: "Image.Image", x: int) -> "Image.Image":
     return image.crop((0, 0, x + 1, image.height))
 
 
-def _crop_date(image: "Image.Image", x: int, y: int) -> tuple["Image.Image", int, int]:
+def __crop_date(image: "Image.Image", x: int, y: int) -> tuple["Image.Image", int, int]:
     """
     Вырезка дня недели и даты с серой полосы.
 
@@ -147,12 +147,12 @@ def _crop_date(image: "Image.Image", x: int, y: int) -> tuple["Image.Image", int
     pixels: PyAccess | None = image.load()
 
     # Получаю верх и низ серой полосы
-    while y < height and _is_pixel_black(pixels[x, y]):
+    while y < height and __is_pixel_black(pixels[x, y]):
         y += 1
 
     up_y = y
 
-    while y < height and not _is_pixel_black(pixels[x, y]):
+    while y < height and not __is_pixel_black(pixels[x, y]):
         y += 1
 
     down_y = y - 1
@@ -162,7 +162,7 @@ def _crop_date(image: "Image.Image", x: int, y: int) -> tuple["Image.Image", int
     start_x = width // 3
     while left_x == 0 and start_x < width // 3 * 2 + 1:
         for height_y in range(up_y, down_y + 1):
-            if _is_pixel_black(pixels[start_x, height_y]):
+            if __is_pixel_black(pixels[start_x, height_y]):
                 left_x = start_x
                 break
         start_x += 1
@@ -170,7 +170,7 @@ def _crop_date(image: "Image.Image", x: int, y: int) -> tuple["Image.Image", int
     end_x = width // 3 * 2
     while right_x == width and end_x > left_x - 1:
         for height_y in range(up_y, down_y + 1):
-            if _is_pixel_black(pixels[end_x, height_y]):
+            if __is_pixel_black(pixels[end_x, height_y]):
                 right_x = end_x
                 break
         end_x -= 1
@@ -186,30 +186,43 @@ def _crop_date(image: "Image.Image", x: int, y: int) -> tuple["Image.Image", int
     return image.crop((left_x, up_y, right_x + 2, down_y + 1)), up_y, down_y
 
 
-def _tesseract_date(image: "Image.Image") -> dt.date:
+def __crop_grade(image: "Image.Image", x: int, y: int) -> "Image.Image":
     """
-    Преобразование изображение из ``def _crop_date`` в объект даты.
+    Ищет, расписание для 10 или 11 классов.
 
-    :param image: Картинка с текстом.
-    :return: Дата.
+    :param image: Исходник расписания.
+    :param x: X конца префиксной части расписания.
+    :param y: Y первой горизонтальной линии.
+    :return: Вырезанная строка с классом.
     """
-    dd_mm = (
-        pytesseract.image_to_string(
-            image,
-            lang="rus",
-            config="--psm 10 --oem 3",
-        )
-        .lower()
-        .replace("$", "8")  # Костыль, восьмёрку распознаёт как доллар :(
-        .split()
-    )[-1]
+    x += 1
+    y += 1
+    width, height = image.size
+    left_x, up_y = x, y
+    pixels: PyAccess | None = image.load()
 
-    day, month = map(int, dd_mm.split("."))
+    while x < width and not __is_pixel_black(pixels[x, y]):
+        x += 1
 
-    return dt.date(day=day, month=month, year=date_today().year)
+    if x == width:
+        raise ValueError("Не удалось найти чёрную полосу после префикса")
+
+    x -= 2
+
+    while y < height and not __is_pixel_black(pixels[x, y]):
+        y += 1
+
+    if left_x == x or up_y == y:
+        raise ValueError("Не удалось правильно выделить класс")
+
+    return image.crop((left_x, up_y, x, y))
 
 
-def _crop_lessons_by_class(image: "Image.Image", x: int, y: int) -> list["Image.Image"]:
+def __crop_lessons_by_class(
+    image: "Image.Image",
+    x: int,
+    y: int,
+) -> list["Image.Image"]:
     """
     Вырезает из расписания каждый класс.
 
@@ -228,7 +241,7 @@ def _crop_lessons_by_class(image: "Image.Image", x: int, y: int) -> list["Image.
     images = []
 
     for _ in range(3):
-        while x < width and not _is_pixel_black(pixels[x, y]):
+        while x < width and not __is_pixel_black(pixels[x, y]):
             x += 1
 
         if x == width:
@@ -245,7 +258,7 @@ def _crop_lessons_by_class(image: "Image.Image", x: int, y: int) -> list["Image.
     return images
 
 
-def _combine_prefix_classes_date(
+def __combine_prefix_classes_date(
     classes: list["Image.Image"],
     prefix: "Image.Image",
     date_im: "Image.Image",
@@ -284,41 +297,32 @@ def _combine_prefix_classes_date(
     return new_classes
 
 
-def _crop_grade(image: "Image.Image", x: int, y: int) -> "Image.Image":
+def __tesseract_date(image: "Image.Image") -> dt.date:
     """
-    Ищет, расписание для 10 или 11 классов.
+    Преобразование изображение из ``def __crop_date`` в объект даты.
 
-    :param image: Исходник расписания.
-    :param x: X конца префиксной части расписания.
-    :param y: Y первой горизонтальной линии.
-    :return: Вырезанная строка с классом.
+    :param image: Картинка с текстом.
+    :return: Дата.
     """
-    x += 1
-    y += 1
-    width, height = image.size
-    left_x, up_y = x, y
-    pixels: PyAccess | None = image.load()
+    dd_mm = (
+        pytesseract.image_to_string(
+            image,
+            lang="rus",
+            config="--psm 10 --oem 3",
+        )
+        .lower()
+        .replace("$", "8")  # Костыль, восьмёрку распознаёт как доллар :(
+        .split()
+    )[-1]
 
-    while x < width and not _is_pixel_black(pixels[x, y]):
-        x += 1
+    day, month = map(int, dd_mm.split("."))
 
-    if x == width:
-        raise ValueError("Не удалось найти чёрную полосу после префикса")
-
-    x -= 2
-
-    while y < height and not _is_pixel_black(pixels[x, y]):
-        y += 1
-
-    if left_x == x or up_y == y:
-        raise ValueError("Не удалось правильно выделить класс")
-
-    return image.crop((left_x, up_y, x, y))
+    return dt.date(day=day, month=month, year=date_today().year)
 
 
-def _tesseract_grade(image: "Image.Image") -> str:
+def __tesseract_grade(image: "Image.Image") -> str:
     """
-    Преобразование изображение из ``def _crop_grade`` в строку с классом.
+    Преобразование изображение из ``def __crop_grade`` в строку с классом.
 
     :param image: Картинка с текстом.
     :return: Класс.

@@ -1,7 +1,6 @@
 import contextlib
 from typing import TYPE_CHECKING, Union
 
-from bot.utils.enums import Roles
 from bot.database.repository import (
     EducatorsScheduleRepository,
     LaundryRepository,
@@ -11,6 +10,7 @@ from bot.database.repository import (
     SettingsRepository,
     UserRepository,
 )
+from bot.utils.enums import Roles
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -67,7 +67,7 @@ class Repository:
         with contextlib.suppress(ValueError):
             user.roles.remove(role)
 
-        await self._session.commit()
+        await self._session.flush()
 
     async def add_role_to_user(
         self,
@@ -88,4 +88,4 @@ class Repository:
 
         user.roles.append(role)
 
-        await self._session.commit()
+        await self._session.flush()

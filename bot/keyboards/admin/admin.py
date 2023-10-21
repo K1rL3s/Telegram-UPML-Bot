@@ -2,9 +2,9 @@ from typing import TYPE_CHECKING
 
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup
 
-from bot.callbacks import AdminEditData, EditMealData, OpenMenu
-from bot.keyboards.admin.admin_manage import open_admins_list_button
-from bot.keyboards.universal import go_to_main_menu_button
+from bot.callbacks import AdminEditMenu, EditMeal, OpenMenu
+from bot.keyboards.admin.manage import admins_list_button
+from bot.keyboards.universal import main_menu_button
 from bot.utils.enums import Meals, Menus, Roles
 
 if TYPE_CHECKING:
@@ -23,9 +23,11 @@ async def admin_panel_keyboard(
     user_id: int,
 ) -> "InlineKeyboardMarkup":
     """Клавиатура в админ меню."""
-    keyboard = InlineKeyboardBuilder()
+    roles: list[str] = [role.role for role in (await repo.get(user_id)).roles]
+    is_admin = Roles.SUPERADMIN in roles or Roles.ADMIN in roles
 
-    for button_text, callback_data in zip(
+    keyboard = InlineKeyboardBuilder()
+    for text, callback_data, condition in zip(
         (
             AUTO_UPDATE_CAFE_MENU,
             EDIT_CAFE_MENU,
@@ -34,19 +36,27 @@ async def admin_panel_keyboard(
             EDIT_EDUCATORS_SCHEDULE,
         ),
         (
-            EditMealData(meal=Meals.AUTO_ALL),
-            AdminEditData(menu=Menus.CAFE_MENU),
-            AdminEditData(menu=Menus.LESSONS),
+            EditMeal(meal=Meals.AUTO_ALL),
+            AdminEditMenu(menu=Menus.CAFE_MENU),
+            AdminEditMenu(menu=Menus.LESSONS),
             OpenMenu(menu=Menus.NOTIFY),
-            AdminEditData(menu=Menus.EDUCATORS),
+            AdminEditMenu(menu=Menus.EDUCATORS),
+        ),
+        (
+            Roles.CAFE_MENU in roles,
+            Roles.CAFE_MENU in roles,
+            Roles.LESSONS in roles,
+            Roles.NOTIFY in roles,
+            Roles.EDUCATORS in roles,
         ),
     ):
-        keyboard.button(text=button_text, callback_data=callback_data)
+        if condition or is_admin:
+            keyboard.button(text=text, callback_data=callback_data)
 
-    if await repo.is_has_any_role(user_id, [Roles.SUPERADMIN]):
-        keyboard.add(open_admins_list_button)
+    if Roles.SUPERADMIN in roles:
+        keyboard.add(admins_list_button)
 
-    keyboard.add(go_to_main_menu_button)
+    keyboard.add(main_menu_button)
 
     keyboard.adjust(2, 2, 1, 1, repeat=True)
 

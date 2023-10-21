@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 def cafe_menu_keyboard(date: "dt.date" = None) -> "InlineKeyboardMarkup":
     """Клавиатура для расписания столовой с перемоткой влево-вправо по дня."""
     return _left_right_keyboard_navigation(
-        menu=Menus.CAFE_MENU,
+        bot_menu=Menus.CAFE_MENU,
         today_smile="🍴",
         date=date,
     )

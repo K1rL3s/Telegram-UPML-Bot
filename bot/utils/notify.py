@@ -15,11 +15,11 @@ if TYPE_CHECKING:
     from bot.database.repository import UserRepository
 
 
-async def one_notify(
+async def do_one_notify(
+    text: str,
     bot: "Bot",
     repo: "UserRepository",
     user: "User",
-    text: str,
     keyboard: "InlineKeyboardMarkup" = None,
 ) -> bool:
     """
@@ -34,9 +34,8 @@ async def one_notify(
     try:
         await bot.send_message(text=text, chat_id=user.user_id, reply_markup=keyboard)
         logger.debug(
-            'Уведомление "{text}" успешно [{short_info}]',
-            text=" ".join(text.split()),
-            short_info=user.short_info(),
+            "Уведомление успешно [{short_info}]",
+            short_info=user.short_info,
         )
     except TelegramForbiddenError:
         await repo.update(user.user_id, is_active=False)
@@ -45,27 +44,51 @@ async def one_notify(
         logger.warning(
             "Ошибка при уведомлении: {err} [{short_info}]",
             err=e,
-            short_info=user.short_info(),
+            short_info=user.short_info,
         )
         return False
 
     return True
 
 
-async def do_admin_notifies(
-    bot: "Bot",
-    repo: "UserRepository",
+async def do_many_notifies(
     text: str,
     users: list["User"],
-    from_who: int = 0,
-    for_who: str = "",
+    bot: "Bot",
+    repo: "UserRepository",
+) -> None:
+    """
+    Рассылка текста пользователям в одновременном режиме.
+
+    :param text: Текст рассылки.
+    :param users: Пользователи, которым должна прийти рассылка.
+    :param bot: ТГ Бот.
+    :param repo: Репозиторий пользователей.
+    """
+    for i in range(0, len(users), NOTIFIES_PER_BATCH):
+        tasks = [
+            asyncio.create_task(do_one_notify(text, bot, repo, user))
+            for user in users[i : i + NOTIFIES_PER_BATCH]
+        ]
+        timer = asyncio.create_task(asyncio.sleep(1))
+        await asyncio.gather(*tasks)
+        await timer
+
+
+async def do_admin_notify(
+    text: str,
+    users: list["User"],
+    from_who: int,
+    for_who: str,
+    bot: "Bot",
+    repo: "UserRepository",
 ) -> None:
     """
     Делатель рассылки от администратора.
 
     :param bot: ТГ Бот.
     :param repo: Репозиторий пользователей.
-    :param text: Сообщение.
+    :param text: Сообщение администратора.
     :param users: Кому отправить сообщение.
     :param from_who: ТГ Айди отправителя (админа)
     :param for_who: Для кого рассылка.
@@ -75,13 +98,4 @@ async def do_admin_notifies(
         "🔔<b>Уведомление от администратора</b> "
         f"{name_link(username, from_who)} <b>{for_who}</b>\n\n" + text
     )
-
-    for i in range(0, len(users), NOTIFIES_PER_BATCH):
-        tasks = [
-            asyncio.create_task(one_notify(bot, repo, user, text))
-            for user in users[i : i + NOTIFIES_PER_BATCH]
-        ]
-        # Из-за рекурсивного вызова one_notify при TelegramRetryAfter
-        # может задерживать всю рассылку.
-        await asyncio.gather(*tasks)
-        await asyncio.sleep(1)
+    await do_many_notifies(text, users, bot, repo)

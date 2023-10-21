@@ -25,10 +25,8 @@ class EducatorsSchedule(AlchemyBaseModel):
         nullable=False,
         index=True,
     )
-
     edit_by: Mapped[int | None] = mapped_column(
         ForeignKey("users.user_id"),
         nullable=True,
     )
-
     schedule: Mapped[str] = mapped_column(String(1024), nullable=True)

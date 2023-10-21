@@ -34,6 +34,7 @@ class RepositoryMiddleware(BaseMiddleware):
         data: dict[str, Any],
     ) -> Any:
         async with self.session_maker() as session:
-            data[self.session_key] = session
-            data[self.repository_key] = Repository(session)
-            return await handler(event, data)
+            async with session.begin():
+                data[self.session_key] = session
+                data[self.repository_key] = Repository(session)
+                return await handler(event, data)

@@ -1,8 +1,20 @@
-from bot.filters.roles import IsAdmin, IsSuperAdmin, RoleAccess
+from bot.filters.roles import (
+    HasCafeMenuRole,
+    HasEducatorsRole,
+    HasLessonsRole,
+    HasNotifyRole,
+    IsAdmin,
+    IsSuperAdmin,
+    RoleAccess,
+)
 
 
 __all__ = (
-    "RoleAccess",
+    "HasCafeMenuRole",
+    "HasEducatorsRole",
+    "HasLessonsRole",
+    "HasNotifyRole",
     "IsAdmin",
     "IsSuperAdmin",
+    "RoleAccess",
 )

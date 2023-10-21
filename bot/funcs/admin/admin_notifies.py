@@ -6,10 +6,10 @@ from bot.keyboards import (
     notify_for_class_keyboard,
     notify_for_grade_keyboard,
 )
-from bot.utils.consts import NOTIFIES_ENG_TO_RU
+from bot.utils.translate import NOTIFIES_TYPES_TRANSLATE
 from bot.utils.enums import NotifyTypes
-from bot.utils.notify import do_admin_notifies
-from bot.utils.states import DoNotify
+from bot.utils.notify import do_admin_notify
+from bot.utils.states import DoingNotify
 
 if TYPE_CHECKING:
     from aiogram import Bot
@@ -41,7 +41,7 @@ async def notify_for_who_func(
         text = "Выберите, какому классу сделать уведомление"
         keyboard = notify_for_class_keyboard
     else:
-        await state.set_state(DoNotify.writing)
+        await state.set_state(DoingNotify.writing)
         await state.set_data(
             {
                 "start_id": message_id,
@@ -50,7 +50,7 @@ async def notify_for_who_func(
             },
         )
         text = (
-            f"Тип: <code>{NOTIFIES_ENG_TO_RU.get(for_who, for_who)}</code>\n"
+            f"Тип: <code>{NOTIFIES_TYPES_TRANSLATE.get(for_who, for_who)}</code>\n"
             "Напишите сообщение, которое будет в уведомлении"
         )
         keyboard = cancel_state_keyboard
@@ -77,10 +77,10 @@ async def notify_message_func(
 
     messages_ids = data.get("messages_ids", [])
     messages_ids.append(message_id)
-    await state.update_data(message_text=html_text, messages_ids=messages_ids)
+    await state.update_data(html_text=html_text, messages_ids=messages_ids)
 
     text = (
-        f"Тип: <code>{NOTIFIES_ENG_TO_RU.get(for_who, for_who)}</code>\n"
+        f"Тип: <code>{NOTIFIES_TYPES_TRANSLATE.get(for_who, for_who)}</code>\n"
         f"Сообщение:\n{html_text}\n\n"
         "Для отправки нажмите кнопку. Если хотите изменить, "
         "отправьте сообщение повторно."
@@ -106,18 +106,18 @@ async def notify_confirm_func(
     """
     data = await state.get_data()
     for_who = data["for_who"]
-    message_text = data["message_text"]
+    html_text = data["html_text"]
     messages_ids = data["messages_ids"]
     await state.clear()
 
     users = await get_users_for_notify(repo, for_who, is_news=True)
-    await do_admin_notifies(
-        bot,
-        repo,
-        message_text,
+    await do_admin_notify(
+        html_text,
         users,
         user_id,
-        NOTIFIES_ENG_TO_RU.get(for_who, for_who),
+        NOTIFIES_TYPES_TRANSLATE.get(for_who, for_who),
+        bot,
+        repo,
     )
 
     return "Рассылка завершена!", messages_ids

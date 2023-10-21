@@ -1,26 +1,26 @@
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 
-from bot.callbacks import DoNotifyData
-from bot.keyboards.universal import go_to_admin_panel_button
+from bot.callbacks import DoNotify
+from bot.keyboards.universal import admin_panel_button
 from bot.utils.consts import GRADES
 from bot.utils.enums import NotifyTypes
 
 
-notify_panel_keyboard = InlineKeyboardMarkup(
+notify_menu_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [
             InlineKeyboardButton(text=for_who, callback_data=callback_data.pack())
             for for_who, callback_data in zip(
                 ("Всем", "Поток", "Класс"),
                 (
-                    DoNotifyData(for_who=NotifyTypes.ALL),
-                    DoNotifyData(notify_type=NotifyTypes.GRADE),
-                    DoNotifyData(notify_type=NotifyTypes.CLASS),
+                    DoNotify(for_who=NotifyTypes.ALL),
+                    DoNotify(notify_type=NotifyTypes.GRADE),
+                    DoNotify(notify_type=NotifyTypes.CLASS),
                 ),
             )
         ],
-        [go_to_admin_panel_button],
+        [admin_panel_button],
     ],
 )
 
@@ -29,14 +29,14 @@ notify_for_grade_keyboard = InlineKeyboardMarkup(
         [
             InlineKeyboardButton(
                 text="10 классы",
-                callback_data=DoNotifyData(for_who=NotifyTypes.GRADE_10).pack(),
+                callback_data=DoNotify(for_who=NotifyTypes.GRADE_10).pack(),
             ),
             InlineKeyboardButton(
                 text="11 классы",
-                callback_data=DoNotifyData(for_who=NotifyTypes.GRADE_11).pack(),
+                callback_data=DoNotify(for_who=NotifyTypes.GRADE_11).pack(),
             ),
         ],
-        [go_to_admin_panel_button],  # сделать переход в панель уведомлений?
+        [admin_panel_button],  # сделать переход в панель уведомлений?
     ],
 )
 
@@ -46,11 +46,11 @@ notify_for_class_keyboard: "InlineKeyboardMarkup" = (
         *(
             InlineKeyboardButton(
                 text=grade_letter,
-                callback_data=DoNotifyData(for_who=grade_letter).pack(),
+                callback_data=DoNotify(for_who=grade_letter).pack(),
             )
             for grade_letter in GRADES
         ),
-        go_to_admin_panel_button,
+        admin_panel_button,
     )
     .adjust(3, 3, 1)
     .as_markup()

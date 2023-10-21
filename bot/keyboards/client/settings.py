@@ -7,7 +7,7 @@ from aiogram.utils.keyboard import (
 )
 
 from bot.callbacks import OpenMenu, SettingsData
-from bot.keyboards.universal import go_to_main_menu_button
+from bot.keyboards.universal import main_menu_button
 from bot.utils.consts import GRADES
 from bot.utils.datehelp import format_time
 from bot.utils.enums import Actions, Menus, UserCallback
@@ -81,7 +81,7 @@ async def settings_keyboard(
                     ).pack(),
                 ),
             ],
-            [go_to_main_menu_button],
+            [main_menu_button],
         ],
     )
 

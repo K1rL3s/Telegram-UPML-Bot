@@ -5,15 +5,15 @@ from aiogram.types import InlineKeyboardMarkup, InputMediaPhoto
 from bot.types import Album, LessonsCollection
 from bot.keyboards import (
     cancel_state_keyboard,
-    choose_grade_parallel_keyboard,
+    choose_parallel_keyboard,
     confirm_cancel_keyboard,
     go_to_main_menu_keyboard,
 )
-from bot.upml.album_lessons import tesseract_album_lessons_func
+from bot.upml.album_lessons import tesseract_lessons
 from bot.utils.datehelp import date_by_format, format_date, weekday_by_date
 from bot.utils.funcs import multi_bytes_to_ids
 from bot.utils.phrases import DONT_UNDERSTAND_DATE
-from bot.utils.states import LoadingLessons
+from bot.utils.states import EditingLessons
 
 if TYPE_CHECKING:
     from aiogram import Bot
@@ -37,17 +37,18 @@ async def process_lessons_album_func(
     :param tesseract_path: Путь до исполняемого файла тессеракта.
     :return: Сообщение и клавиатура для пользователя.
     """
-    lessons = await tesseract_album_lessons_func(bot, album, tesseract_path)
+    lessons = await tesseract_lessons(bot, album, tesseract_path)
     await state.update_data(lessons=[lesson.model_dump() for lesson in lessons])
 
     if all(lesson.status for lesson in lessons):  # Всё успешно обработалось
-        await state.set_state(LoadingLessons.all_good)
+        await state.set_state(EditingLessons.all_good)
         return "\n".join(lesson.text for lesson in lessons), confirm_cancel_keyboard
 
-    await state.set_state(LoadingLessons.something_bad)
+    await state.set_state(EditingLessons.something_bad)
     text = (
         "\n".join(lesson.text for lesson in lessons if lesson.status)
-        + "\n\nНе удалось распознать некоторые расписания.\nВвеcти данные вручную?"
+        + "\n\nНе удалось распознать некоторые расписания."
+        + "\nВвеcти данные вручную?"
     )
     return text, confirm_cancel_keyboard
 
@@ -67,7 +68,7 @@ async def all_good_lessons_func(
     :param repo: Репозиторий расписаний уроков.
     :return: Сообщение и клавиатура для пользователя.
     """
-    lessons: list["LessonsCollection"] = [
+    lessons = [
         LessonsCollection(**kwargs) for kwargs in (await state.get_data())["lessons"]
     ]
 
@@ -93,11 +94,11 @@ async def start_choose_grades_func(
     :param state: Состояние пользователя.
     :return: Сообщение пользователю и текущее расписаний.
     """
-    lessons: list["LessonsCollection"] = [
+    lessons = [
         LessonsCollection(**kwargs) for kwargs in (await state.get_data())["lessons"]
     ]
 
-    if await state.get_state() == LoadingLessons.all_good:
+    if await state.get_state() == EditingLessons.all_good:
         for i, lesson in enumerate(lessons):
             lessons[i] = LessonsCollection(
                 text=lesson.text,
@@ -105,7 +106,7 @@ async def start_choose_grades_func(
             )
         await state.update_data(lessons=[lesson.model_dump() for lesson in lessons])
 
-    await state.set_state(LoadingLessons.choose_grade)
+    await state.set_state(EditingLessons.choose_grade)
 
     # Начало выбора классов
     return "Для каких классов это расписание?", lessons[0]
@@ -123,8 +124,9 @@ async def choose_grades_func(
              Если всё, то первое медиа и вводом даты.
              Если не всё, то медиа с одним изображением и выбором класса.
     """
-    data = await state.get_data()
-    lessons = [LessonsCollection(**kwargs) for kwargs in data["lessons"]]
+    lessons = [
+        LessonsCollection(**kwargs) for kwargs in (await state.get_data())["lessons"]
+    ]
     no_grade_lessons = [lesson for lesson in lessons if lesson.grade is None]
 
     no_grade_lessons[0].grade = grade
@@ -134,14 +136,14 @@ async def choose_grades_func(
     if len(no_grade_lessons) > 1:
         return (
             "Для каких классов это расписание?",
-            choose_grade_parallel_keyboard,
+            choose_parallel_keyboard,
             no_grade_lessons[1],
         )
 
     # Начало ввода дат
     text = "Введите дату расписания в формате <b>ДД.ММ.ГГГГ</b>"
     keyboard = cancel_state_keyboard
-    await state.set_state(LoadingLessons.choose_date)
+    await state.set_state(EditingLessons.choose_date)
 
     return text, keyboard, lessons[0]
 
@@ -188,7 +190,7 @@ async def choose_dates_func(
         )
         keyboard = confirm_cancel_keyboard
         media = [InputMediaPhoto(media=lesson.full_photo_id) for lesson in lessons]
-        await state.set_state(LoadingLessons.confirm)
+        await state.set_state(EditingLessons.confirm)
 
     return text, keyboard, media
 

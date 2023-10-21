@@ -106,3 +106,12 @@ class Roles(str, Enum):
 
     SUPERADMIN = "superadmin"
     ADMIN = "admin"
+    NOTIFY = "notify"
+    LESSONS = "lessons"
+    CAFE_MENU = "cafe_menu"
+    EDUCATORS = "educators"
+
+    @staticmethod
+    def all_roles() -> list[str]:
+        """Названия всех ролей."""
+        return [role.value if isinstance(role, Enum) else role for role in Roles]
