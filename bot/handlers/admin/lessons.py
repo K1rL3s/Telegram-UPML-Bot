@@ -7,7 +7,7 @@ from aiogram.types import InputMediaPhoto
 from bot.callbacks import AdminEditMenu, EditLessons, InStateData
 from bot.filters import HasLessonsRole
 from bot.types import Album
-from bot.funcs.admin.admin_lessons import (
+from bot.funcs.admin.lessons import (
     all_good_lessons_func,
     choose_dates_func,
     choose_grades_func,

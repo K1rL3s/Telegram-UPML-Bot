@@ -72,8 +72,8 @@ async def notify_message_func(
     :return: Сообщение и айди начального сообщения бота.
     """
     data = await state.get_data()
-    start_id = data["start_id"]
-    for_who = data["for_who"]
+    start_id: int = data["start_id"]
+    for_who: str = data["for_who"]
 
     messages_ids = data.get("messages_ids", [])
     messages_ids.append(message_id)
@@ -105,9 +105,9 @@ async def notify_confirm_func(
     :return: Сообщение пользователю и айдишники его сообщений с изменениями.
     """
     data = await state.get_data()
-    for_who = data["for_who"]
-    html_text = data["html_text"]
-    messages_ids = data["messages_ids"]
+    for_who: str = data["for_who"]
+    html_text: str = data["html_text"]
+    messages_ids: list[int] = data["messages_ids"]
     await state.clear()
 
     users = await get_users_for_notify(repo, for_who, is_news=True)

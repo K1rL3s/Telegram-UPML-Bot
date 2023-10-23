@@ -136,7 +136,8 @@ async def edit_laundry_time_handler(
 ) -> None:
     """Обработчик сообщения с минутами для изменения таймера прачечной."""
     data = await state.get_data()
-    start_id, attr = data["start_id"], data["attr"]
+    start_id: int = data["start_id"]
+    attr: str = data["attr"]
 
     text, keyboard = await edit_laundry_time_func(
         message.from_user.id,

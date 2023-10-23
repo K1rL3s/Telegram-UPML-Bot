@@ -5,7 +5,7 @@ from aiogram.filters import StateFilter
 
 from bot.callbacks import DoNotify, InStateData, OpenMenu
 from bot.filters import HasNotifyRole
-from bot.funcs.admin.admin_notifies import (
+from bot.funcs.admin.notifies import (
     notify_confirm_func,
     notify_for_who_func,
     notify_message_func,

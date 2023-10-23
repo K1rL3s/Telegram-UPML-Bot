@@ -7,7 +7,11 @@ from aiogram.utils.keyboard import (
 )
 
 from bot.callbacks import AdminCheck, AdminEditRole, AdminList
-from bot.keyboards.universal import admin_panel_button, cancel_state_button
+from bot.keyboards.universal import (
+    admin_panel_button,
+    cancel_state_button,
+    confirm_state_button,
+)
 from bot.utils.enums import Actions, Roles
 from bot.utils.translate import ROLES_TRANSLATE
 
@@ -88,7 +92,7 @@ def admins_list_keyboard(
     return keyboard.as_markup()
 
 
-def check_admin_keyboard(
+def check_admin_roles_keyboard(
     user_id: int,
     page: int,
     roles: list[str],
@@ -108,43 +112,52 @@ def check_admin_keyboard(
         keyboard.button(
             text=ROLES_TRANSLATE[role].capitalize(),
             callback_data=AdminEditRole(
-                action=Actions.REMOVE,
+                action=Actions.EDIT,
                 user_id=user_id,
                 role=role,
             ),
         )
 
-    keyboard.button(
-        text=ADMIN_LIST,
-        callback_data=AdminList(page=page),
+    keyboard.adjust(ceil(len(roles) / 2), repeat=True)
+    keyboard.row(
+        InlineKeyboardButton(
+            text=ADMIN_LIST,
+            callback_data=AdminList(page=page).pack(),
+        ),
+        admin_panel_button,
     )
-    keyboard.add(admin_panel_button)
 
-    return keyboard.adjust(len(roles), 2).as_markup()
+    return keyboard.as_markup()
 
 
 def edit_roles_keyboard(
-    roles: list[str],
+    all_roles: list[str],
+    choosed_roles: list[str],
     action: str,
 ) -> "InlineKeyboardMarkup":
     """
-    Возвращает клавиатуру c переданными ролями и действием.
+    Клавиатура для множественного выбора (редактирования) ролей.
 
-    :param roles: Роли.
+    :param all_roles: Все отображаемые роли.
+    :param choosed_roles: Выбранные роли.
     :param action: Действие.
     :return: Клавиатура.
     """
     keyboard = InlineKeyboardBuilder()
-    for role in roles:
+    for role in all_roles:
+        text = ROLES_TRANSLATE[role].capitalize()
+        if role in choosed_roles:
+            text = f"🔘{text}"
+
         keyboard.button(
-            text=ROLES_TRANSLATE[role].capitalize(),
+            text=text,
             callback_data=AdminEditRole(
                 action=action,
                 role=role,
             ),
         )
 
-    keyboard.adjust(ceil(len(roles) / 3) or 1, repeat=True)
-    keyboard.row(cancel_state_button)
+    keyboard.adjust(ceil(len(all_roles) / 3) or 1, repeat=True)
+    keyboard.row(confirm_state_button, cancel_state_button)
 
     return keyboard.as_markup()

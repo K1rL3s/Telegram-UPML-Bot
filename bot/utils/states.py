@@ -38,7 +38,7 @@ class EditingRoles(StatesGroup):
 
     username = State()
     action = State()
-    role = State()
+    roles = State()
     confirm = State()
 
 

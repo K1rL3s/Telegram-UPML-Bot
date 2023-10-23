@@ -5,7 +5,7 @@ from aiogram.filters import StateFilter
 
 from bot.callbacks import AdminEditMenu, EditMeal, InStateData
 from bot.filters import HasCafeMenuRole
-from bot.funcs.admin.admin_cafe_menu import (
+from bot.funcs.admin.cafe_menu import (
     edit_cafe_menu_confirm_func,
     edit_cafe_menu_date_func,
     edit_cafe_menu_meal_func,
