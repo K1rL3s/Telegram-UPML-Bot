@@ -78,3 +78,12 @@ class User(UserRelatedModel):
     def short_info(self) -> str:
         """Краткая информация о пользователе."""
         return f"User(id={self.id}, user_id={self.user_id}, username={self.username})"
+
+    def should_activate(self, username: str) -> bool:
+        """
+        Нужно ли активировать пользователя или обновить ему имя.
+
+        :param username: Имя пользователя в ТГ.
+        :return: Нужно ли поставить новый никнейм или изменить статус на активный.
+        """
+        return not self.is_active or self.username != username

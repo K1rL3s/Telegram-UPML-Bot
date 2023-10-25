@@ -32,9 +32,9 @@ class LaundryRepository(BaseRepository):
 
         :return: Список с Laundry.
         """
-        now = datetime_now()
         query = select(Laundry).where(
-            Laundry.is_active == True, Laundry.end_time <= now  # noqa
+            Laundry.is_active == True,  # noqa
+            Laundry.end_time <= datetime_now(),
         )
         return list((await self._session.scalars(query)).all())
 

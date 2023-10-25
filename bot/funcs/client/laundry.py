@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from bot.utils.enums import UserCallback
 
 
-async def laundry_both_handler(
+async def laundry_func(
     user_id: int,
     repo: "LaundryRepository",
 ) -> tuple[str, "InlineKeyboardMarkup"]:

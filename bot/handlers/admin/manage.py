@@ -18,6 +18,7 @@ from bot.funcs.admin.manage import (
 from bot.keyboards import (
     admin_panel_keyboard,
     cancel_state_keyboard,
+    confirm_cancel_keyboard,
 )
 from bot.utils.enums import Actions
 from bot.utils.states import EditingRoles
@@ -165,12 +166,12 @@ async def edit_roles_confirm_handler(
     state: "FSMContext",
 ) -> None:
     """Обработчик кнопки "Подтвердить" при добавлении админа."""
-    text, keyboard, message_id = await edit_role_confirm_func(state)
+    text, message_id = await edit_role_confirm_func(state)
     await callback.bot.edit_message_text(
         text=text,
         chat_id=callback.message.chat.id,
         message_id=message_id,
-        reply_markup=keyboard,
+        reply_markup=confirm_cancel_keyboard,
     )
 
 

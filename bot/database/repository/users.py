@@ -103,14 +103,13 @@ class UserRepository(BaseRepository):
         """
         user = await self.get(user_id)
 
-        # Если юзер в бд и (он помечен как неактивный или изменился никнейм)
-        if user and (not user.is_active or user.username != username):
-            user.is_active = True
-            user.username = username
-        elif not user:
+        if user is None:
             user = User(user_id=user_id, username=username)
             self._session.add(user)
             logger.info("Новый пользователь {user}", user=user)
+        elif user.should_activate(username):
+            user.is_active = True
+            user.username = username
 
         await self._session.flush()
 

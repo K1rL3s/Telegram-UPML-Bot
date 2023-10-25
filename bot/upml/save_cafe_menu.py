@@ -1,7 +1,7 @@
 import asyncio
 import datetime as dt
 from io import BytesIO
-from typing import Optional, TYPE_CHECKING, Union
+from typing import Optional, TYPE_CHECKING
 
 from aiohttp import ClientSession, ClientTimeout
 from loguru import logger
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from bot.database.repository import MenuRepository
 
 
-async def process_cafe_menu(repo: "MenuRepository", timeout: int) -> tuple[bool, str]:
+async def process_cafe_menu(repo: "MenuRepository", timeout: int) -> str:
     """
     Поиск, составление и сохранение расписания еды в столовой.
 
@@ -24,17 +24,20 @@ async def process_cafe_menu(repo: "MenuRepository", timeout: int) -> tuple[bool,
     """
     if (pdf_reader := await __get_pdf_menu(timeout)) is None:
         logger.warning(text := "Не удалось найти PDF с меню")
-        return False, text
+        return text
 
     # Спасибо столовой моего лицея за то, что они могут опублиовать меню
-    # с датой вторника, а начинается с понедельника. :)
-    menu_date = __compare_pdf_date(pdf_reader)
-
-    if isinstance(menu_date, str):
-        return False, menu_date
+    # с датой вторника в названии, а пдф начинается с понедельника. :)
+    try:
+        menu_date = __compare_pdf_date(pdf_reader)
+    except ValueError as e:
+        logger.warning(text := str(e))
+        return text
 
     await __parse_pdf_menu(repo, pdf_reader, menu_date)
-    return True, "Расписание еды обновлено!"
+
+    logger.info(text := "Расписание еды обновлено!")
+    return text
 
 
 async def __get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
@@ -66,7 +69,7 @@ async def __get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
     return None
 
 
-def __compare_pdf_date(pdf_reader: "PdfReader") -> "Union[dt.date, str]":
+def __compare_pdf_date(pdf_reader: "PdfReader") -> "dt.date":
     """
     Возвращает дату, с которой начинается расписание еды в пдф файле.
 
@@ -82,8 +85,7 @@ def __compare_pdf_date(pdf_reader: "PdfReader") -> "Union[dt.date, str]":
         add_counter += 1
 
     if add_counter >= 7:
-        logger.warning(text := "Не удалось сравнять дату PDF и текущей недели")
-        return text
+        raise ValueError("Не удалось сравнять дату PDF и текущей недели")
 
     return menu_date
 
@@ -142,7 +144,7 @@ def __get_meal(menu: str, start_sub: str, end_sub: str) -> tuple[str, int, int]:
 # Это самое жуткое, что я когда-либо писал, и оно работает :(
 def __normalize_meal(one_meal: str) -> str:
     """
-    Принимает строку из ``def get_string_meal`` и переделывает её в читаемый вид.
+    Принимает строку из ``def __get_meal`` и переделывает её в читаемый вид.
 
     (Каждое блюдо с новой строки без лишних символов).
 

@@ -7,7 +7,6 @@ from bot.keyboards import (
     cancel_state_keyboard,
     choose_parallel_keyboard,
     confirm_cancel_keyboard,
-    go_to_main_menu_keyboard,
 )
 from bot.upml.album_lessons import tesseract_lessons
 from bot.utils.datehelp import date_by_format, format_date, weekday_by_date
@@ -27,7 +26,7 @@ async def process_lessons_album_func(
     bot: "Bot",
     state: "FSMContext",
     tesseract_path: str,
-) -> tuple[str, "InlineKeyboardMarkup"]:
+) -> str:
     """
     Обработчки фотографий расписаний при нескольких штуках.
 
@@ -42,15 +41,14 @@ async def process_lessons_album_func(
 
     if all(lesson.status for lesson in lessons):  # Всё успешно обработалось
         await state.set_state(EditingLessons.all_good)
-        return "\n".join(lesson.text for lesson in lessons), confirm_cancel_keyboard
+        return "\n".join(lesson.text for lesson in lessons)
 
     await state.set_state(EditingLessons.something_bad)
-    text = (
+    return (
         "\n".join(lesson.text for lesson in lessons if lesson.status)
         + "\n\nНе удалось распознать некоторые расписания."
         + "\nВвеcти данные вручную?"
     )
-    return text, confirm_cancel_keyboard
 
 
 async def all_good_lessons_func(
@@ -58,7 +56,7 @@ async def all_good_lessons_func(
     bot: "Bot",
     state: "FSMContext",
     repo: "LessonsRepository",
-) -> tuple[str, "InlineKeyboardMarkup"]:
+) -> str:
     """
     Обработка кнопки "Подтвердить" при всех верных расписаниях.
 
@@ -82,7 +80,7 @@ async def all_good_lessons_func(
 
     await state.clear()
 
-    return "Успешно!", go_to_main_menu_keyboard
+    return "Успешно!"
 
 
 async def start_choose_grades_func(
@@ -142,10 +140,9 @@ async def choose_grades_func(
 
     # Начало ввода дат
     text = "Введите дату расписания в формате <b>ДД.ММ.ГГГГ</b>"
-    keyboard = cancel_state_keyboard
     await state.set_state(EditingLessons.choose_date)
 
-    return text, keyboard, lessons[0]
+    return text, cancel_state_keyboard, lessons[0]
 
 
 async def choose_dates_func(

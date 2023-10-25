@@ -25,7 +25,7 @@ services:
   redis:
     image: redis:7.2.1
     container_name: upml-bot-redis
-    restart: "unless-stopped"
+    restart: unless-stopped
     volumes:
       - "/var/upml-bot/redis:/data"
     ports:

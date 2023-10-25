@@ -1,10 +1,10 @@
 flake8==6.1.0
 pylint==2.17.5
-black==23.9.1
+black==23.10.1
 dlint==0.14.1
 tryceratops==2.3.2
 pep8-naming==0.13.3
-pydoclint==0.3.3
+pydoclint==0.3.8
 
 flake8-absolute-import==1.0.0.2
 flake8-annotations==3.0.1

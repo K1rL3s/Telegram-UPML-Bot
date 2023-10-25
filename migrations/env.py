@@ -1,5 +1,6 @@
 import asyncio
 from logging.config import fileConfig
+from pathlib import Path
 
 from alembic import context
 from alembic.script import ScriptDirectory
@@ -13,7 +14,7 @@ from bot.database import AlchemyBaseModel
 
 
 config = context.config
-db_settings = get_settings().db
+db_settings = get_settings(dotenv_path=Path.cwd() / ".env").db
 
 section = config.config_ini_section
 config.set_section_option(section, "POSTGRES_HOST", db_settings.host)

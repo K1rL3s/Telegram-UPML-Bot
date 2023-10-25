@@ -7,7 +7,10 @@ from bot.utils.consts import TODAY
 
 # Смещение часового пояса по умолчанию, используется при работе бота.
 # В тестах всегда должно подставляться одинаковое значение.
-default_timezone_offset = get_settings().other.timezone_offset
+try:
+    default_timezone_offset = get_settings().other.timezone_offset
+except KeyError:
+    default_timezone_offset = 0
 
 
 def format_date(date: "dt.date", with_year: bool = True) -> str:

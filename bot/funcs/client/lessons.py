@@ -77,15 +77,15 @@ async def get_lessons_for_user(
         full_lessons = await lessons_repo.get(date, settings.grade)
         class_lessons = await lessons_repo.get(date, settings.class_)  # noqa
         images = [
-            getattr(full_lessons, "image", None),
-            getattr(class_lessons, "image", None),
+            getattr(full_lessons, "file_id", None),
+            getattr(class_lessons, "file_id", None),
         ]
     else:
         full_10_lessons = await lessons_repo.get(date, "10")
         full_11_lessons = await lessons_repo.get(date, "11")
         images = [
-            getattr(full_10_lessons, "image", None),
-            getattr(full_11_lessons, "image", None),
+            getattr(full_10_lessons, "file_id", None),
+            getattr(full_11_lessons, "file_id", None),
         ]
 
     for_class = settings.class_ if settings.class_ else QUESTION

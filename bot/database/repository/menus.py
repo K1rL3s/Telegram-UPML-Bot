@@ -24,9 +24,9 @@ class MenuRepository(BaseRepository):
         date: "dt.date",
     ) -> Menu | None:
         """
-        Возвращает меню на день по дате.
+        Возвращает меню столовой по дате.
 
-        :param date: Дата запрашеваемого меню.
+        :param date: Дата.
         :return: Модель Menu.
         """
         query = select(Menu).where(Menu.date == date)

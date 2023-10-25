@@ -25,7 +25,7 @@ class LessonsRepository(BaseRepository):
         self,
         date: "dt.date",
         class_or_grade: str,
-    ) -> "Union[ClassLessons, FullLessons, None]":
+    ) -> "Optional[Union[ClassLessons, FullLessons]]":
         """
         Возвращает модель с айди изображением уроков на дату.
 
@@ -39,20 +39,22 @@ class LessonsRepository(BaseRepository):
 
     async def save_or_update_to_db(
         self,
-        image: str,
+        file_id: str,
         date: "dt.date",
         grade: str,
         letter: str | None = None,
     ) -> None:
         """
-        Сохраняет или обновляет уроки для паралелли.
+        Сохраняет или обновляет уроки для паралелли или класса.
 
-        :param image: Айди изображения.
+        :param file_id: Айди изображения.
         :param date: Дата.
         :param grade: 10 или 11.
         :param letter: А, Б, В
         """
-        model = ClassLessons if letter else FullLessons
+        model: "type[Union[ClassLessons, FullLessons]]" = (
+            ClassLessons if letter else FullLessons
+        )
 
         find_query = select(model).where(
             model.date == date,
@@ -63,12 +65,12 @@ class LessonsRepository(BaseRepository):
             find_query = find_query.where(model.letter == letter)
 
         if lessons := await self._session.scalar(find_query):
-            lessons.image = image
+            lessons.file_id = file_id
         else:
             data = {
                 "date": date,
                 "grade": grade,
-                "image": image,
+                "file_id": file_id,
             }
             if letter:
                 data["letter"] = letter
@@ -82,7 +84,7 @@ class LessonsRepository(BaseRepository):
         lessons: "LessonsCollection",
     ) -> None:
         """
-        Сохранение готовых изображений расписаний уроков на дату для параллели.
+        Сохраняет готовые изображения расписаний уроков на дату для параллели.
 
         :param lessons: Полное изображение расписания уроков.
         """
@@ -105,7 +107,7 @@ class LessonsRepository(BaseRepository):
         grade: str,
     ) -> None:
         """
-        Удаляет расписания для отдельных классов по дате и паралелли.
+        Удаляет отдельные расписания для классов по дате и паралелли.
 
         :param date: Дата.
         :param grade: Параллель.
@@ -123,7 +125,7 @@ class LessonsRepository(BaseRepository):
         class_: str,
     ) -> "Optional[ClassLessons]":
         """
-        Возвращает айди картинки расписания уроков для класса.
+        Возвращает ClassLessons для класса.
 
         :param date: Дата.
         :param class_: (10 или 11) + (А или Б или В) | (10А, 11Б, ...)
@@ -141,7 +143,7 @@ class LessonsRepository(BaseRepository):
         grade: str,
     ) -> "Optional[FullLessons]":
         """
-        Возвращает айди картинки расписания уроков для параллели.
+        Возвращает FullLessons для параллели.
 
         :param date: Дата.
         :param grade: 10 или 11.

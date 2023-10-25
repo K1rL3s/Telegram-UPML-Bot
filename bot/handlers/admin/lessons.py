@@ -18,6 +18,7 @@ from bot.funcs.admin.lessons import (
 from bot.keyboards import (
     cancel_state_keyboard,
     choose_parallel_keyboard,
+    confirm_cancel_keyboard,
     go_to_main_menu_keyboard,
 )
 from bot.utils.enums import Actions, Menus
@@ -82,7 +83,7 @@ async def process_lessons_album_handler(
     album: "Album",
 ) -> None:
     """Обработчки фотографий расписаний при нескольких штуках."""
-    text, keyboard = await process_lessons_album_func(
+    text = await process_lessons_album_func(
         album,
         message.bot,
         state,
@@ -90,7 +91,7 @@ async def process_lessons_album_handler(
     )
     await message.reply(
         text=text,
-        reply_markup=keyboard,
+        reply_markup=confirm_cancel_keyboard,
     )
 
 
@@ -104,7 +105,7 @@ async def all_good_lessons_handler(
     repo: "Repository",
 ) -> None:
     """Обработка кнопки "Подтвердить" при всех верных расписаниях."""
-    text, keyboard = await all_good_lessons_func(
+    text = await all_good_lessons_func(
         callback.message.chat.id,
         callback.bot,
         state,
@@ -113,7 +114,7 @@ async def all_good_lessons_handler(
 
     await callback.message.answer(
         text=text,
-        reply_markup=keyboard,
+        reply_markup=go_to_main_menu_keyboard,
     )
 
 

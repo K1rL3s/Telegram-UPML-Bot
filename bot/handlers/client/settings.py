@@ -16,6 +16,7 @@ from bot.keyboards import (
 )
 from bot.middlewares.inner.save_user import SaveUpdateUserMiddleware
 from bot.utils.enums import Actions, Menus, SlashCommands, TextCommands, UserCallback
+from bot.utils.phrases import SETTINGS_WELCOME_TEXT
 from bot.utils.states import EditingSettings
 
 if TYPE_CHECKING:
@@ -27,16 +28,6 @@ if TYPE_CHECKING:
 
 router = Router(name=__name__)
 router.message.middleware(SaveUpdateUserMiddleware())
-
-SETTINGS_WELCOME_TEXT = """
-Привет! Я - настройки!
-
-<b>Класс</b> - твой класс.
-<b>Уроки</b> - уведомления при изменении расписания.
-<b>Новости</b> - уведомления о мероприятиях, новостях.
-<b>Стирка</b> - время таймера для стирки.
-<b>Сушка</b> - время таймера для сушки.
-""".strip()
 
 
 @router.callback_query(OpenMenu.filter(F.menu == Menus.SETTINGS))

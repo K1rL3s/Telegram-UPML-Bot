@@ -19,9 +19,4 @@ async def update_cafe_menu(
         if monday or today:
             return
 
-        status, message = await process_cafe_menu(repo, timeout)
-        logger.info(
-            "Обновление меню - {status}, {message}",
-            status=status,
-            message=message,
-        )
+        await process_cafe_menu(repo, timeout)

@@ -27,9 +27,11 @@ class AlchemyBaseModel(DeclarativeBase):
         )
 
     def _repr(self, **fields: Any) -> str:
-        """Помощник __repr__.
-        Взят с https://stackoverflow.com/questions/55713664/sqlalchemy-best-way-to-define-repr-for-large-tables
-        """  # noqa
+        """
+        Помощник __repr__.
+
+        Взят с https://stackoverflow.com/a/55749579
+        """
         field_strings = []
         at_least_one_attached_attribute = False
 

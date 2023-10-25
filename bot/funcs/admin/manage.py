@@ -4,7 +4,6 @@ from bot.keyboards import (
     admins_list_keyboard,
     cancel_state_keyboard,
     check_admin_roles_keyboard,
-    confirm_cancel_keyboard,
     edit_roles_keyboard,
     roles_actions_keyboard,
 )
@@ -196,7 +195,7 @@ async def edit_role_choose_role_func(
 
 async def edit_role_confirm_func(
     state: "FSMContext",
-) -> tuple[str, "InlineKeyboardMarkup", int]:
+) -> tuple[str, int]:
     """
     Обработчик кнопки "Подтвердить" при изменении ролей.
 
@@ -217,7 +216,6 @@ async def edit_role_confirm_func(
     return (
         f"Вы уверены, что хотите {ACTIONS_TRANSLATE[action]} "
         f'роль(-и) "{foramtted_roles}" {name_link(username, user_id)}?',
-        confirm_cancel_keyboard,
         start_id,
     )
 
