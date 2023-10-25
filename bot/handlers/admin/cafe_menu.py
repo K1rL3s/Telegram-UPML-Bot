@@ -3,8 +3,9 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import StateFilter
 
-from bot.callbacks import AdminEditData, EditMealData, StateData
-from bot.funcs.admin.admin_cafe_menu import (
+from bot.callbacks import AdminEditMenu, EditMeal, InStateData
+from bot.filters import HasCafeMenuRole
+from bot.funcs.admin.cafe_menu import (
     edit_cafe_menu_confirm_func,
     edit_cafe_menu_date_func,
     edit_cafe_menu_meal_func,
@@ -29,9 +30,11 @@ if TYPE_CHECKING:
 
 
 router = Router(name=__name__)
+router.message.filter(HasCafeMenuRole())
+router.callback_query.filter(HasCafeMenuRole())
 
 
-@router.callback_query(EditMealData.filter(F.meal == Meals.AUTO_ALL))
+@router.callback_query(EditMeal.filter(F.meal == Meals.AUTO_ALL))
 async def auto_update_cafe_menu_handler(
     callback: "CallbackQuery",
     settings: "Settings",
@@ -49,7 +52,7 @@ async def auto_update_cafe_menu_handler(
     )
 
 
-@router.callback_query(AdminEditData.filter(F.menu == Menus.CAFE_MENU))
+@router.callback_query(AdminEditMenu.filter(F.menu == Menus.CAFE_MENU))
 async def edit_cafe_menu_start_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
@@ -83,10 +86,10 @@ async def edit_cafe_menu_date_handler(
     )
 
 
-@router.callback_query(StateFilter(EditingMenu.choose_meal), EditMealData.filter())
+@router.callback_query(StateFilter(EditingMenu.choose_meal), EditMeal.filter())
 async def edit_cafe_menu_meal_handler(
     callback: "CallbackQuery",
-    callback_data: "EditMealData",
+    callback_data: "EditMeal",
     state: "FSMContext",
     repo: "Repository",
 ) -> None:
@@ -116,7 +119,7 @@ async def edit_cafe_menu_text_handler(
 
 @router.callback_query(
     StateFilter(EditingMenu.writing),
-    StateData.filter(F.action == Actions.CONFIRM),
+    InStateData.filter(F.action == Actions.CONFIRM),
 )
 async def edit_cafe_menu_confirm_handler(
     callback: "CallbackQuery",

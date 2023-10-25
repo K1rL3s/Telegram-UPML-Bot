@@ -56,4 +56,4 @@ class LaundryRepository(BaseRepository):
             laundry = Laundry(user_id=user_id, **fields)
             self._session.add(laundry)
 
-        await self._session.commit()
+        await self._session.flush()

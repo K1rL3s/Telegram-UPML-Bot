@@ -3,7 +3,7 @@ from math import ceil
 from typing import Literal, TYPE_CHECKING
 
 from bot.keyboards import laundry_keyboard
-from bot.utils.consts import LAUNDRY_REPEAT
+from bot.utils.consts import REPEAT_LAUNDRY_TIMER
 from bot.utils.datehelp import datetime_now, datetime_time_delta
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ async def laundry_both_handler(
     :return: Сообщение пользователю и клавиатура.
     """
     text = f"""Привет! Я - таймер для прачечной.
-После конца таймер запустится ещё два раза на <b>{LAUNDRY_REPEAT}</b> минут."""
+После конца таймер запустится ещё два раза на <b>{REPEAT_LAUNDRY_TIMER}</b> минут."""
 
     laundry = await repo.get(user_id)
     keyboard = await laundry_keyboard(laundry)

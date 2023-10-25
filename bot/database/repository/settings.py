@@ -43,4 +43,4 @@ class SettingsRepository(BaseRepository):
             settings = Settings(user_id=user_id, **fields)
             self._session.add(settings)
 
-        await self._session.commit()
+        await self._session.flush()

@@ -54,4 +54,4 @@ class EducatorsScheduleRepository(BaseRepository):
             )
             self._session.add(schedule)
 
-        await self._session.commit()
+        await self._session.flush()

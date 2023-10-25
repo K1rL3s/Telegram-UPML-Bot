@@ -1,7 +1,7 @@
 from typing import Literal, TYPE_CHECKING
 
 from bot.keyboards import cancel_state_keyboard, settings_keyboard
-from bot.utils.consts import LAUNDRY_ENG_TO_RU
+from bot.utils.translate import LAUNDRY_TIMERS_TRANSLATE
 from bot.utils.datehelp import (
     format_time,
     hours_minutes_to_minutes,
@@ -116,7 +116,7 @@ async def _edit_time_laundry(
     await repo.save_or_update_to_db(user_id, **{f"{attr}_time": time})
 
     return (
-        f"{YES} <b>{LAUNDRY_ENG_TO_RU[attr].capitalize()}</b> "
+        f"{YES} <b>{LAUNDRY_TIMERS_TRANSLATE[attr].capitalize()}</b> "
         f"установлено на {format_time(time)}."
     )
 
@@ -146,6 +146,6 @@ async def _edit_minutes_laundry(
 
     hours, minutes = minutes_to_hours_minutes(minutes)
     return (
-        f"{YES} <b>{LAUNDRY_ENG_TO_RU[attr].capitalize()}</b> "
+        f"{YES} <b>{LAUNDRY_TIMERS_TRANSLATE[attr].capitalize()}</b> "
         f"установлено на <b>{hours} часов, {minutes} минут</b>."
     )

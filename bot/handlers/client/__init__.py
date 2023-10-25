@@ -9,16 +9,22 @@ from bot.handlers.client import (
     settings,
     start,
 )
+from bot.handlers.client.state import router as cancel_state_router
 
 
 client_router = Router()
 
 client_router.include_routers(
+    start.router,
     cafe_menu.router,
     educators.router,
     electives.router,
     laundry.router,
     lessons.router,
     settings.router,
-    start.router,
+)
+
+__all__ = (
+    "cancel_state_router",
+    "client_router",
 )

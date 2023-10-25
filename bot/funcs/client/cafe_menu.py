@@ -2,7 +2,8 @@ from typing import TYPE_CHECKING
 
 from cachetools.func import ttl_cache
 
-from bot.utils.consts import BEAUTIFY_MEALS, CAFE_MENU_ENG_TO_RU
+from bot.utils.consts import BEAUTIFY_MEALS
+from bot.utils.translate import CAFE_MENU_TRANSLATE
 from bot.utils.phrases import NO_DATA
 from bot.utils.datehelp import date_today, format_date, weekday_by_date
 
@@ -31,7 +32,7 @@ async def get_format_menu_by_date(
     menu = await repo.get(date)
 
     meals = tuple(
-        getattr(menu, meal, NO_DATA) or NO_DATA for meal in CAFE_MENU_ENG_TO_RU
+        getattr(menu, meal, NO_DATA) or NO_DATA for meal in CAFE_MENU_TRANSLATE
     )
 
     return (

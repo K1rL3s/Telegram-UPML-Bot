@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from aiogram import Bot
 
 
-async def tesseract_album_lessons_func(
+async def tesseract_lessons(
     bot: "Bot",
     album: "Album",
     tesseract_path: str,
@@ -33,7 +33,7 @@ async def tesseract_album_lessons_func(
         photo = await bot.get_file(photo_id)
         await bot.download_file(photo.file_path, image := BytesIO())
 
-        lessons_process = await _tesseract_one_lessons_func(image, tesseract_path)
+        lessons_process = await __tesseract_one_lesson(image, tesseract_path)
 
         if lessons_process.grade is None or lessons_process.date is None:
             results.append(LessonsCollection(full_photo_id=photo_id))
@@ -59,7 +59,7 @@ async def tesseract_album_lessons_func(
     return results
 
 
-async def _tesseract_one_lessons_func(
+async def __tesseract_one_lesson(
     image: "BytesIO",
     tesseract_path: str,
 ) -> "LessonsProcess":

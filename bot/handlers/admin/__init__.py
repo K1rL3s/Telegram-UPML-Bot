@@ -6,37 +6,32 @@
 
 from aiogram import Router
 
-from bot.filters import IsAdmin, IsSuperAdmin
+from bot.filters.roles import HasAnyRole
 
 from bot.handlers.admin import (
-    admin,
     cafe_menu,
     educators,
     electives,
     lessons,
     manage,
     notifies,
+    panel,
 )
 
 
 admin_router = Router(name=__name__)
-admin_router.message.filter(IsAdmin())
-admin_router.callback_query.filter(IsAdmin())
-
-__super_admin_router = Router(name=__name__)
-__super_admin_router.message.filter(IsSuperAdmin())
-__super_admin_router.callback_query.filter(IsSuperAdmin())
-
-__super_admin_router.include_routers(
-    manage.router,
-)
+admin_router.message.filter(HasAnyRole())
+admin_router.callback_query.filter(HasAnyRole())
 
 admin_router.include_routers(
-    admin.router,
+    panel.router,
     cafe_menu.router,
     educators.router,
     electives.router,
+    manage.router,
     lessons.router,
     notifies.router,
-    __super_admin_router,
 )
+
+
+__all__ = ("admin_router",)

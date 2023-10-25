@@ -31,5 +31,14 @@ class RoleRepository(BaseRepository):
         if isinstance(role, Enum):
             role = role.value
 
-        role_query = select(Role).where(Role.role == role)
-        return await self._session.scalar(role_query)
+        query = select(Role).where(Role.role == role)
+        return await self._session.scalar(query)
+
+    async def get_all(self) -> list[Role]:
+        """
+        Возвращает все роли из базы данных.
+
+        :return: Список моделей Role.
+        """
+        query = select(Role).order_by(Role.id)
+        return list((await self._session.scalars(query)).all())

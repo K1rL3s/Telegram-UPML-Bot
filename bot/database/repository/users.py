@@ -112,7 +112,7 @@ class UserRepository(BaseRepository):
             self._session.add(user)
             logger.info("Новый пользователь {user}", user=user)
 
-        await self._session.commit()
+        await self._session.flush()
 
     async def update(
         self,
@@ -127,12 +127,12 @@ class UserRepository(BaseRepository):
         """
         query = sa.update(User).where(User.user_id == user_id).values(**fields)
         await self._session.execute(query)
-        await self._session.commit()
+        await self._session.flush()
 
     async def is_has_any_role(
         self,
         user_id: int,
-        roles: "list[Roles | str] | tuple[Roles| str, ...]",
+        roles: "list[Union[Roles, str]]",
     ) -> bool:
         """
         Имеет ли юзер хотя бы одну роль из переданных.

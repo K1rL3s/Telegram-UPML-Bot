@@ -4,7 +4,8 @@ from sqlalchemy import select
 
 from bot.database.models.menus import Menu
 from bot.database.repository.base_repo import BaseRepository
-from bot.utils.consts import CAFE_MENU_ENG_TO_RU
+from bot.utils.translate import CAFE_MENU_TRANSLATE
+
 
 if TYPE_CHECKING:
     import datetime as dt
@@ -59,7 +60,7 @@ class MenuRepository(BaseRepository):
             )
             self._session.add(menu)
 
-        await self._session.commit()
+        await self._session.flush()
 
     async def update(
         self,
@@ -77,7 +78,7 @@ class MenuRepository(BaseRepository):
         :param edit_by: ТГ Айди того, кто меняет.
         """
         menu = await self.get(date)
-        meals = {meal: getattr(menu, meal, None) for meal in CAFE_MENU_ENG_TO_RU}
+        meals = {meal: getattr(menu, meal, None) for meal in CAFE_MENU_TRANSLATE}
         meals[meal] = new_menu
 
         await self.save_or_update_to_db(date=date, edit_by=edit_by, **meals)

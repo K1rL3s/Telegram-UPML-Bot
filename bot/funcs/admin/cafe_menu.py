@@ -2,16 +2,40 @@ from typing import TYPE_CHECKING
 
 from bot.funcs.admin.admin import get_meal_by_date
 from bot.keyboards import cancel_state_keyboard, choose_meal_keyboard
-from bot.utils.consts import CAFE_MENU_ENG_TO_RU
-from bot.utils.datehelp import date_by_format, format_date, weekday_by_date
+from bot.utils.translate import CAFE_MENU_TRANSLATE
+from bot.utils.datehelp import date_by_format, date_today, format_date, weekday_by_date
 from bot.utils.phrases import NO
 from bot.utils.states import EditingMenu
 
 if TYPE_CHECKING:
+    import datetime as dt
+
     from aiogram.types import InlineKeyboardMarkup
     from aiogram.fsm.context import FSMContext
 
     from bot.database.repository import MenuRepository
+
+
+async def edit_cafe_menu_start_func(
+    message_id: int,
+    state: "FSMContext",
+) -> tuple[str, "InlineKeyboardMarkup"]:
+    """
+    Обрабочтки кнопки "Изменить меню".
+
+    :param message_id: Начальное сообщение бота.
+    :param state: Состояние пользователя.
+    :return: Сообщение и клавиатура для пользователя.
+    """
+    text = f"""
+Введите дату дня, меню которого хотите изменить в формате <b>ДД.ММ.ГГГГ</b>
+Например, <code>{format_date(date_today())}</code>
+""".strip()
+
+    await state.set_state(EditingMenu.choose_date)
+    await state.update_data(start_id=message_id)
+
+    return text, cancel_state_keyboard
 
 
 async def edit_cafe_menu_date_func(
@@ -54,12 +78,12 @@ async def edit_cafe_menu_meal_func(
     :param repo: Репозиторий расписаний столовой.
     :return: Сообщение пользователю.
     """
-    edit_date = date_by_format((await state.get_data())["edit_date"])
-    meal = CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()
-    menu = await get_meal_by_date(repo, edit_meal, edit_date)
-
     await state.set_state(EditingMenu.writing)
-    await state.update_data(edit_meal=edit_meal)
+    data = await state.update_data(edit_meal=edit_meal)
+
+    edit_date: "dt.date" = date_by_format(data["edit_date"])
+    meal = CAFE_MENU_TRANSLATE[edit_meal].capitalize()
+    menu = await get_meal_by_date(repo, edit_meal, edit_date)
 
     return (
         f"<b>Дата</b>: <code>{format_date(edit_date)}</code> "
@@ -85,13 +109,13 @@ async def edit_cafe_menu_text_func(
     :return: Сообщение пользователю и айди начального сообщения бота.
     """
     data = await state.get_data()
-    start_id = data["start_id"]
-    edit_meal = data["edit_meal"]
-    edit_date = date_by_format(data["edit_date"])
+    start_id: int = data["start_id"]
+    edit_meal: str = data["edit_meal"]
+    edit_date: "dt.date" = date_by_format(data["edit_date"])
 
-    new_ids = data.get("new_ids", []) + [message_id]
+    new_ids: list[int] = data.get("new_ids", []) + [message_id]
     await state.update_data(new_menu=html_text, new_ids=new_ids)
-    meal = CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()
+    meal = CAFE_MENU_TRANSLATE[edit_meal].capitalize()
     text = (
         f"<b>Дата</b>: <code>{format_date(edit_date)}</code> "
         f"({weekday_by_date(edit_date)})\n"
@@ -119,17 +143,17 @@ async def edit_cafe_menu_confirm_func(
     :return: Сообщение пользователю и айдишники его сообщений с изменениями.
     """
     data = await state.get_data()
-    edit_date = date_by_format(data["edit_date"])
-    edit_meal = data["edit_meal"]
-    new_menu = data["new_menu"]
-    new_ids = data["new_ids"]
+    edit_date: "dt.date" = date_by_format(data["edit_date"])
+    edit_meal: str = data["edit_meal"]
+    new_menu: str = data["new_menu"]
+    new_ids: list[int] = data["new_ids"]
 
     await state.clear()
 
     await repo.update(edit_meal, new_menu, edit_date, user_id)
 
     text = (
-        f"<b>{CAFE_MENU_ENG_TO_RU[edit_meal].capitalize()}</b> на "
+        f"<b>{CAFE_MENU_TRANSLATE[edit_meal].capitalize()}</b> на "
         f"<b>{format_date(edit_date)} ({weekday_by_date(edit_date)})</b> "
         f"успешно изменён!"
     )

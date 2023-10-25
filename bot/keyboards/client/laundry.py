@@ -4,8 +4,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.callbacks import LaundryData
 from bot.keyboards.universal import (
-    go_to_main_menu_button,
-    go_to_settings_button,
+    main_menu_button,
+    settings_button,
 )
 from bot.utils.enums import Actions, UserCallback
 from bot.utils.phrases import NO
@@ -49,7 +49,7 @@ async def laundry_keyboard(
             callback_data=LaundryData(action=Actions.CANCEL),
         )
 
-    keyboard.add(go_to_main_menu_button, go_to_settings_button)
+    keyboard.add(main_menu_button, settings_button)
 
     keyboard.adjust(2, repeat=True)
 

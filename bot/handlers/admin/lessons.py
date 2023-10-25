@@ -4,9 +4,10 @@ from aiogram import F, Router
 from aiogram.filters import StateFilter
 from aiogram.types import InputMediaPhoto
 
-from bot.callbacks import AdminEditData, EditLessonsData, StateData
+from bot.callbacks import AdminEditMenu, EditLessons, InStateData
+from bot.filters import HasLessonsRole
 from bot.types import Album
-from bot.funcs.admin.admin_lessons import (
+from bot.funcs.admin.lessons import (
     all_good_lessons_func,
     choose_dates_func,
     choose_grades_func,
@@ -16,11 +17,11 @@ from bot.funcs.admin.admin_lessons import (
 )
 from bot.keyboards import (
     cancel_state_keyboard,
-    choose_grade_parallel_keyboard,
+    choose_parallel_keyboard,
     go_to_main_menu_keyboard,
 )
 from bot.utils.enums import Actions, Menus
-from bot.utils.states import LoadingLessons
+from bot.utils.states import EditingLessons
 
 if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
@@ -31,22 +32,24 @@ if TYPE_CHECKING:
 
 
 router = Router(name=__name__)
+router.message.filter(HasLessonsRole())
+router.callback_query.filter(HasLessonsRole())
 
 
-@router.callback_query(AdminEditData.filter(F.menu == Menus.LESSONS))
+@router.callback_query(AdminEditMenu.filter(F.menu == Menus.LESSONS))
 async def start_process_lessons_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
 ) -> None:
     """Обработчик кнопки "Загрузить уроки"."""
-    await state.set_state(LoadingLessons.input_images)
+    await state.set_state(EditingLessons.input_images)
     text = "Отправьте изображение(-я) расписания уроков"
 
     await callback.message.edit_text(text=text, reply_markup=cancel_state_keyboard)
 
 
 @router.message(
-    StateFilter(LoadingLessons.input_images),
+    StateFilter(EditingLessons.input_images),
     ~F.media_group_id,
     F.content_type.in_({"photo"}),
 )
@@ -68,7 +71,7 @@ async def process_lessons_handler(
 
 
 @router.message(
-    StateFilter(LoadingLessons.input_images),
+    StateFilter(EditingLessons.input_images),
     F.media_group_id,
     F.content_type.in_({"photo"}),
 )
@@ -92,8 +95,8 @@ async def process_lessons_album_handler(
 
 
 @router.callback_query(
-    StateFilter(LoadingLessons.all_good),
-    StateData.filter(F.action == Actions.CONFIRM),
+    StateFilter(EditingLessons.all_good),
+    InStateData.filter(F.action == Actions.CONFIRM),
 )
 async def all_good_lessons_handler(
     callback: "CallbackQuery",
@@ -115,12 +118,12 @@ async def all_good_lessons_handler(
 
 
 @router.callback_query(
-    StateFilter(LoadingLessons.all_good),
-    StateData.filter(F.action == Actions.CANCEL),
+    StateFilter(EditingLessons.all_good),
+    InStateData.filter(F.action == Actions.CANCEL),
 )
 @router.callback_query(
-    StateFilter(LoadingLessons.something_bad),
-    StateData.filter(F.action == Actions.CONFIRM),
+    StateFilter(EditingLessons.something_bad),
+    InStateData.filter(F.action == Actions.CONFIRM),
 )
 async def start_choose_grades_handler(
     callback: "CallbackQuery",
@@ -135,17 +138,17 @@ async def start_choose_grades_handler(
     )
     await photo[0].reply(
         text=text,
-        reply_markup=choose_grade_parallel_keyboard,
+        reply_markup=choose_parallel_keyboard,
     )
 
 
 @router.callback_query(
-    StateFilter(LoadingLessons.choose_grade),
-    EditLessonsData.filter(),
+    StateFilter(EditingLessons.choose_grade),
+    EditLessons.filter(),
 )
 async def choose_grades_handler(
     callback: "CallbackQuery",
-    callback_data: "EditLessonsData",
+    callback_data: "EditLessons",
     state: "FSMContext",
 ) -> None:
     """Обработчик кнопок "10 классы" и "11 классы" для нераспознанных расписаний."""
@@ -164,7 +167,7 @@ async def choose_grades_handler(
     )
 
 
-@router.message(StateFilter(LoadingLessons.choose_date))
+@router.message(StateFilter(EditingLessons.choose_date))
 async def choose_dates_handler(
     message: "Message",
     state: "FSMContext",
@@ -183,8 +186,8 @@ async def choose_dates_handler(
 
 
 @router.callback_query(
-    StateFilter(LoadingLessons.confirm),
-    StateData.filter(F.action == Actions.CONFIRM),
+    StateFilter(EditingLessons.confirm),
+    InStateData.filter(F.action == Actions.CONFIRM),
 )
 async def confirm_edit_lessons_handler(
     callback: "CallbackQuery",

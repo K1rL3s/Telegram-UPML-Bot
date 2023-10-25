@@ -7,7 +7,7 @@ from aiohttp import ClientSession, ClientTimeout
 from loguru import logger
 from pypdf import PdfReader
 
-from bot.utils.consts import CAFE_MENU_ENG_TO_RU
+from bot.utils.translate import CAFE_MENU_TRANSLATE
 from bot.utils.datehelp import format_date, get_this_week_monday
 
 if TYPE_CHECKING:
@@ -16,76 +16,28 @@ if TYPE_CHECKING:
 
 async def process_cafe_menu(repo: "MenuRepository", timeout: int) -> tuple[bool, str]:
     """
-    Основная функция в файле, выполняет всю работу, вызывая другие функции.
+    Поиск, составление и сохранение расписания еды в столовой.
 
     :param repo: Репозиторий расписаний столовой.
     :param timeout: Таймаут для запроса на сайт лицея.
     :return: Сохранилось/Обновилось ли меню.
     """
-    if (pdf_reader := await _get_pdf_menu(timeout)) is None:
+    if (pdf_reader := await __get_pdf_menu(timeout)) is None:
         logger.warning(text := "Не удалось найти PDF с меню")
         return False, text
 
     # Спасибо столовой моего лицея за то, что они могут опублиовать меню
     # с датой вторника, а начинается с понедельника. :)
-    menu_date = _compare_pdf_date(pdf_reader)
+    menu_date = __compare_pdf_date(pdf_reader)
 
     if isinstance(menu_date, str):
         return False, menu_date
 
-    await _parse_pdf_menu(repo, pdf_reader, menu_date)
+    await __parse_pdf_menu(repo, pdf_reader, menu_date)
     return True, "Расписание еды обновлено!"
 
 
-def _get_meal(menu: str, start_sub: str, end_sub: str) -> tuple[str, int, int]:
-    """
-    Возвращает строку с едой для конкретного приёма пищи.
-
-    Подстроки start_sub и end_sub разделяют начало и конец нужной строки.
-
-    :param menu: Меню столовой на день без переносов строки.
-    :param start_sub: Начальное ключевое слово.
-    :param end_sub: Конечное ключевое слово.
-    :return: Строка формата "{блюдо} {числа} {блюдо} {числа} ...",
-             начальный и конечный индексы по строке меню.
-    """
-    start_index = menu.lower().index(start_sub) + len(start_sub)
-    end_index = menu.lower().rindex(end_sub)
-    return menu[start_index:end_index].strip(), start_index, end_index
-
-
-# РАБОТАЕТ НЕ ТРОГАТЬ РАБОТАЕТ НЕ ТРОГАТЬ РАБОТАЕТ НЕ ТРОГАТЬ
-def _normalize_meal(one_meal: str) -> str:
-    """
-    Принимает строку из ``def get_string_meal`` и переделывает её в читаемый вид.
-
-    (Каждое блюдо с новой строки без лишних символов).
-
-    :param one_meal: Строка с конкретным приёмом пищи (завтрак, обед).
-    :return: Читаемый вид этой строки
-    """
-    meal = " ".join(one_meal.replace(",", "").strip().split())
-
-    dishes = []
-    dish = ""
-    for i, char in enumerate(meal):
-        if char.isdigit():
-            if len(set(dish)) > 2:
-                dish = dish.strip("[].I/, \t\n")
-                if dish.startswith("Д "):
-                    dish = dish[2:]
-                dishes.append(dish)
-                dish = ""
-        elif char == " ":
-            if not meal[i - 1].isdigit():
-                dish += char
-        else:
-            dish += char
-
-    return "\n".join(dishes)
-
-
-async def _get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
+async def __get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
     """
     Ищет и возвращает файл с недельным расписанием питания с сайта лицея.
 
@@ -114,7 +66,7 @@ async def _get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
     return None
 
 
-def _compare_pdf_date(pdf_reader: "PdfReader") -> "Union[dt.date, str]":
+def __compare_pdf_date(pdf_reader: "PdfReader") -> "Union[dt.date, str]":
     """
     Возвращает дату, с которой начинается расписание еды в пдф файле.
 
@@ -136,7 +88,7 @@ def _compare_pdf_date(pdf_reader: "PdfReader") -> "Union[dt.date, str]":
     return menu_date
 
 
-async def _parse_pdf_menu(
+async def __parse_pdf_menu(
     repo: "MenuRepository",
     pdf_reader: "PdfReader",
     date: "dt.date",
@@ -160,11 +112,59 @@ async def _parse_pdf_menu(
 
         meals = []
         for start_sub, end_sub in food_times:
-            meal, _, end = _get_meal(text_menu, start_sub, end_sub)
-            meals.append(_normalize_meal(meal))
+            meal, _, end = __get_meal(text_menu, start_sub, end_sub)
+            meals.append(__normalize_meal(meal))
             text_menu = text_menu[end:]
 
-        fields = dict(zip(CAFE_MENU_ENG_TO_RU.keys(), meals))
+        fields = dict(zip(CAFE_MENU_TRANSLATE.keys(), meals))
         await repo.save_or_update_to_db(date, **fields)
 
         date += dt.timedelta(days=1)
+
+
+def __get_meal(menu: str, start_sub: str, end_sub: str) -> tuple[str, int, int]:
+    """
+    Возвращает строку с едой для конкретного приёма пищи.
+
+    Подстроки start_sub и end_sub разделяют начало и конец нужной строки.
+
+    :param menu: Меню столовой на день без переносов строки.
+    :param start_sub: Начальное ключевое слово.
+    :param end_sub: Конечное ключевое слово.
+    :return: Строка формата "{блюдо} {числа} {блюдо} {числа} ...",
+             начальный и конечный индексы по строке меню.
+    """
+    start_index = menu.lower().index(start_sub) + len(start_sub)
+    end_index = menu.lower().rindex(end_sub)
+    return menu[start_index:end_index].strip(), start_index, end_index
+
+
+# Это самое жуткое, что я когда-либо писал, и оно работает :(
+def __normalize_meal(one_meal: str) -> str:
+    """
+    Принимает строку из ``def get_string_meal`` и переделывает её в читаемый вид.
+
+    (Каждое блюдо с новой строки без лишних символов).
+
+    :param one_meal: Строка с конкретным приёмом пищи (завтрак, обед).
+    :return: Читаемый вид этой строки
+    """
+    meal = " ".join(one_meal.replace(",", "").strip().split())
+
+    dishes = []
+    dish = ""
+    for i, char in enumerate(meal):
+        if char.isdigit():
+            if len(set(dish)) > 2:
+                dish = dish.strip("[].I/, \t\n")
+                if dish.startswith("Д "):
+                    dish = dish[2:]
+                dishes.append(dish)
+                dish = ""
+        elif char == " ":
+            if not meal[i - 1].isdigit():
+                dish += char
+        else:
+            dish += char
+
+    return "\n".join(dishes)

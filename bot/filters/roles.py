@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class RoleAccess(Filter):
     """Фильтр доступа к обработчику по роли (уровню доступа)."""
 
-    def __init__(self, roles: list["Roles"]) -> None:
+    def __init__(self, roles: "list[Union[Roles, str]]") -> None:
         self.roles = roles
 
     async def __call__(
@@ -24,6 +24,13 @@ class RoleAccess(Filter):
         return await repo.user.is_has_any_role(event.from_user.id, self.roles)
 
 
+class IsSuperAdmin(RoleAccess):
+    """Фильтр по роли SUPERADMIN."""
+
+    def __init__(self) -> None:
+        super().__init__([Roles.SUPERADMIN])
+
+
 class IsAdmin(RoleAccess):
     """Фильтр по ролям SUPERADMIN и ADMIN."""
 
@@ -31,8 +38,36 @@ class IsAdmin(RoleAccess):
         super().__init__([Roles.SUPERADMIN, Roles.ADMIN])
 
 
-class IsSuperAdmin(RoleAccess):
-    """Фильтр по роли SUPERADMIN."""
+class HasAnyRole(RoleAccess):
+    """Фильтр доступа к админ-панели. Любой, у кого есть роль - "админ"."""
 
     def __init__(self) -> None:
-        super().__init__([Roles.SUPERADMIN])
+        super().__init__(Roles.all_roles())
+
+
+class HasNotifyRole(RoleAccess):
+    """Фильтр доступа к рассылке уведомлений."""
+
+    def __init__(self) -> None:
+        super().__init__([Roles.SUPERADMIN, Roles.ADMIN, Roles.NOTIFY])
+
+
+class HasLessonsRole(RoleAccess):
+    """Фильтр доступа к редактированию уроков."""
+
+    def __init__(self) -> None:
+        super().__init__([Roles.SUPERADMIN, Roles.ADMIN, Roles.LESSONS])
+
+
+class HasCafeMenuRole(RoleAccess):
+    """Фильтр доступа к редактированию расписаний столовой."""
+
+    def __init__(self) -> None:
+        super().__init__([Roles.SUPERADMIN, Roles.ADMIN, Roles.CAFE_MENU])
+
+
+class HasEducatorsRole(RoleAccess):
+    """Фильтр доступа к редактированию расписаний воспитателей."""
+
+    def __init__(self) -> None:
+        super().__init__([Roles.SUPERADMIN, Roles.ADMIN, Roles.EDUCATORS])

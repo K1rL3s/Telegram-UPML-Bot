@@ -75,7 +75,7 @@ class LessonsRepository(BaseRepository):
             lessons = model(**data)
             self._session.add(lessons)
 
-        await self._session.commit()
+        await self._session.flush()
 
     async def save_prepared_to_db(
         self,
@@ -115,7 +115,7 @@ class LessonsRepository(BaseRepository):
             ClassLessons.grade == grade,
         )
         await self._session.execute(query)
-        await self._session.commit()
+        await self._session.flush()
 
     async def _get_class_lessons(
         self,

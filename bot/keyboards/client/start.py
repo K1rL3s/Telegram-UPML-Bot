@@ -10,9 +10,9 @@ from aiogram.utils.keyboard import (
 
 from bot.callbacks import OpenMenu
 from bot.keyboards.universal import (
-    go_to_admin_panel_button,
-    go_to_main_menu_button,
-    go_to_settings_button,
+    admin_panel_button,
+    main_menu_button,
+    settings_button,
 )
 from bot.utils.consts import TODAY
 from bot.utils.enums import Menus, Roles, TextCommands
@@ -23,11 +23,11 @@ if TYPE_CHECKING:
 
 
 go_to_main_menu_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[[go_to_main_menu_button]],
+    inline_keyboard=[[main_menu_button]],
 )
 
 
-async def main_menu_inline_keyboard(
+async def main_menu_keyboard(
     repo: "UserRepository",
     user_id: int,
 ) -> "InlineKeyboardMarkup":
@@ -55,10 +55,10 @@ async def main_menu_inline_keyboard(
             callback_data=callback_data.pack(),
         )
 
-    keyboard.add(go_to_settings_button)
+    keyboard.add(settings_button)
 
-    if await repo.is_has_any_role(user_id, [Roles.SUPERADMIN, Roles.ADMIN]):
-        keyboard.add(go_to_admin_panel_button)
+    if await repo.is_has_any_role(user_id, Roles.all_roles()):
+        keyboard.add(admin_panel_button)
 
     keyboard.adjust(2, repeat=True)
 
@@ -70,7 +70,7 @@ async def start_reply_keyboard(
     user_id: int,
 ) -> "ReplyKeyboardMarkup":
     """Клавиатура с текстовыми кнопками после команды /start."""
-    inline_keyboard = await main_menu_inline_keyboard(repo, user_id)
+    inline_keyboard = await main_menu_keyboard(repo, user_id)
     reply_keyboard = ReplyKeyboardBuilder()
 
     for row in inline_keyboard.inline_keyboard:

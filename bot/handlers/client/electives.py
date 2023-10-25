@@ -4,7 +4,7 @@ from aiogram import F, Router
 from aiogram.filters import Command
 
 from bot.callbacks import OpenMenu
-from bot.keyboards import main_menu_inline_keyboard
+from bot.keyboards import main_menu_keyboard
 from bot.utils.enums import Menus, SlashCommands, TextCommands
 
 
@@ -37,5 +37,5 @@ async def electives_message_handler(
     """Обработчик команды "/electives"."""
     await message.answer(
         text="🥲",
-        reply_markup=await main_menu_inline_keyboard(repo.user, message.from_user.id),
+        reply_markup=await main_menu_keyboard(repo.user, message.from_user.id),
     )

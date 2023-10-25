@@ -3,8 +3,9 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import StateFilter
 
-from bot.callbacks import DoNotifyData, OpenMenu, StateData
-from bot.funcs.admin.admin_notifies import (
+from bot.callbacks import DoNotify, InStateData, OpenMenu
+from bot.filters import HasNotifyRole
+from bot.funcs.admin.notifies import (
     notify_confirm_func,
     notify_for_who_func,
     notify_message_func,
@@ -12,10 +13,10 @@ from bot.funcs.admin.admin_notifies import (
 from bot.keyboards import (
     admin_panel_keyboard,
     confirm_cancel_keyboard,
-    notify_panel_keyboard,
+    notify_menu_keyboard,
 )
 from bot.utils.enums import Actions, Menus
-from bot.utils.states import DoNotify
+from bot.utils.states import DoingNotify
 
 if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
@@ -25,6 +26,8 @@ if TYPE_CHECKING:
 
 
 router = Router(name=__name__)
+router.message.filter(HasNotifyRole())
+router.callback_query.filter(HasNotifyRole())
 
 
 @router.callback_query(OpenMenu.filter(F.menu == Menus.NOTIFY))
@@ -38,13 +41,13 @@ async def notify_panel_handler(callback: "CallbackQuery") -> None:
 <b>Класс</b> - для конкретного класса.
 """.strip()
 
-    await callback.message.edit_text(text=text, reply_markup=notify_panel_keyboard)
+    await callback.message.edit_text(text=text, reply_markup=notify_menu_keyboard)
 
 
-@router.callback_query(DoNotifyData.filter())
+@router.callback_query(DoNotify.filter())
 async def notify_for_who_handler(
     callback: "CallbackQuery",
-    callback_data: "DoNotifyData",
+    callback_data: "DoNotify",
     state: "FSMContext",
 ) -> None:
     """Обработчик нажатия одной из кнопок уведомления в панели уведомлений."""
@@ -57,7 +60,7 @@ async def notify_for_who_handler(
     await callback.message.edit_text(text=text, reply_markup=keyboard)
 
 
-@router.message(StateFilter(DoNotify.writing))
+@router.message(StateFilter(DoingNotify.writing))
 async def notify_message_handler(
     message: "Message",
     state: "FSMContext",
@@ -77,8 +80,8 @@ async def notify_message_handler(
 
 
 @router.callback_query(
-    StateData.filter(F.action == Actions.CONFIRM),
-    StateFilter(DoNotify.writing),
+    InStateData.filter(F.action == Actions.CONFIRM),
+    StateFilter(DoingNotify.writing),
 )
 async def notify_confirm_handler(
     callback: "CallbackQuery",

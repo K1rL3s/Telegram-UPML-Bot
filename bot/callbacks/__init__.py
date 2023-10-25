@@ -1,24 +1,26 @@
 from bot.callbacks.admin import (
-    AdminEditData,
-    AdminListData,
-    AdminManageData,
-    DoNotifyData,
-    EditLessonsData,
-    EditMealData,
+    AdminCheck,
+    AdminEditMenu,
+    AdminEditRole,
+    AdminList,
+    DoNotify,
+    EditLessons,
+    EditMeal,
 )
 from bot.callbacks.client import LaundryData, SettingsData
-from bot.callbacks.universal import OpenMenu, StateData
+from bot.callbacks.universal import InStateData, OpenMenu
 
 
 __all__ = (
-    "AdminEditData",
-    "AdminListData",
-    "AdminManageData",
-    "DoNotifyData",
-    "EditLessonsData",
-    "EditMealData",
+    "AdminCheck",
+    "AdminEditMenu",
+    "AdminEditRole",
+    "AdminList",
+    "DoNotify",
+    "EditLessons",
+    "EditMeal",
+    "InStateData",
     "LaundryData",
     "OpenMenu",
     "SettingsData",
-    "StateData",
 )
