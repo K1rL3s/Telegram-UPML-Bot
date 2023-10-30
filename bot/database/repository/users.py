@@ -101,9 +101,7 @@ class UserRepository(BaseRepository):
         :param user_id: Айди юзера.
         :param username: Имя пользователя.
         """
-        user = await self.get(user_id)
-
-        if user is None:
+        if (user := await self.get(user_id)) is None:
             user = User(user_id=user_id, username=username)
             self._session.add(user)
             logger.info("Новый пользователь {user}", user=user)

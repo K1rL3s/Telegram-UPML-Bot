@@ -39,7 +39,7 @@ async def do_one_notify(
         )
     except TelegramForbiddenError:
         await repo.update(user.user_id, is_active=False)
-        return True
+        return False
     except Exception as e:
         logger.warning(
             "Ошибка при уведомлении: {err} [{short_info}]",
@@ -86,12 +86,12 @@ async def do_admin_notify(
     """
     Делатель рассылки от администратора.
 
-    :param bot: ТГ Бот.
-    :param repo: Репозиторий пользователей.
     :param text: Сообщение администратора.
     :param users: Кому отправить сообщение.
     :param from_who: ТГ Айди отправителя (админа)
     :param for_who: Для кого рассылка.
+    :param bot: ТГ Бот.
+    :param repo: Репозиторий пользователей.
     """
     username = await username_by_user_id(bot, from_who)
     text = (

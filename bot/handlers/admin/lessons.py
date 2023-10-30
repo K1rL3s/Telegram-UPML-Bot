@@ -109,7 +109,7 @@ async def all_good_lessons_handler(
         callback.message.chat.id,
         callback.bot,
         state,
-        repo.lessons,
+        repo,
     )
 
     await callback.message.answer(
@@ -200,7 +200,7 @@ async def confirm_edit_lessons_handler(
         callback.message.chat.id,
         callback.bot,
         state,
-        repo.lessons,
+        repo,
     )
 
     await callback.message.answer(

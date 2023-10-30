@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import Union
+from typing import Optional
 
 from bot.settings import get_settings
 from bot.utils.consts import TODAY
@@ -8,9 +8,9 @@ from bot.utils.consts import TODAY
 # Смещение часового пояса по умолчанию, используется при работе бота.
 # В тестах всегда должно подставляться одинаковое значение.
 try:
-    default_timezone_offset = get_settings().other.timezone_offset
+    DEFAULT_TIMEZONE_OFFSET = get_settings().other.timezone_offset
 except KeyError:
-    default_timezone_offset = 0
+    DEFAULT_TIMEZONE_OFFSET = 0
 
 
 def format_date(date: "dt.date", with_year: bool = True) -> str:
@@ -36,8 +36,8 @@ def format_datetime(datetime: "dt.datetime") -> str:
 
 def date_by_format(
     date: str,
-    timezone_offset: int = default_timezone_offset,
-) -> "Union[dt.date, bool]":
+    timezone_offset: int = DEFAULT_TIMEZONE_OFFSET,
+) -> "Optional[dt.date]":
     """
     Конвертация отформатированной строки в дату.
 
@@ -57,7 +57,8 @@ def date_by_format(
 
         date_obj = dt.date(day=day, month=month, year=year)
     except ValueError:
-        return False
+        return None
+
     return date_obj
 
 
@@ -147,7 +148,7 @@ def weekday_by_date(date: "dt.date") -> str:
     )[date.weekday()]
 
 
-def get_this_week_monday(timezone_offset: int = default_timezone_offset) -> "dt.date":
+def get_this_week_monday(timezone_offset: int = DEFAULT_TIMEZONE_OFFSET) -> "dt.date":
     """
     Возвращает объект date с понедельником текущей недели.
 
@@ -158,7 +159,7 @@ def get_this_week_monday(timezone_offset: int = default_timezone_offset) -> "dt.
     return today - dt.timedelta(days=today.weekday())
 
 
-def datetime_now(timezone_offset: int = default_timezone_offset) -> "dt.datetime":
+def datetime_now(timezone_offset: int = DEFAULT_TIMEZONE_OFFSET) -> "dt.datetime":
     """
     Функция datetime.datetime.now, но в указанной в ``.env`` временной зоне.
 
@@ -170,7 +171,7 @@ def datetime_now(timezone_offset: int = default_timezone_offset) -> "dt.datetime
     ).replace(tzinfo=None)
 
 
-def date_today(timezone_offset: int = default_timezone_offset) -> "dt.date":
+def date_today(timezone_offset: int = DEFAULT_TIMEZONE_OFFSET) -> "dt.date":
     """
     Функция datetime.date.today, но в указанной в ``.env`` временной зоне.
 

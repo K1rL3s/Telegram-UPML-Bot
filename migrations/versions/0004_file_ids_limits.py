@@ -54,4 +54,3 @@ def downgrade() -> None:
     op.alter_column("class_lessons", "file_id", nullable=False)
     op.drop_column("class_lessons", "file_id")
     # ### end Alembic commands ###
-

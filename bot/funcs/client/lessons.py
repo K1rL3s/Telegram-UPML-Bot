@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from aiogram import Bot
 
     from bot.database.repository.repository import Repository
-    from bot.database.repository import LessonsRepository, SettingsRepository
 
 
 async def send_lessons_images(
@@ -35,12 +34,7 @@ async def send_lessons_images(
     :param repo: Доступ к базе данных.
     :return: Сообщение для пользователя.
     """
-    text, images = await get_lessons_for_user(
-        repo.settings,
-        repo.lessons,
-        user_id,
-        date,
-    )
+    text, images = await get_lessons_for_user(user_id, date, repo)
 
     if any(images):
         messages = await bot.send_media_group(
@@ -54,10 +48,9 @@ async def send_lessons_images(
 
 
 async def get_lessons_for_user(
-    settings_repo: "SettingsRepository",
-    lessons_repo: "LessonsRepository",
     user_id: int,
-    date: "dt.date" = None,
+    date: "dt.date",
+    repo: "Repository",
 ) -> tuple[str, list[str | None]]:
     """Возвращает сообщение о расписании уроков и айдишники фото.
 
@@ -65,24 +58,23 @@ async def get_lessons_for_user(
     Если класс не выбран, то список из двух айди с расписаниями параллелей.
     Если расписаний нет, то None.
 
-    :param settings_repo: Репозиторий настроек.
-    :param lessons_repo: Репозиторий расписаний уроков.
     :param user_id: Айди юзера.
     :param date: Дата расписания.
+    :param repo: Доступ к базе данных.
     :return: Сообщение и список с двумя айди изображений.
     """
-    settings = await settings_repo.get(user_id)
+    settings = await repo.settings.get(user_id)
 
     if settings.class_:
-        full_lessons = await lessons_repo.get(date, settings.grade)
-        class_lessons = await lessons_repo.get(date, settings.class_)  # noqa
+        full_lessons = await repo.full_lessons.get(date, settings.grade)
+        class_lessons = await repo.class_lessons.get(date, settings.class_)
         images = [
             getattr(full_lessons, "file_id", None),
             getattr(class_lessons, "file_id", None),
         ]
     else:
-        full_10_lessons = await lessons_repo.get(date, "10")
-        full_11_lessons = await lessons_repo.get(date, "11")
+        full_10_lessons = await repo.full_lessons.get(date, "10")
+        full_11_lessons = await repo.full_lessons.get(date, "11")
         images = [
             getattr(full_10_lessons, "file_id", None),
             getattr(full_11_lessons, "file_id", None),

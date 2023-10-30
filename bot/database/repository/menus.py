@@ -4,6 +4,7 @@ from sqlalchemy import select
 
 from bot.database.models.menus import Menu
 from bot.database.repository.base_repo import BaseRepository
+from bot.utils.datehelp import date_today, get_this_week_monday
 from bot.utils.translate import CAFE_MENU_TRANSLATE
 
 
@@ -82,3 +83,13 @@ class MenuRepository(BaseRepository):
         meals[meal] = new_menu
 
         await self.save_or_update_to_db(date=date, edit_by=edit_by, **meals)
+
+    async def is_filled_on_today(self) -> bool:
+        """
+        Заполнено ли расписание еды на сегодня (неделю).
+
+        :return: Бул.
+        """
+        monday_menu = await self.get(get_this_week_monday())
+        today_menu = await self.get(date_today())
+        return bool(monday_menu or today_menu)

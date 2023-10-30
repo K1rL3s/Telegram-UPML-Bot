@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from aiogram import Bot
     from aiogram.fsm.context import FSMContext
 
-    from bot.database.repository import LessonsRepository
+    from bot.database.repository.repository import Repository
 
 
 async def process_lessons_album_func(
@@ -55,7 +55,7 @@ async def all_good_lessons_func(
     chat_id: int,
     bot: "Bot",
     state: "FSMContext",
-    repo: "LessonsRepository",
+    repo: "Repository",
 ) -> str:
     """
     Обработка кнопки "Подтвердить" при всех верных расписаниях.
@@ -76,7 +76,7 @@ async def all_good_lessons_func(
             lesson.class_photos,
             bot,
         )
-        await repo.save_prepared_to_db(lesson)
+        await repo.save_lessons_collection_to_db(lesson)
 
     await state.clear()
 
@@ -196,7 +196,7 @@ async def confirm_edit_lessons_func(
     chat_id: int,
     bot: "Bot",
     state: "FSMContext",
-    repo: "LessonsRepository",
+    repo: "Repository",
 ) -> str:
     """
     Обработка подтверждения сохранения нераспознанных расписаний.
@@ -210,7 +210,7 @@ async def confirm_edit_lessons_func(
     for lesson in [
         LessonsCollection(**kwargs) for kwargs in (await state.get_data())["lessons"]
     ]:
-        await repo.delete_class_lessons(
+        await repo.class_lessons.delete(
             date_by_format(lesson.date),
             lesson.grade,
         )
@@ -219,7 +219,7 @@ async def confirm_edit_lessons_func(
             lesson.class_photos,
             bot,
         )
-        await repo.save_prepared_to_db(lesson)
+        await repo.save_lessons_collection_to_db(lesson)
 
     await state.clear()
 
