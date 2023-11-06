@@ -8,7 +8,6 @@ from bot.filters import IsSuperAdmin
 from bot.funcs.admin.manage import (
     admins_list_func,
     check_admin_roles_func,
-    edit_role_action_func,
     edit_role_choose_role_func,
     edit_role_confirm_func,
     edit_role_confirm_sure_func,
@@ -64,7 +63,7 @@ async def admin_check_roles_handler(
 
 
 @router.callback_query(
-    AdminEditRole.filter(F.action == Actions.EDIT),
+    AdminEditRole.filter(F.role.is_not(None)),
     AdminEditRole.filter(F.user_id.is_not(None)),
 )
 async def edit_roles_directly_handler(
@@ -89,7 +88,6 @@ async def edit_roles_directly_handler(
 
 @router.callback_query(
     AdminEditRole.filter(F.action == Actions.EDIT),
-    AdminEditRole.filter(F.role.is_(None)),
     AdminEditRole.filter(F.user_id.is_(None)),
 )
 async def edit_roles_handler(
@@ -110,33 +108,19 @@ async def edit_roles_username_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик сообщения с юзернеймом, которому хотят изменить роли."""
-    text, keyboard = await edit_role_username_func(message.text, state, repo.user)
+    text, keyboard = await edit_role_username_func(
+        message.text,
+        state,
+        repo.user,
+    )
 
     await message.answer(text=text, reply_markup=keyboard)
     await message.delete()
 
 
-@router.callback_query(StateFilter(EditingRoles.action), AdminEditRole.filter())
-async def edit_roles_action_handler(
-    callback: "CallbackQuery",
-    callback_data: "AdminEditRole",
-    state: "FSMContext",
-    repo: "Repository",
-) -> None:
-    """Обработчик кнопок действия с ролями (добавить или удалить)."""
-    text, keyboard = await edit_role_action_func(
-        callback_data.action,
-        callback.message.message_id,
-        state,
-        repo.user,
-        repo.role,
-    )
-    await callback.message.edit_text(text=text, reply_markup=keyboard)
-
-
 @router.callback_query(
     StateFilter(EditingRoles.roles),
-    AdminEditRole.filter(F.role.is_not(None)),
+    AdminEditRole.filter(F.user_id.is_(None)),
 )
 async def edit_roles_choose_role_handler(
     callback: "CallbackQuery",
@@ -144,14 +128,12 @@ async def edit_roles_choose_role_handler(
     state: "FSMContext",
 ) -> None:
     """Обработчик кнопок с ролями при редактировании ролей пользователя."""
-    text, keyboard, message_id = await edit_role_choose_role_func(
+    text, keyboard = await edit_role_choose_role_func(
         callback_data.role,
         state,
     )
-    await callback.bot.edit_message_text(
+    await callback.message.edit_text(
         text=text,
-        chat_id=callback.message.chat.id,
-        message_id=message_id,
         reply_markup=keyboard,
     )
 
@@ -165,11 +147,9 @@ async def edit_roles_confirm_handler(
     state: "FSMContext",
 ) -> None:
     """Обработчик кнопки "Подтвердить" при добавлении админа."""
-    text, keyboard, message_id = await edit_role_confirm_func(state)
-    await callback.bot.edit_message_text(
+    text, keyboard = await edit_role_confirm_func(state)
+    await callback.message.edit_text(
         text=text,
-        chat_id=callback.message.chat.id,
-        message_id=message_id,
         reply_markup=keyboard,
     )
 
@@ -183,11 +163,9 @@ async def edit_roles_confirm_sure_handler(
     state: "FSMContext",
     repo: "Repository",
 ) -> None:
-    """Обработчик кнопки "Подтвердить" при добавлении админа."""
-    text, message_id = await edit_role_confirm_sure_func(state, repo)
-    await callback.bot.edit_message_text(
+    """Обработчик кнопки "Подтвердить" при добавлении админа, точное подтверждение."""
+    text = await edit_role_confirm_sure_func(state, repo.user_role)
+    await callback.message.edit_text(
         text=text,
-        chat_id=callback.message.chat.id,
-        message_id=message_id,
         reply_markup=await admin_panel_keyboard(repo.user, callback.from_user.id),
     )

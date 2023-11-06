@@ -23,7 +23,7 @@ class AdminCheck(CallbackData, prefix="admin_check"):
 class AdminEditRole(CallbackData, prefix="admin_role"):
     """Фабрика для редактирования ролей."""
 
-    action: str
+    action: str | None = None
     role: str | None = None
     user_id: int | None = None
 

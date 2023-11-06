@@ -4,6 +4,7 @@ from bot.database.repository.lessons import LessonsRepository
 from bot.database.repository.menus import MenuRepository
 from bot.database.repository.roles import RoleRepository
 from bot.database.repository.settings import SettingsRepository
+from bot.database.repository.user_role import UserRoleRepository
 from bot.database.repository.users import UserRepository
 
 
@@ -15,4 +16,5 @@ __all__ = (
     "RoleRepository",
     "SettingsRepository",
     "UserRepository",
+    "UserRoleRepository",
 )
