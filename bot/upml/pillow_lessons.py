@@ -8,6 +8,7 @@ from PIL import Image
 from bot.utils.datehelp import date_today
 
 if TYPE_CHECKING:
+    # noinspection PyUnresolvedReferences
     from PIL.PyAccess import PyAccess
 
     from bot.types import LessonsProcess
@@ -81,7 +82,7 @@ def __y_first_horizontal_line(image: "Image.Image") -> int:
     :return: Высота первой чёрной полосы.
     """
     width, height = image.size
-    pixels = cast(PyAccess, image.load())
+    pixels = cast("PyAccess", image.load())
 
     x, y = width // 2, 0
     while y < height and not __is_pixel_black(pixels[x, y]):

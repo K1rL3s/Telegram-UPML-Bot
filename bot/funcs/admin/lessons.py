@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from aiogram.types import InlineKeyboardMarkup, InputMediaPhoto
 
+from bot.database.repository import ClassLessonsRepository, FullLessonsRepository
 from bot.keyboards import (
     cancel_state_keyboard,
     choose_parallel_keyboard,
@@ -76,7 +77,11 @@ async def all_good_lessons_func(
             lesson.class_photos,
             bot,
         )
-        await repo.save_lessons_collection_to_db(lesson)
+        await save_lessons_collection_to_db(
+            lesson,
+            repo.full_lessons,
+            repo.class_lessons,
+        )
 
     await state.clear()
 
@@ -219,8 +224,38 @@ async def confirm_edit_lessons_func(
             lesson.class_photos,
             bot,
         )
-        await repo.save_lessons_collection_to_db(lesson)
+        await save_lessons_collection_to_db(
+            lesson,
+            repo.full_lessons,
+            repo.class_lessons,
+        )
 
     await state.clear()
 
     return "Успешно!"
+
+
+async def save_lessons_collection_to_db(
+    lesson: "LessonsCollection",
+    full_lessons: "FullLessonsRepository",
+    class_lessons: "ClassLessonsRepository",
+) -> None:
+    """
+    Сохраняет заполненный LessonsCollection в базу данных.
+
+    :param lesson: LessonsCollection.
+    :param full_lessons: Репозиторий полных уроков.
+    :param class_lessons: Репозиторий уроков для класса.
+    """
+    await full_lessons.save_or_update_to_db(
+        lesson.full_photo_id,
+        date_by_format(lesson.date),
+        lesson.grade,
+    )
+    for photo_id, letter in zip(lesson.class_photo_ids, "АБВ"):
+        await class_lessons.save_or_update_to_db(
+            photo_id,
+            date_by_format(lesson.date),
+            lesson.grade,
+            letter,
+        )

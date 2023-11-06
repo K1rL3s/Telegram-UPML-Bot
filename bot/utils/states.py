@@ -37,7 +37,6 @@ class EditingRoles(StatesGroup):
     """Админские состояния для добавляения нового админа."""
 
     username = State()
-    action = State()
     roles = State()
     confirm = State()
 
