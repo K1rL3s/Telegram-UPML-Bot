@@ -1,0 +1,33 @@
+exclude = [
+    ".idea",
+    ".git",
+    ".ruff_cache",
+    "venv",
+    "__pycache__",
+]
+
+line-length = 88
+indent-width = 4
+target-version = "py311"
+
+[lint]
+select = [
+    "E", # pycodestyle
+    "F", # Pyflakes
+    "UP", # pyupgrade
+    "B", # flake8-bugbear
+    "SIM", # flake8-simplify
+    "I", # isort
+]
+ignore = [
+    "UP007", # Use `X | Y` for type annotations
+    "B905", # `zip()` without an explicit `strict=` parameter
+]
+fixable = ["ALL"]
+unfixable = []
+
+[format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

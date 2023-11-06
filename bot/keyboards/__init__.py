@@ -26,7 +26,6 @@ from bot.keyboards.client.start import (
 )
 from bot.keyboards.universal import cancel_state_keyboard, confirm_cancel_keyboard
 
-
 __all__ = (
     "admin_panel_keyboard",
     "admins_list_keyboard",

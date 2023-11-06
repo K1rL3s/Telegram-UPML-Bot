@@ -1,7 +1,7 @@
 import datetime as dt
 
 from sqlalchemy import Boolean, ForeignKey, Integer, String, Time
-from sqlalchemy.orm import column_property, Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, column_property, mapped_column, relationship
 
 from bot.database.base import UserRelatedModel
 

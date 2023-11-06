@@ -1,4 +1,4 @@
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from bot.database.repository.repository import Repository
 from bot.upml.save_cafe_menu import process_cafe_menu

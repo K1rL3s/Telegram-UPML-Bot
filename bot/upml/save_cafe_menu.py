@@ -1,14 +1,14 @@
 import asyncio
 import datetime as dt
 from io import BytesIO
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from aiohttp import ClientSession, ClientTimeout
 from loguru import logger
 from pypdf import PdfReader
 
-from bot.utils.translate import CAFE_MENU_TRANSLATE
 from bot.utils.datehelp import format_date, get_this_week_monday
+from bot.utils.translate import CAFE_MENU_TRANSLATE
 
 if TYPE_CHECKING:
     from bot.database.repository import MenuRepository

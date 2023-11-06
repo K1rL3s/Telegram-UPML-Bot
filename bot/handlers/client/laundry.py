@@ -10,8 +10,8 @@ from bot.funcs.client.laundry import (
     laundry_start_timer_func,
 )
 from bot.keyboards import go_to_main_menu_keyboard
-from bot.utils.enums import Actions, Menus, SlashCommands, TextCommands
 from bot.utils.datehelp import format_datetime
+from bot.utils.enums import Actions, Menus, SlashCommands, TextCommands
 
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message

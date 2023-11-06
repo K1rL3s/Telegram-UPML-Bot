@@ -5,7 +5,6 @@ from bot.callbacks import EditLessons
 from bot.keyboards.universal import cancel_state_button
 from bot.utils.enums import Grades
 
-
 GRADE_10 = "10 классы"
 GRADE_11 = "11 классы"
 

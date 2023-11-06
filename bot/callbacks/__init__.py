@@ -10,7 +10,6 @@ from bot.callbacks.admin import (
 from bot.callbacks.client import LaundryData, SettingsData
 from bot.callbacks.universal import InStateData, OpenMenu
 
-
 __all__ = (
     "AdminCheck",
     "AdminEditMenu",

@@ -1,7 +1,7 @@
 from typing import Any
 
 from sqlalchemy import MetaData
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, Mapped
 from sqlalchemy.orm.exc import DetachedInstanceError
 
 
@@ -53,4 +53,4 @@ class UserRelatedModel(AlchemyBaseModel):
 
     __abstract__ = True
 
-    user_id: int
+    user_id: Mapped[int]

@@ -1,7 +1,6 @@
-from typing import Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from bot.keyboards import cancel_state_keyboard, settings_keyboard
-from bot.utils.translate import LAUNDRY_TIMERS_TRANSLATE
 from bot.utils.datehelp import (
     format_time,
     hours_minutes_to_minutes,
@@ -11,12 +10,13 @@ from bot.utils.datehelp import (
 from bot.utils.enums import UserCallback
 from bot.utils.funcs import laundry_limit_min_max
 from bot.utils.phrases import DONT_UNDERSTAND_TIMER, YES
+from bot.utils.translate import LAUNDRY_TIMERS_TRANSLATE
 
 if TYPE_CHECKING:
     import datetime as dt
 
-    from aiogram.types import InlineKeyboardMarkup
     from aiogram.fsm.context import FSMContext
+    from aiogram.types import InlineKeyboardMarkup
 
     from bot.database.repository import SettingsRepository
 
@@ -67,7 +67,7 @@ async def edit_grade_setting_func(
 
 async def edit_laundry_time_func(
     user_id: int,
-    attr: "Literal[UserCallback.WASHING, UserCallback.DRYING]",
+    attr: str,
     text: str,
     state: "FSMContext",
     repo: "SettingsRepository",
@@ -101,7 +101,7 @@ async def edit_laundry_time_func(
 async def _edit_time_laundry(
     time: "dt.time",
     user_id: int,
-    attr: "Literal[UserCallback.WASHING, UserCallback.DRYING]",
+    attr: str,
     repo: "SettingsRepository",
 ) -> str:
     """
@@ -124,7 +124,7 @@ async def _edit_time_laundry(
 async def _edit_minutes_laundry(
     minutes: int,
     user_id: int,
-    attr: "Literal[UserCallback.WASHING, UserCallback.DRYING]",
+    attr: str,
     repo: "SettingsRepository",
 ) -> str:
     """

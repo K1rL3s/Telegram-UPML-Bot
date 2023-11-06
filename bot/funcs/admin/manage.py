@@ -12,13 +12,12 @@ from bot.utils.funcs import name_link
 from bot.utils.states import EditingRoles
 from bot.utils.translate import ACTIONS_TRANSLATE, ROLES_TRANSLATE
 
-
 if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
     from aiogram.types import InlineKeyboardMarkup
 
-    from bot.database.repository.repository import Repository
     from bot.database.repository import RoleRepository, UserRepository
+    from bot.database.repository.repository import Repository
 
 
 async def admins_list_func(

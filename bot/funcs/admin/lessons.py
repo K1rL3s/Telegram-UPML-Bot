@@ -2,12 +2,12 @@ from typing import TYPE_CHECKING
 
 from aiogram.types import InlineKeyboardMarkup, InputMediaPhoto
 
-from bot.types import Album, LessonsCollection
 from bot.keyboards import (
     cancel_state_keyboard,
     choose_parallel_keyboard,
     confirm_cancel_keyboard,
 )
+from bot.types import Album, LessonsCollection
 from bot.upml.album_lessons import tesseract_lessons
 from bot.utils.datehelp import date_by_format, format_date, weekday_by_date
 from bot.utils.funcs import multi_bytes_to_ids

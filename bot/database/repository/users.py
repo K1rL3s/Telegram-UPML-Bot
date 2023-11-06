@@ -1,10 +1,9 @@
 from enum import Enum
-from typing import Any, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
-from loguru import logger
 import sqlalchemy as sa
-
-from sqlalchemy.orm import Mapped, MappedColumn, selectinload
+from loguru import logger
+from sqlalchemy.orm import MappedColumn, selectinload
 
 from bot.database.models.roles import Role
 from bot.database.models.settings import Settings
@@ -35,7 +34,7 @@ class UserRepository(BaseRepository):
 
     async def get_by_conditions(
         self,
-        values: "list[tuple[Union[MappedColumn, Mapped], Any]]",
+        values: "list[tuple[MappedColumn[Any], Any]]",
         or_mode: bool = False,
     ) -> list["User"]:
         """
@@ -48,8 +47,8 @@ class UserRepository(BaseRepository):
         :return: Список юзеров.
         """
         conditions = [column == value for column, value in values]  # !! [] ?
-        conditions = sa.or_(*conditions) if or_mode else sa.and_(*conditions)
-        query = sa.select(User).join(Settings).where(conditions)
+        query_conditions = sa.or_(*conditions) if or_mode else sa.and_(*conditions)
+        query = sa.select(User).join(Settings).where(query_conditions)
 
         return list((await self._session.scalars(query)).all())
 

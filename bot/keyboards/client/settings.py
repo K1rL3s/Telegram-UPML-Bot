@@ -13,7 +13,6 @@ from bot.utils.datehelp import format_time
 from bot.utils.enums import Actions, Menus, UserCallback
 from bot.utils.phrases import NO, QUESTION, YES
 
-
 if TYPE_CHECKING:
     from bot.database.repository import SettingsRepository
 

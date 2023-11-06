@@ -1,4 +1,4 @@
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import select
 
@@ -6,7 +6,6 @@ from bot.database.models.menus import Menu
 from bot.database.repository.base_repo import BaseRepository
 from bot.utils.datehelp import date_today, get_this_week_monday
 from bot.utils.translate import CAFE_MENU_TRANSLATE
-
 
 if TYPE_CHECKING:
     import datetime as dt

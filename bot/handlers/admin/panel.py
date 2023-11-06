@@ -4,8 +4,8 @@ from aiogram import F, Router
 
 from bot.callbacks import OpenMenu
 from bot.keyboards import admin_panel_keyboard
-from bot.utils.phrases import ADMIN_START_TEXT
 from bot.utils.enums import Menus, TextCommands
+from bot.utils.phrases import ADMIN_START_TEXT
 
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message

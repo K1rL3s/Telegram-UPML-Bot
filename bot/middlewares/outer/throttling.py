@@ -1,5 +1,5 @@
 """Source: https://github.com/wakaree/simple_echo_bot."""
-from typing import Any, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Union
 
 from cachetools import TTLCache
 

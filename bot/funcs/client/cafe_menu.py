@@ -3,9 +3,9 @@ from typing import TYPE_CHECKING
 from cachetools.func import ttl_cache
 
 from bot.utils.consts import BEAUTIFY_MEALS
-from bot.utils.translate import CAFE_MENU_TRANSLATE
+from bot.utils.datehelp import format_date, weekday_by_date
 from bot.utils.phrases import NO_DATA
-from bot.utils.datehelp import date_today, format_date, weekday_by_date
+from bot.utils.translate import CAFE_MENU_TRANSLATE
 
 if TYPE_CHECKING:
     import datetime as dt
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 # @ttl_cache(ttl=60 * 60)  # Час
 async def get_format_menu_by_date(
     repo: "MenuRepository",
-    date: "dt.date" = None,
+    date: "dt.date",
 ) -> str:
     """Возвращает меню по дате.
 
@@ -26,9 +26,6 @@ async def get_format_menu_by_date(
     :param date: Нужная дата.
     :return: Готовое сообщение для телеги.
     """
-    if date is None:
-        date = date_today()
-
     menu = await repo.get(date)
 
     meals = tuple(

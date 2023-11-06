@@ -1,4 +1,6 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Union
+
+from sqlalchemy.orm import Mapped, MappedColumn
 
 from bot.database.models.settings import Settings
 from bot.database.models.users import User
@@ -22,7 +24,9 @@ async def get_users_for_notify(
     :param is_lessons: Уведомление об изменении расписания.
     :param is_news: Уведомление о новостях (ручная рассылка).
     """
-    conditions = [(User.is_active, True)]
+    conditions: "list[tuple[Union[MappedColumn, Mapped], Any]]" = [
+        (User.is_active, True)
+    ]
 
     if is_lessons:
         conditions.append((Settings.lessons_notify, True))

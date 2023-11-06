@@ -1,4 +1,4 @@
-from typing import Any, Final, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Final
 
 from aiogram import BaseMiddleware
 
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
 
     from aiogram.types import TelegramObject
-    from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 
 class RepositoryMiddleware(BaseMiddleware):

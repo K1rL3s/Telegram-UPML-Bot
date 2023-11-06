@@ -67,10 +67,10 @@ class Repository:
             role = role.value
 
         user = await self.user.get(user_id)
-        role = await self.role.get(role)
+        role_model = await self.role.get(role)
 
         with contextlib.suppress(ValueError):
-            user.roles.remove(role)
+            user.roles.remove(role_model)
 
         await self._session.flush()
 

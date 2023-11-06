@@ -1,7 +1,7 @@
 import datetime as dt
 
 from sqlalchemy import Date, Integer, String
-from sqlalchemy.orm import column_property, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, column_property, mapped_column
 
 from bot.database.base import AlchemyBaseModel
 

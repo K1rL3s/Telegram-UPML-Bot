@@ -1,7 +1,7 @@
 import datetime as dt
 from typing import TYPE_CHECKING
 
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from bot.database.repository.repository import Repository
 from bot.funcs.client.laundry import laundry_cancel_timer_func

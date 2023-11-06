@@ -4,14 +4,14 @@ Revision ID: 0001
 Revises:
 Create Date: 2023-08-12 01:48:40.873630
 """
-from typing import Sequence, Union
+from collections.abc import Sequence
+from typing import Union
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 from bot.database.models import Role
 from bot.utils.enums import Roles
-
 
 # revision identifiers, used by Alembic.
 revision: str = "0001"

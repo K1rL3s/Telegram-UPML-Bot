@@ -4,7 +4,6 @@ from typing import Optional
 from bot.settings import get_settings
 from bot.utils.consts import TODAY
 
-
 # Смещение часового пояса по умолчанию, используется при работе бота.
 # В тестах всегда должно подставляться одинаковое значение.
 try:

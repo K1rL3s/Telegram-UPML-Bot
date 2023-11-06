@@ -6,7 +6,6 @@ from aiogram.types import InputMediaPhoto
 
 from bot.callbacks import AdminEditMenu, EditLessons, InStateData
 from bot.filters import HasLessonsRole
-from bot.types import Album
 from bot.funcs.admin.lessons import (
     all_good_lessons_func,
     choose_dates_func,
@@ -21,6 +20,7 @@ from bot.keyboards import (
     confirm_cancel_keyboard,
     go_to_main_menu_keyboard,
 )
+from bot.types import Album
 from bot.utils.enums import Actions, Menus
 from bot.utils.states import EditingLessons
 
@@ -28,8 +28,8 @@ if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
     from aiogram.types import CallbackQuery, Message
 
-    from bot.settings import Settings
     from bot.database.repository.repository import Repository
+    from bot.settings import Settings
 
 
 router = Router(name=__name__)

@@ -1,6 +1,6 @@
 import datetime as dt
 from math import ceil
-from typing import Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from bot.keyboards import laundry_keyboard
 from bot.utils.consts import REPEAT_LAUNDRY_TIMER
@@ -11,7 +11,6 @@ if TYPE_CHECKING:
 
     from bot.database.models.laundries import Laundry
     from bot.database.repository import LaundryRepository, SettingsRepository
-    from bot.utils.enums import UserCallback
 
 
 async def laundry_func(
@@ -62,7 +61,7 @@ async def laundry_start_timer_func(
     settings_repo: "SettingsRepository",
     laundry_repo: "LaundryRepository",
     user_id: int,
-    attr: "Literal[UserCallback.WASHING, UserCallback.DRYING]",
+    attr: str,
 ) -> tuple[int, "dt.datetime"]:
     """
     Логика обработки кнопок "Запустить стирку" и "Запустить сушку".

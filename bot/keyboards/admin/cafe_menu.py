@@ -9,7 +9,6 @@ from bot.keyboards.universal import cancel_state_button
 from bot.utils.consts import BEAUTIFY_MEALS
 from bot.utils.enums import Meals
 
-
 choose_meal_keyboard: "InlineKeyboardMarkup" = (
     InlineKeyboardBuilder()
     .add(

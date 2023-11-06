@@ -1,5 +1,4 @@
 import datetime as dt
-
 from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, Boolean, DateTime, Integer, String

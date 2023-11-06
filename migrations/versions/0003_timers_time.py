@@ -5,11 +5,11 @@ Revises: 0002
 Create Date: 2023-09-16 22:00:57.407299
 
 """
-from typing import Sequence, Union
+from collections.abc import Sequence
+from typing import Union
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "0003"
@@ -31,8 +31,8 @@ def upgrade() -> None:
 
     op.execute(
         """
-    UPDATE settings 
-    SET washing_minutes = washing_time, 
+    UPDATE settings
+    SET washing_minutes = washing_time,
         drying_minutes = drying_time;
     """
     )
@@ -79,8 +79,8 @@ def downgrade() -> None:
 
     op.execute(
         """
-    UPDATE settings 
-    SET washing_time = washing_minutes, 
+    UPDATE settings
+    SET washing_time = washing_minutes,
         drying_time = drying_minutes;
     """
     )

@@ -2,14 +2,14 @@
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from bot.middlewares.session.request import RetryRequestMiddleware
-from bot.middlewares.outer.logging import LoggingMiddleware
-from bot.middlewares.outer.callback_answer import CallbackAnswerMiddleware
-from bot.middlewares.outer.throttling import ThrottlingMiddleware
-from bot.middlewares.outer.repository import RepositoryMiddleware
 from bot.middlewares.outer.album import AlbumsMiddleware
+from bot.middlewares.outer.callback_answer import CallbackAnswerMiddleware
+from bot.middlewares.outer.logging import LoggingMiddleware
+from bot.middlewares.outer.repository import RepositoryMiddleware
+from bot.middlewares.outer.throttling import ThrottlingMiddleware
+from bot.middlewares.session.request import RetryRequestMiddleware
 
 if TYPE_CHECKING:
     from aiogram import Bot, Dispatcher

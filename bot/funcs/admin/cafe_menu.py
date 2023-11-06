@@ -1,16 +1,16 @@
 from typing import TYPE_CHECKING
 
 from bot.keyboards import cancel_state_keyboard, choose_meal_keyboard
-from bot.utils.translate import CAFE_MENU_TRANSLATE
 from bot.utils.datehelp import date_by_format, date_today, format_date, weekday_by_date
 from bot.utils.phrases import NO, NO_DATA
 from bot.utils.states import EditingMenu
+from bot.utils.translate import CAFE_MENU_TRANSLATE
 
 if TYPE_CHECKING:
     import datetime as dt
 
-    from aiogram.types import InlineKeyboardMarkup
     from aiogram.fsm.context import FSMContext
+    from aiogram.types import InlineKeyboardMarkup
 
     from bot.database.repository import MenuRepository
 

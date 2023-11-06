@@ -52,7 +52,7 @@ async def admins_list_handler(
 @router.callback_query(AdminCheck.filter())
 async def admin_check_roles_handler(
     callback: "CallbackQuery",
-    callback_data: "AdminEditRole",
+    callback_data: "AdminCheck",
     repo: "Repository",
 ) -> None:
     """Обработчик кнопки с юзернеймом админа в списке админов."""

@@ -7,7 +7,6 @@ from bot.database.repository.roles import RoleRepository
 from bot.database.repository.settings import SettingsRepository
 from bot.database.repository.users import UserRepository
 
-
 __all__ = (
     "ClassLessonsRepository",
     "EducatorsScheduleRepository",
