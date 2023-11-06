@@ -1,17 +1,16 @@
 from typing import TYPE_CHECKING
 
-from bot.funcs.admin.admin import get_meal_by_date
 from bot.keyboards import cancel_state_keyboard, choose_meal_keyboard
-from bot.utils.translate import CAFE_MENU_TRANSLATE
 from bot.utils.datehelp import date_by_format, date_today, format_date, weekday_by_date
-from bot.utils.phrases import NO
+from bot.utils.phrases import NO, NO_DATA
 from bot.utils.states import EditingMenu
+from bot.utils.translate import CAFE_MENU_TRANSLATE
 
 if TYPE_CHECKING:
     import datetime as dt
 
-    from aiogram.types import InlineKeyboardMarkup
     from aiogram.fsm.context import FSMContext
+    from aiogram.types import InlineKeyboardMarkup
 
     from bot.database.repository import MenuRepository
 
@@ -19,7 +18,7 @@ if TYPE_CHECKING:
 async def edit_cafe_menu_start_func(
     message_id: int,
     state: "FSMContext",
-) -> tuple[str, "InlineKeyboardMarkup"]:
+) -> str:
     """
     Обрабочтки кнопки "Изменить меню".
 
@@ -27,15 +26,13 @@ async def edit_cafe_menu_start_func(
     :param state: Состояние пользователя.
     :return: Сообщение и клавиатура для пользователя.
     """
-    text = f"""
-Введите дату дня, меню которого хотите изменить в формате <b>ДД.ММ.ГГГГ</b>
-Например, <code>{format_date(date_today())}</code>
-""".strip()
-
     await state.set_state(EditingMenu.choose_date)
     await state.update_data(start_id=message_id)
 
-    return text, cancel_state_keyboard
+    return f"""
+Введите дату дня, меню которого хотите изменить в формате <b>ДД.ММ.ГГГГ</b>
+Например, <code>{format_date(date_today())}</code>
+""".strip()
 
 
 async def edit_cafe_menu_date_func(
@@ -83,7 +80,7 @@ async def edit_cafe_menu_meal_func(
 
     edit_date: "dt.date" = date_by_format(data["edit_date"])
     meal = CAFE_MENU_TRANSLATE[edit_meal].capitalize()
-    menu = await get_meal_by_date(repo, edit_meal, edit_date)
+    menu = getattr(await repo.get(edit_date), meal, None) or NO_DATA
 
     return (
         f"<b>Дата</b>: <code>{format_date(edit_date)}</code> "

@@ -4,14 +4,12 @@ from bot.keyboards import (
     admins_list_keyboard,
     cancel_state_keyboard,
     check_admin_roles_keyboard,
-    confirm_cancel_keyboard,
     edit_roles_keyboard,
 )
 from bot.utils.enums import Roles
 from bot.utils.funcs import name_link
 from bot.utils.states import EditingRoles
 from bot.utils.translate import ROLES_TRANSLATE
-
 
 if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
@@ -145,9 +143,7 @@ async def edit_role_choose_role_func(
     )
 
 
-async def edit_role_confirm_func(
-    state: "FSMContext",
-) -> tuple[str, "InlineKeyboardMarkup"]:
+async def edit_role_confirm_func(state: "FSMContext") -> str:
     """
     Обработчик кнопки "Подтвердить" при изменении ролей.
 
@@ -166,8 +162,7 @@ async def edit_role_confirm_func(
     )
     return (
         f"Вы уверены, что у {name_link(username, user_id)} будут роль(-и):\n"
-        f"{foramtted_roles} ?",
-        confirm_cancel_keyboard,
+        f"{foramtted_roles} ?"
     )
 
 

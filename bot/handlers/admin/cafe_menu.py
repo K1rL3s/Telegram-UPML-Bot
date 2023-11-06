@@ -9,6 +9,7 @@ from bot.funcs.admin.cafe_menu import (
     edit_cafe_menu_confirm_func,
     edit_cafe_menu_date_func,
     edit_cafe_menu_meal_func,
+    edit_cafe_menu_start_func,
     edit_cafe_menu_text_func,
 )
 from bot.keyboards import (
@@ -18,15 +19,14 @@ from bot.keyboards import (
 )
 from bot.upml.save_cafe_menu import process_cafe_menu
 from bot.utils.enums import Actions, Meals, Menus
-from bot.utils.datehelp import date_today, format_date
 from bot.utils.states import EditingMenu
 
 if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
     from aiogram.types import CallbackQuery, Message
 
-    from bot.settings import Settings
     from bot.database.repository.repository import Repository
+    from bot.settings import Settings
 
 
 router = Router(name=__name__)
@@ -44,8 +44,7 @@ async def auto_update_cafe_menu_handler(
 
     Загружает и обрабатывает PDF расписание еды с сайта лицея.
     """
-    _, text = await process_cafe_menu(repo.menu, settings.other.timeout)
-
+    text = await process_cafe_menu(repo.menu, settings.other.timeout)
     await callback.message.edit_text(
         text=text,
         reply_markup=await admin_panel_keyboard(repo.user, callback.from_user.id),
@@ -57,15 +56,8 @@ async def edit_cafe_menu_start_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
 ) -> None:
-    """Обрабочтки кнопки "Изменить меню"."""
-    text = f"""
-Введите дату дня, меню которого хотите изменить в формате <b>ДД.ММ.ГГГГ</b>
-Например, <code>{format_date(date_today())}</code>
-""".strip()
-
-    await state.set_state(EditingMenu.choose_date)
-    await state.update_data(start_id=callback.message.message_id)
-
+    """Обработчик кнопки "Изменить меню"."""
+    text = await edit_cafe_menu_start_func(callback.message.message_id, state)
     await callback.message.edit_text(text=text, reply_markup=cancel_state_keyboard)
 
 

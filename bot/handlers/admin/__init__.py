@@ -7,7 +7,6 @@
 from aiogram import Router
 
 from bot.filters.roles import HasAnyRole
-
 from bot.handlers.admin import (
     cafe_menu,
     educators,
@@ -17,7 +16,6 @@ from bot.handlers.admin import (
     notifies,
     panel,
 )
-
 
 admin_router = Router(name=__name__)
 admin_router.message.filter(HasAnyRole())

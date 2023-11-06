@@ -1,16 +1,13 @@
 from typing import TYPE_CHECKING
 
-from bot.funcs.admin.admin import get_educators_schedule_by_date
-from bot.keyboards import cancel_state_keyboard
 from bot.utils.datehelp import date_by_format, date_today, format_date
-from bot.utils.phrases import DONT_UNDERSTAND_DATE
+from bot.utils.phrases import DONT_UNDERSTAND_DATE, NO_DATA
 from bot.utils.states import EditingEducators
 
 if TYPE_CHECKING:
     import datetime as dt
 
     from aiogram.fsm.context import FSMContext
-    from aiogram.types import InlineKeyboardMarkup
 
     from bot.database.repository import EducatorsScheduleRepository
 
@@ -18,7 +15,7 @@ if TYPE_CHECKING:
 async def edit_educators_start_func(
     message_id: int,
     state: "FSMContext",
-) -> tuple[str, "InlineKeyboardMarkup"]:
+) -> str:
     """
     Обработчик кнопки "Изменить меню".
 
@@ -26,15 +23,13 @@ async def edit_educators_start_func(
     :param state: Состояние пользователя.
     :return: Сообщение и клавиатура для пользователя.
     """
-    text = f"""
-Введите дату дня, расписание которого хотите изменить в формате <b>ДД.ММ.ГГГГ</b>
-Например, <code>{format_date(date_today())}</code>
-""".strip()
-
     await state.set_state(EditingEducators.choose_date)
     await state.update_data(start_id=message_id)
 
-    return text, cancel_state_keyboard
+    return f"""
+Введите дату дня, расписание которого хотите изменить в формате <b>ДД.ММ.ГГГГ</b>
+Например, <code>{format_date(date_today())}</code>
+""".strip()
 
 
 async def edit_educators_date_func(
@@ -51,7 +46,7 @@ async def edit_educators_date_func(
     :return: Сообщение пользователю и айди начального сообщения бота.
     """
     if edit_date := date_by_format(text):
-        schedule = await get_educators_schedule_by_date(repo, edit_date)
+        schedule = getattr(await repo.get(edit_date), "schedule", None) or NO_DATA
         text = (
             f"<b>Дата</b>: <code>{format_date(edit_date)}</code>\n"
             f"<b>Расписание</b>:\n{schedule}\n\n"

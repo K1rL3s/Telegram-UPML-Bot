@@ -22,7 +22,7 @@ class EducatorsScheduleRepository(BaseRepository):
         date: "dt.date",
     ) -> EducatorsSchedule | None:
         """
-        Возвращает расписание воспитателей на день по дате.
+        Возвращает расписание воспитателей по дате.
 
         :param date: Дата запрашеваемого меню.
         :return: Модель EducatorsSchedule.

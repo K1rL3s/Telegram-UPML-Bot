@@ -29,7 +29,7 @@ class Laundry(UserRelatedModel):
         DateTime,
         nullable=True,
     )
-    # Когда он должен закончится
+    # Когда таймер должен закончиться
     end_time: Mapped[dt.datetime | None] = mapped_column(
         DateTime,
         nullable=True,

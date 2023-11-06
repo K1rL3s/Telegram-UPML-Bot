@@ -17,6 +17,7 @@ from bot.funcs.admin.manage import (
 from bot.keyboards import (
     admin_panel_keyboard,
     cancel_state_keyboard,
+    confirm_cancel_keyboard,
 )
 from bot.utils.enums import Actions
 from bot.utils.states import EditingRoles
@@ -50,7 +51,7 @@ async def admins_list_handler(
 @router.callback_query(AdminCheck.filter())
 async def admin_check_roles_handler(
     callback: "CallbackQuery",
-    callback_data: "AdminEditRole",
+    callback_data: "AdminCheck",
     repo: "Repository",
 ) -> None:
     """Обработчик кнопки с юзернеймом админа в списке админов."""
@@ -147,10 +148,10 @@ async def edit_roles_confirm_handler(
     state: "FSMContext",
 ) -> None:
     """Обработчик кнопки "Подтвердить" при добавлении админа."""
-    text, keyboard = await edit_role_confirm_func(state)
+    text = await edit_role_confirm_func(state)
     await callback.message.edit_text(
         text=text,
-        reply_markup=keyboard,
+        reply_markup=confirm_cancel_keyboard,
     )
 
 

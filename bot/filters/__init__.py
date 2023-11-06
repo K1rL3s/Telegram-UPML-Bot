@@ -8,7 +8,6 @@ from bot.filters.roles import (
     RoleAccess,
 )
 
-
 __all__ = (
     "HasCafeMenuRole",
     "HasEducatorsRole",

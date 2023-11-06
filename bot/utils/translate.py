@@ -2,7 +2,6 @@ from typing import Final
 
 from bot.utils.enums import Meals, Roles, UserCallback
 
-
 CAFE_MENU_TRANSLATE: Final[dict[str, str]] = {
     Meals.BREAKFAST: "завтрак",
     Meals.LUNCH: "второй завтрак",

@@ -1,13 +1,14 @@
 import datetime as dt
 from io import BytesIO
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
-from PIL import Image
 import pytesseract
+from PIL import Image
 
 from bot.utils.datehelp import date_today
 
 if TYPE_CHECKING:
+    # noinspection PyUnresolvedReferences
     from PIL.PyAccess import PyAccess
 
     from bot.types import LessonsProcess
@@ -81,7 +82,7 @@ def __y_first_horizontal_line(image: "Image.Image") -> int:
     :return: Высота первой чёрной полосы.
     """
     width, height = image.size
-    pixels: PyAccess | None = image.load()
+    pixels = cast("PyAccess", image.load())
 
     x, y = width // 2, 0
     while y < height and not __is_pixel_black(pixels[x, y]):
@@ -102,7 +103,7 @@ def __x_prefix_for_lessons(image: "Image.Image", y: int) -> int:
     :return: Четвёртая вертикальная линия.
     """
     width, x = image.width, 0
-    pixels: PyAccess | None = image.load()
+    pixels = cast("PyAccess", image.load())
 
     black_count = 0
 
@@ -144,7 +145,7 @@ def __crop_date(image: "Image.Image", x: int, y: int) -> tuple["Image.Image", in
              исходника расписания.
     """
     width, height = image.size
-    pixels: PyAccess | None = image.load()
+    pixels = cast("PyAccess", image.load())
 
     # Получаю верх и низ серой полосы
     while y < height and __is_pixel_black(pixels[x, y]):
@@ -199,7 +200,7 @@ def __crop_grade(image: "Image.Image", x: int, y: int) -> "Image.Image":
     y += 1
     width, height = image.size
     left_x, up_y = x, y
-    pixels: PyAccess | None = image.load()
+    pixels = cast("PyAccess", image.load())
 
     while x < width and not __is_pixel_black(pixels[x, y]):
         x += 1
@@ -236,7 +237,7 @@ def __crop_lessons_by_class(
 
     image = image.crop((x, 0, image.width, image.height))
     width, height = image.size
-    pixels: PyAccess | None = image.load()
+    pixels = cast("PyAccess", image.load())
 
     images = []
 
@@ -252,7 +253,7 @@ def __crop_lessons_by_class(
 
         image = image.crop((x, 0, width, height))
         width, height = image.size
-        pixels: PyAccess | None = image.load()
+        pixels = cast("PyAccess", image.load())
         x = 1
 
     return images

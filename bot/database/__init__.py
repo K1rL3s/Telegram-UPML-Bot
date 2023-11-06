@@ -1,9 +1,9 @@
 from typing import TYPE_CHECKING
 
 from loguru import logger
-from sqlalchemy import URL
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession, create_async_engine
 from redis.asyncio.client import Redis
+from sqlalchemy import URL
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from bot.database.base import AlchemyBaseModel
 

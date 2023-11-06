@@ -13,4 +13,7 @@ class BaseInfoMiddleware(BaseMiddleware, ABC):
     @staticmethod
     def get_short_info(message: "Union[Message, CallbackQuery]") -> str | None:
         """Короткая информация о пользователе для логов."""
-        return f"id={message.from_user.id}, username={extract_username(message)}"
+        return (
+            f"id={message.from_user.id}, "
+            f"username={extract_username(message.from_user)}"
+        )

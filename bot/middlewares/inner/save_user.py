@@ -1,8 +1,7 @@
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from bot.middlewares.base import BaseInfoMiddleware
 from bot.utils.funcs import extract_username
-
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
@@ -27,6 +26,9 @@ class SaveUpdateUserMiddleware(BaseInfoMiddleware):
         data: dict[str, Any],
     ) -> Any:
         repo: "Repository" = data["repo"]
-        await repo.save_new_user_to_db(event.from_user.id, extract_username(event))
+        await repo.save_new_user_to_db(
+            event.from_user.id,
+            extract_username(event.from_user),
+        )
 
         return await handler(event, data)

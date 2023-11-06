@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
+from bot.utils.datehelp import format_date, weekday_by_date
 from bot.utils.phrases import NO_DATA
-from bot.utils.datehelp import date_today, format_date, weekday_by_date
 
 if TYPE_CHECKING:
     import datetime as dt
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 async def get_format_educators_by_date(
     repo: "EducatorsScheduleRepository",
-    date: "dt.date" = None,
+    date: "dt.date",
 ) -> str:
     """Возвращает расписание воспитателей по дате.
 
@@ -21,9 +21,6 @@ async def get_format_educators_by_date(
     :param date: Нужная дата.
     :return: Готовое сообщение для телеги.
     """
-    if date is None:
-        date = date_today()
-
     schedule = await repo.get(date)
 
     return (

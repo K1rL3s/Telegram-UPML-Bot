@@ -1,40 +1,39 @@
 import asyncio
 import datetime as dt
 from io import BytesIO
-from typing import Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Optional
 
 from aiohttp import ClientSession, ClientTimeout
 from loguru import logger
 from pypdf import PdfReader
 
-from bot.utils.translate import CAFE_MENU_TRANSLATE
 from bot.utils.datehelp import format_date, get_this_week_monday
+from bot.utils.translate import CAFE_MENU_TRANSLATE
 
 if TYPE_CHECKING:
     from bot.database.repository import MenuRepository
 
 
-async def process_cafe_menu(repo: "MenuRepository", timeout: int) -> tuple[bool, str]:
+async def process_cafe_menu(repo: "MenuRepository", timeout: int) -> str:
     """
     Поиск, составление и сохранение расписания еды в столовой.
 
     :param repo: Репозиторий расписаний столовой.
     :param timeout: Таймаут для запроса на сайт лицея.
-    :return: Сохранилось/Обновилось ли меню.
+    :return: Сохранилось/Обновилось ли меню, текст результата.
     """
     if (pdf_reader := await __get_pdf_menu(timeout)) is None:
         logger.warning(text := "Не удалось найти PDF с меню")
-        return False, text
+        return text
 
-    # Спасибо столовой моего лицея за то, что они могут опублиовать меню
-    # с датой вторника, а начинается с понедельника. :)
-    menu_date = __compare_pdf_date(pdf_reader)
-
-    if isinstance(menu_date, str):
-        return False, menu_date
+    if (menu_date := __compare_pdf_date(pdf_reader)) is None:
+        logger.warning(text := "Не удалось сравнять дату PDF и текущей недели")
+        return text
 
     await __parse_pdf_menu(repo, pdf_reader, menu_date)
-    return True, "Расписание еды обновлено!"
+
+    logger.info(text := "Расписание еды обновлено!")
+    return text
 
 
 async def __get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
@@ -66,12 +65,12 @@ async def __get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
     return None
 
 
-def __compare_pdf_date(pdf_reader: "PdfReader") -> "Union[dt.date, str]":
+def __compare_pdf_date(pdf_reader: "PdfReader") -> "Optional[dt.date]":
     """
     Возвращает дату, с которой начинается расписание еды в пдф файле.
 
     :param pdf_reader: PDF файл.
-    :return: Дата начала расписания еды или текст ошибки.
+    :return: Дата начала расписания еды или None, если не удалось сравнять дату.
     """
     menu_date = get_this_week_monday()
     add_counter = 0
@@ -82,8 +81,7 @@ def __compare_pdf_date(pdf_reader: "PdfReader") -> "Union[dt.date, str]":
         add_counter += 1
 
     if add_counter >= 7:
-        logger.warning(text := "Не удалось сравнять дату PDF и текущей недели")
-        return text
+        return None
 
     return menu_date
 
@@ -102,24 +100,35 @@ async def __parse_pdf_menu(
     """
     for page in pdf_reader.pages:
         text_menu = " ".join(page.extract_text().split())
-        food_times = [
-            ("автрак", "автрак"),
-            ("автрак", "обед"),
-            ("обед", "полдник"),
-            ("полдник", "ужин"),
-            ("ужин", "итого"),
-        ]
-
-        meals = []
-        for start_sub, end_sub in food_times:
-            meal, _, end = __get_meal(text_menu, start_sub, end_sub)
-            meals.append(__normalize_meal(meal))
-            text_menu = text_menu[end:]
-
-        fields = dict(zip(CAFE_MENU_TRANSLATE.keys(), meals))
-        await repo.save_or_update_to_db(date, **fields)
+        meals = __parse_page_to_meals(text_menu)
+        meals_to_info = dict(zip(CAFE_MENU_TRANSLATE.keys(), meals))
+        await repo.save_or_update_to_db(date, **meals_to_info)
 
         date += dt.timedelta(days=1)
+
+
+def __parse_page_to_meals(text_menu: str) -> list[str]:
+    """
+    Разбение текста страницы расписания еды на приёмы пищи.
+
+    :param text_menu: Текст страницы.
+    :return: Расписание еды по распорядку дня.
+    """
+    food_times = [
+        ("автрак", "автрак"),
+        ("автрак", "обед"),
+        ("обед", "полдник"),
+        ("полдник", "ужин"),
+        ("ужин", "итого"),
+    ]
+
+    meals = []
+    for start_sub, end_sub in food_times:
+        meal, _, end = __get_meal(text_menu, start_sub, end_sub)
+        meals.append(__normalize_meal(meal))
+        text_menu = text_menu[end:]
+
+    return meals
 
 
 def __get_meal(menu: str, start_sub: str, end_sub: str) -> tuple[str, int, int]:
@@ -142,7 +151,7 @@ def __get_meal(menu: str, start_sub: str, end_sub: str) -> tuple[str, int, int]:
 # Это самое жуткое, что я когда-либо писал, и оно работает :(
 def __normalize_meal(one_meal: str) -> str:
     """
-    Принимает строку из ``def get_string_meal`` и переделывает её в читаемый вид.
+    Принимает строку из ``def __get_meal`` и переделывает её в читаемый вид.
 
     (Каждое блюдо с новой строки без лишних символов).
 

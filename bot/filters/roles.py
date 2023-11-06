@@ -39,7 +39,7 @@ class IsAdmin(RoleAccess):
 
 
 class HasAnyRole(RoleAccess):
-    """Фильтр доступа к админ-панели. Любой, у кого есть роль - "админ"."""
+    """Фильтр доступа к админ-панели. Любой, у кого есть роль - имеет доступ."""
 
     def __init__(self) -> None:
         super().__init__(Roles.all_roles())

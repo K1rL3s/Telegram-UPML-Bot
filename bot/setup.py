@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
-from aiogram.types import BotCommand, BotCommandScopeAllPrivateChats
 from aiogram.fsm.storage.redis import RedisStorage
-from sqlalchemy.orm import close_all_sessions
+from aiogram.types import BotCommand, BotCommandScopeAllPrivateChats
 from loguru import logger
+from sqlalchemy.orm import close_all_sessions
 
 from bot.handlers import include_routers
 from bot.utils.enums import SlashCommands

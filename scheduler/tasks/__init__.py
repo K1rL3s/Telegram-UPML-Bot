@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING
 
-from scheduler.tasks.update_cafe_menu import update_cafe_menu
 from scheduler.tasks.laundry_notify import check_laundry_timers
+from scheduler.tasks.update_cafe_menu import update_cafe_menu
 
 if TYPE_CHECKING:
     from aiogram import Bot
     from apscheduler.schedulers.asyncio import AsyncIOScheduler
-    from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 
 __all__ = ("add_schedule_jobs",)

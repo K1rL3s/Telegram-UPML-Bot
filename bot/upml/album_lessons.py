@@ -8,7 +8,6 @@ from bot.types import Album, LessonsCollection, LessonsProcess
 from bot.upml.pillow_lessons import parse_one_lessons_file
 from bot.utils.datehelp import format_date, weekday_by_date
 
-
 if TYPE_CHECKING:
     from aiogram import Bot
 

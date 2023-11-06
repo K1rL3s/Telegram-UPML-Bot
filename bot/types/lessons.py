@@ -11,8 +11,8 @@ class LessonsProcess(BaseModel, arbitrary_types_allowed=True):  # BytesIO :(
     Используется для промежуточного сохранения даты и параллели.
     """
 
-    date: dt.date = None
-    grade: str = None
+    date: dt.date | None = None
+    grade: str | None = None
     class_lessons: list[BytesIO] = Field(default_factory=list)
 
 

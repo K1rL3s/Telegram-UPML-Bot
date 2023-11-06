@@ -7,7 +7,6 @@ from bot.callbacks import OpenMenu
 from bot.keyboards import main_menu_keyboard
 from bot.utils.enums import Menus, SlashCommands, TextCommands
 
-
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message
 

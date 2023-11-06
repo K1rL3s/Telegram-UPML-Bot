@@ -4,11 +4,10 @@ from typing import TYPE_CHECKING, Union
 from uuid import uuid1
 
 from aiocache import cached
-from aiogram.types import BufferedInputFile
+from aiogram.types import BufferedInputFile, User
 
 if TYPE_CHECKING:
     from aiogram import Bot
-    from aiogram.types import CallbackQuery, Message
 
 
 async def bytes_io_to_image_id(
@@ -36,7 +35,7 @@ async def bytes_io_to_image_id(
 
 async def multi_bytes_to_ids(
     chat_id: int,
-    images: "list[BytesIO | str]",
+    images: "Union[list[BytesIO], list[str]]",
     bot: "Bot",
 ) -> list[str]:
     """
@@ -70,18 +69,14 @@ async def username_by_user_id(bot: "Bot", user_id: int) -> str | None:
     return chat.username or chat.first_name or chat.last_name
 
 
-def extract_username(message: "Union[CallbackQuery, Message]") -> str | None:
+def extract_username(from_user: "User") -> str | None:
     """
     Получение имени для бд из сообщения или нажатия кнопки.
 
-    :param message: Событие.
+    :param from_user: От кого событие.
     :return: Имя для бд.
     """
-    return (
-        message.from_user.username
-        or message.from_user.first_name
-        or message.from_user.last_name
-    )  # XD
+    return from_user.username or from_user.first_name or from_user.last_name  # XD
 
 
 def name_link(username: str, user_id: int) -> str:

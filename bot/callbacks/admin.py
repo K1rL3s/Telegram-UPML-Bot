@@ -14,7 +14,7 @@ class AdminList(CallbackData, prefix="admin_list"):
 
 
 class AdminCheck(CallbackData, prefix="admin_check"):
-    """Фабрика для просмотра админов."""
+    """Фабрика для просмотра одного админа."""
 
     user_id: int
     page: int = 0
@@ -41,7 +41,7 @@ class EditLessons(CallbackData, prefix="edit_lessons"):
 
 
 class DoNotify(CallbackData, prefix="do_notify"):
-    """Фабрика для рассылки уведомления."""
+    """Фабрика для рассылки уведомлений."""
 
     notify_type: str | None = None  # grade, class, all
     for_who: str | None = None  # 10, 11, 10А, 10Б, 10В, 11А, 11Б, 11В

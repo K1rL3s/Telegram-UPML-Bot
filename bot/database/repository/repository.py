@@ -1,9 +1,10 @@
 from typing import TYPE_CHECKING
 
 from bot.database.repository import (
+    ClassLessonsRepository,
     EducatorsScheduleRepository,
+    FullLessonsRepository,
     LaundryRepository,
-    LessonsRepository,
     MenuRepository,
     RoleRepository,
     SettingsRepository,
@@ -23,14 +24,15 @@ class Repository:
         session: "AsyncSession",
     ) -> None:
         self._session = session
+        self.class_lessons = ClassLessonsRepository(session)
+        self.educators = EducatorsScheduleRepository(session)
+        self.full_lessons = FullLessonsRepository(session)
         self.user = UserRepository(session)
         self.role = RoleRepository(session)
         self.user_role = UserRoleRepository(session, self.user, self.role)
         self.settings = SettingsRepository(session)
         self.laundry = LaundryRepository(session)
         self.menu = MenuRepository(session)
-        self.lessons = LessonsRepository(session)
-        self.educators = EducatorsScheduleRepository(session)
 
     async def save_new_user_to_db(
         self,
@@ -38,7 +40,7 @@ class Repository:
         username: str,
     ) -> None:
         """
-        Сохранение нового пользователя или обновление никнейма существующего.
+        Сохранение нового пользователя или обновление никнейма и статуса существующего.
 
         :param user_id: ТГ Айди.
         :param username: Имя пользователя.

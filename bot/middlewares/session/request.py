@@ -24,9 +24,9 @@ from loguru import logger
 
 if TYPE_CHECKING:
     from aiogram import Bot
+    from aiogram.client.session.middlewares.base import NextRequestMiddlewareType
     from aiogram.methods import Response, TelegramMethod
     from aiogram.methods.base import TelegramType
-    from aiogram.client.session.middlewares.base import NextRequestMiddlewareType
 
 
 class RetryRequestMiddleware(BaseRequestMiddleware):

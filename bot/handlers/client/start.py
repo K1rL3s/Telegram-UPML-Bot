@@ -6,12 +6,12 @@ from aiogram.filters import Command, CommandStart, StateFilter
 from bot.callbacks import OpenMenu
 from bot.keyboards import main_menu_keyboard, start_reply_keyboard
 from bot.middlewares.inner.save_user import SaveUpdateUserMiddleware
-from bot.utils.phrases import MAIN_MENU_TEXT, USER_START_TEXT
 from bot.utils.enums import Menus, SlashCommands, TextCommands
+from bot.utils.phrases import MAIN_MENU_TEXT, USER_START_TEXT
 
 if TYPE_CHECKING:
-    from aiogram.types import CallbackQuery, Message
     from aiogram.fsm.context import FSMContext
+    from aiogram.types import CallbackQuery, Message
 
     from bot.database.repository.repository import Repository
 

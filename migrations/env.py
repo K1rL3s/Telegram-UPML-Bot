@@ -1,5 +1,6 @@
 import asyncio
 from logging.config import fileConfig
+from pathlib import Path
 
 from alembic import context
 from alembic.script import ScriptDirectory
@@ -7,13 +8,13 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from bot.settings import get_settings
-from bot.database.models import *  # noqa
+# noinspection PyUnresolvedReferences
 from bot.database import AlchemyBaseModel
-
+from bot.database.models import *  # noqa: F403
+from bot.settings import get_settings
 
 config = context.config
-db_settings = get_settings().db
+db_settings = get_settings(dotenv_path=Path.cwd() / ".env").db
 
 section = config.config_ini_section
 config.set_section_option(section, "POSTGRES_HOST", db_settings.host)
@@ -41,7 +42,7 @@ def process_revision_directives(context, revision, directives):
     else:
         last_rev_id = int(head_revision.lstrip("0"))
         new_rev_id = last_rev_id + 1
-    migration_script.rev_id = "{0:04}".format(new_rev_id)
+    migration_script.rev_id = f"{new_rev_id:04}"
 
 
 def run_migrations_offline() -> None:

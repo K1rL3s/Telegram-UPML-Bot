@@ -15,7 +15,6 @@ from bot.keyboards.universal import (
 from bot.utils.enums import Actions, Roles
 from bot.utils.translate import ROLES_TRANSLATE
 
-
 ADMIN_LIST = "👮‍♀️Список админов"
 EDIT_PERMISSIONS = "🔎Изменить роли"
 PAGE_BACK = "⬅️Назад"
