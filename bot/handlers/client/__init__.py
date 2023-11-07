@@ -11,7 +11,6 @@ from bot.handlers.client import (
 )
 from bot.handlers.client.state import router as cancel_state_router
 
-
 client_router = Router()
 
 client_router.include_routers(

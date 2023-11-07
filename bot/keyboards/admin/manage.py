@@ -15,7 +15,6 @@ from bot.keyboards.universal import (
 from bot.utils.enums import Actions, Roles
 from bot.utils.translate import ROLES_TRANSLATE
 
-
 ADMIN_LIST = "👮‍♀️Список админов"
 EDIT_PERMISSIONS = "🔎Изменить роли"
 PAGE_BACK = "⬅️Назад"
@@ -30,21 +29,6 @@ admins_list_button = InlineKeyboardButton(
 edit_permissions_button = InlineKeyboardButton(
     text=EDIT_PERMISSIONS,
     callback_data=AdminEditRole(action=Actions.EDIT).pack(),
-)
-roles_actions_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text=ADD_ROLE,
-                callback_data=AdminEditRole(action=Actions.ADD).pack(),
-            ),
-            InlineKeyboardButton(
-                text=REMOVE_ROLE,
-                callback_data=AdminEditRole(action=Actions.REMOVE).pack(),
-            ),
-        ],
-        [cancel_state_button],
-    ],
 )
 
 
@@ -133,14 +117,12 @@ def check_admin_roles_keyboard(
 def edit_roles_keyboard(
     all_roles: list[str],
     choosed_roles: list[str],
-    action: str,
 ) -> "InlineKeyboardMarkup":
     """
     Клавиатура для множественного выбора (редактирования) ролей.
 
     :param all_roles: Все отображаемые роли.
     :param choosed_roles: Выбранные роли.
-    :param action: Действие.
     :return: Клавиатура.
     """
     keyboard = InlineKeyboardBuilder()
@@ -152,7 +134,6 @@ def edit_roles_keyboard(
         keyboard.button(
             text=text,
             callback_data=AdminEditRole(
-                action=action,
                 role=role,
             ),
         )

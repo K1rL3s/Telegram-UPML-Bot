@@ -6,7 +6,6 @@ from bot.keyboards.universal import admin_panel_button
 from bot.utils.consts import GRADES
 from bot.utils.enums import NotifyTypes
 
-
 notify_menu_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [

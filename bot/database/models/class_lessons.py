@@ -1,7 +1,7 @@
 import datetime as dt
 
 from sqlalchemy import Date, Integer, String
-from sqlalchemy.orm import column_property, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, column_property, mapped_column
 
 from bot.database.base import AlchemyBaseModel
 
@@ -23,4 +23,4 @@ class ClassLessons(AlchemyBaseModel):
     grade: Mapped[str] = mapped_column(String(2), nullable=False)  # 10 или 11
     letter: Mapped[str] = mapped_column(String(1), nullable=False)  # А, Б, В
     class_: Mapped[str] = column_property(grade + letter)
-    image: Mapped[str] = mapped_column(String, nullable=False)
+    file_id: Mapped[str] = mapped_column(String(128), nullable=False)

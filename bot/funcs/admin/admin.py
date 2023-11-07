@@ -1,49 +1,12 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Union
+
+from sqlalchemy.orm import Mapped, MappedColumn
 
 from bot.database.models.settings import Settings
 from bot.database.models.users import User
-from bot.utils.phrases import NO_DATA
 
 if TYPE_CHECKING:
-    import datetime as dt
-
-    from bot.database.repository import (
-        EducatorsScheduleRepository,
-        MenuRepository,
-        UserRepository,
-    )
-
-
-async def get_meal_by_date(
-    repo: "MenuRepository",
-    meal: str,
-    date: "dt.date",
-) -> str | None:
-    """
-    Возвращает приём пищи по названию и дате.
-
-    :param repo: Репозиторий расписаний столовой.
-    :param meal: Название приёма пищи на английском.
-    :param date: Дата.
-    :return: Приём пищи из бд.
-    """
-    menu = await repo.get(date)
-    return getattr(menu, meal, None) or NO_DATA
-
-
-async def get_educators_schedule_by_date(
-    repo: "EducatorsScheduleRepository",
-    date: "dt.date",
-) -> str | None:
-    """
-    Возвращает расписание воспитателей по дате.
-
-    :param repo: Репозиторий расписаний воспитателей.
-    :param date: Дата.
-    :return: Расписание воспитателей из бд.
-    """
-    schedule = await repo.get(date)
-    return getattr(schedule, "schedule", None) or NO_DATA
+    from bot.database.repository import UserRepository
 
 
 async def get_users_for_notify(
@@ -61,7 +24,9 @@ async def get_users_for_notify(
     :param is_lessons: Уведомление об изменении расписания.
     :param is_news: Уведомление о новостях (ручная рассылка).
     """
-    conditions = [(User.is_active, True)]
+    conditions: "list[tuple[Union[MappedColumn, Mapped], Any]]" = [
+        (User.is_active, True)
+    ]
 
     if is_lessons:
         conditions.append((Settings.lessons_notify, True))

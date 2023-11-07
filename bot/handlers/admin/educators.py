@@ -37,8 +37,8 @@ async def edit_educators_start_handler(
     state: "FSMContext",
 ) -> None:
     """Обработчик кнопки "Изменить меню"."""
-    text, keyboard = await edit_educators_start_func(callback.message.message_id, state)
-    await callback.message.edit_text(text=text, reply_markup=keyboard)
+    text = await edit_educators_start_func(callback.message.message_id, state)
+    await callback.message.edit_text(text=text, reply_markup=cancel_state_keyboard)
 
 
 @router.message(StateFilter(EditingEducators.choose_date))

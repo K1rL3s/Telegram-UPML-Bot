@@ -7,8 +7,8 @@ from bot.callbacks import OpenMenu
 from bot.funcs.client.educators import get_format_educators_by_date
 from bot.keyboards import educators_keyboard
 from bot.utils.consts import TODAY
-from bot.utils.enums import Menus, SlashCommands, TextCommands
 from bot.utils.datehelp import date_by_format
+from bot.utils.enums import Menus, SlashCommands, TextCommands
 
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message

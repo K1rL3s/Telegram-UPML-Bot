@@ -3,9 +3,7 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import Command, StateFilter
 
-
 from bot.callbacks import InStateData
-
 from bot.handlers.client.start import (
     main_menu_callback_handler,
     main_menu_message_handler,
@@ -13,8 +11,8 @@ from bot.handlers.client.start import (
 from bot.utils.enums import Actions, SlashCommands, TextCommands
 
 if TYPE_CHECKING:
-    from aiogram.types import CallbackQuery, Message
     from aiogram.fsm.context import FSMContext
+    from aiogram.types import CallbackQuery, Message
 
     from bot.database.repository.repository import Repository
 

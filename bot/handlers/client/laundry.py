@@ -5,13 +5,13 @@ from aiogram.filters import Command
 
 from bot.callbacks import LaundryData, OpenMenu
 from bot.funcs.client.laundry import (
-    laundry_both_handler,
     laundry_cancel_timer_func,
+    laundry_func,
     laundry_start_timer_func,
 )
 from bot.keyboards import go_to_main_menu_keyboard
-from bot.utils.enums import Actions, Menus, SlashCommands, TextCommands
 from bot.utils.datehelp import format_datetime
+from bot.utils.enums import Actions, Menus, SlashCommands, TextCommands
 
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message
@@ -27,7 +27,7 @@ async def laundry_callback_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик кнопки "Прачечная"."""
-    text, keyboard = await laundry_both_handler(callback.from_user.id, repo.laundry)
+    text, keyboard = await laundry_func(callback.from_user.id, repo.laundry)
     await callback.message.edit_text(
         text=text,
         reply_markup=keyboard,
@@ -41,7 +41,7 @@ async def laundry_message_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик команды "Прачечная"."""
-    text, keyboard = await laundry_both_handler(message.from_user.id, repo.laundry)
+    text, keyboard = await laundry_func(message.from_user.id, repo.laundry)
     await message.answer(text=text, reply_markup=keyboard)
 
 
@@ -78,6 +78,6 @@ async def laundry_cancel_timer_handler(
     await laundry_cancel_timer_func(repo.laundry, callback.from_user.id)
 
     text = "Таймер отменён."
-    _, keyboard = await laundry_both_handler(callback.from_user.id, repo.laundry)
+    _, keyboard = await laundry_func(callback.from_user.id, repo.laundry)
 
     await callback.message.edit_text(text=text, reply_markup=keyboard)

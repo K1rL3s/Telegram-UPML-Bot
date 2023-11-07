@@ -4,11 +4,11 @@ Revision ID: 0002
 Revises: 0001
 Create Date: 2023-08-15 01:54:39.912725
 """
-from typing import Sequence, Union
+from collections.abc import Sequence
+from typing import Union
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "0002"

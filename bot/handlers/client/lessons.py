@@ -7,8 +7,8 @@ from bot.callbacks import OpenMenu
 from bot.funcs.client.lessons import send_lessons_images
 from bot.keyboards import lessons_keyboard
 from bot.utils.consts import TODAY
-from bot.utils.enums import Menus, SlashCommands, TextCommands
 from bot.utils.datehelp import date_by_format
+from bot.utils.enums import Menus, SlashCommands, TextCommands
 
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message

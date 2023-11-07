@@ -1,5 +1,8 @@
 import os
+from pathlib import Path
+from typing import Optional, Union
 
+from dotenv import load_dotenv
 from pydantic import BaseModel
 
 
@@ -44,12 +47,16 @@ class Settings(BaseModel):
     other: OtherSettings
 
 
-def get_settings() -> Settings:
+def get_settings(dotenv_path: "Optional[Union[Path, str]]" = None) -> Settings:
     """
     Создание настроек из переменных среды.
 
+    :param dotenv_path: Путь до .env файла. Используется для alembic'а.
     :return: Настройки.
     """
+    if dotenv_path:
+        load_dotenv(dotenv_path)
+
     db = DBSettings(
         host=os.environ["POSTGRES_HOST"],
         host_port=int(os.environ["POSTGRES_HOST_PORT"]),

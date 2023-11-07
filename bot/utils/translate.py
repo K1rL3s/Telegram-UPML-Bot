@@ -1,7 +1,6 @@
 from typing import Final
 
-from bot.utils.enums import Actions, Meals, Roles, UserCallback
-
+from bot.utils.enums import Meals, Roles, UserCallback
 
 CAFE_MENU_TRANSLATE: Final[dict[str, str]] = {
     Meals.BREAKFAST: "завтрак",
@@ -18,10 +17,6 @@ NOTIFIES_TYPES_TRANSLATE: Final[dict[str, str]] = {
 LAUNDRY_TIMERS_TRANSLATE: Final[dict[str, str]] = {
     UserCallback.WASHING: "время стирки",
     UserCallback.DRYING: "время сушки",
-}
-ACTIONS_TRANSLATE: Final[dict[str, str]] = {
-    Actions.ADD: "добавить",
-    Actions.REMOVE: "удалить",
 }
 ROLES_TRANSLATE: Final[dict[str, str]] = {
     Roles.SUPERADMIN: "супер-админ",

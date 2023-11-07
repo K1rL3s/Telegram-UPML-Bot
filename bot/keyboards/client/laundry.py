@@ -10,7 +10,6 @@ from bot.keyboards.universal import (
 from bot.utils.enums import Actions, UserCallback
 from bot.utils.phrases import NO
 
-
 if TYPE_CHECKING:
     from aiogram.utils.keyboard import InlineKeyboardMarkup
 

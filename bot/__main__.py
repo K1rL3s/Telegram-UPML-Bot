@@ -3,9 +3,8 @@ import contextlib
 
 from bot.database import database_init, redis_init
 from bot.middlewares import setup_global_middlewares
-from bot.setup import configure_logs, make_bot, make_dispatcher
 from bot.settings import get_settings
-
+from bot.setup import configure_logs, make_bot, make_dispatcher
 
 """На будущее:
 1. Cделать в фильтре RoleAccess временный кэш (?).

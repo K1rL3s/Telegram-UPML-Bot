@@ -17,7 +17,6 @@ from bot.keyboards.universal import (
 from bot.utils.consts import TODAY
 from bot.utils.enums import Menus, Roles, TextCommands
 
-
 if TYPE_CHECKING:
     from bot.database.repository import UserRepository
 

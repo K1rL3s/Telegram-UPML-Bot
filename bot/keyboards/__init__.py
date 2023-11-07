@@ -7,7 +7,6 @@ from bot.keyboards.admin.manage import (
     admins_list_keyboard,
     check_admin_roles_keyboard,
     edit_roles_keyboard,
-    roles_actions_keyboard,
 )
 from bot.keyboards.admin.notifies import (
     notify_for_class_keyboard,
@@ -25,7 +24,6 @@ from bot.keyboards.client.start import (
     start_reply_keyboard,
 )
 from bot.keyboards.universal import cancel_state_keyboard, confirm_cancel_keyboard
-
 
 __all__ = (
     "admin_panel_keyboard",
@@ -46,7 +44,6 @@ __all__ = (
     "notify_for_class_keyboard",
     "notify_for_grade_keyboard",
     "notify_menu_keyboard",
-    "roles_actions_keyboard",
     "settings_keyboard",
     "start_reply_keyboard",
 )

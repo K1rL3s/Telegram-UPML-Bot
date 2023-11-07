@@ -6,15 +6,15 @@ from bot.keyboards import (
     notify_for_class_keyboard,
     notify_for_grade_keyboard,
 )
-from bot.utils.translate import NOTIFIES_TYPES_TRANSLATE
 from bot.utils.enums import NotifyTypes
 from bot.utils.notify import do_admin_notify
 from bot.utils.states import DoingNotify
+from bot.utils.translate import NOTIFIES_TYPES_TRANSLATE
 
 if TYPE_CHECKING:
     from aiogram import Bot
-    from aiogram.types import InlineKeyboardMarkup
     from aiogram.fsm.context import FSMContext
+    from aiogram.types import InlineKeyboardMarkup
 
     from bot.database.repository import UserRepository
 

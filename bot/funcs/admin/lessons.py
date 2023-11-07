@@ -2,13 +2,13 @@ from typing import TYPE_CHECKING
 
 from aiogram.types import InlineKeyboardMarkup, InputMediaPhoto
 
-from bot.types import Album, LessonsCollection
+from bot.database.repository import ClassLessonsRepository, FullLessonsRepository
 from bot.keyboards import (
     cancel_state_keyboard,
     choose_parallel_keyboard,
     confirm_cancel_keyboard,
-    go_to_main_menu_keyboard,
 )
+from bot.types import Album, LessonsCollection
 from bot.upml.album_lessons import tesseract_lessons
 from bot.utils.datehelp import date_by_format, format_date, weekday_by_date
 from bot.utils.funcs import multi_bytes_to_ids
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from aiogram import Bot
     from aiogram.fsm.context import FSMContext
 
-    from bot.database.repository import LessonsRepository
+    from bot.database.repository.repository import Repository
 
 
 async def process_lessons_album_func(
@@ -27,7 +27,7 @@ async def process_lessons_album_func(
     bot: "Bot",
     state: "FSMContext",
     tesseract_path: str,
-) -> tuple[str, "InlineKeyboardMarkup"]:
+) -> str:
     """
     Обработчки фотографий расписаний при нескольких штуках.
 
@@ -42,23 +42,22 @@ async def process_lessons_album_func(
 
     if all(lesson.status for lesson in lessons):  # Всё успешно обработалось
         await state.set_state(EditingLessons.all_good)
-        return "\n".join(lesson.text for lesson in lessons), confirm_cancel_keyboard
+        return "\n".join(lesson.text for lesson in lessons)
 
     await state.set_state(EditingLessons.something_bad)
-    text = (
+    return (
         "\n".join(lesson.text for lesson in lessons if lesson.status)
         + "\n\nНе удалось распознать некоторые расписания."
         + "\nВвеcти данные вручную?"
     )
-    return text, confirm_cancel_keyboard
 
 
 async def all_good_lessons_func(
     chat_id: int,
     bot: "Bot",
     state: "FSMContext",
-    repo: "LessonsRepository",
-) -> tuple[str, "InlineKeyboardMarkup"]:
+    repo: "Repository",
+) -> str:
     """
     Обработка кнопки "Подтвердить" при всех верных расписаниях.
 
@@ -78,11 +77,15 @@ async def all_good_lessons_func(
             lesson.class_photos,
             bot,
         )
-        await repo.save_prepared_to_db(lesson)
+        await save_lessons_collection_to_db(
+            lesson,
+            repo.full_lessons,
+            repo.class_lessons,
+        )
 
     await state.clear()
 
-    return "Успешно!", go_to_main_menu_keyboard
+    return "Успешно!"
 
 
 async def start_choose_grades_func(
@@ -142,10 +145,9 @@ async def choose_grades_func(
 
     # Начало ввода дат
     text = "Введите дату расписания в формате <b>ДД.ММ.ГГГГ</b>"
-    keyboard = cancel_state_keyboard
     await state.set_state(EditingLessons.choose_date)
 
-    return text, keyboard, lessons[0]
+    return text, cancel_state_keyboard, lessons[0]
 
 
 async def choose_dates_func(
@@ -199,7 +201,7 @@ async def confirm_edit_lessons_func(
     chat_id: int,
     bot: "Bot",
     state: "FSMContext",
-    repo: "LessonsRepository",
+    repo: "Repository",
 ) -> str:
     """
     Обработка подтверждения сохранения нераспознанных расписаний.
@@ -213,7 +215,7 @@ async def confirm_edit_lessons_func(
     for lesson in [
         LessonsCollection(**kwargs) for kwargs in (await state.get_data())["lessons"]
     ]:
-        await repo.delete_class_lessons(
+        await repo.class_lessons.delete(
             date_by_format(lesson.date),
             lesson.grade,
         )
@@ -222,8 +224,38 @@ async def confirm_edit_lessons_func(
             lesson.class_photos,
             bot,
         )
-        await repo.save_prepared_to_db(lesson)
+        await save_lessons_collection_to_db(
+            lesson,
+            repo.full_lessons,
+            repo.class_lessons,
+        )
 
     await state.clear()
 
     return "Успешно!"
+
+
+async def save_lessons_collection_to_db(
+    lesson: "LessonsCollection",
+    full_lessons: "FullLessonsRepository",
+    class_lessons: "ClassLessonsRepository",
+) -> None:
+    """
+    Сохраняет заполненный LessonsCollection в базу данных.
+
+    :param lesson: LessonsCollection.
+    :param full_lessons: Репозиторий полных уроков.
+    :param class_lessons: Репозиторий уроков для класса.
+    """
+    await full_lessons.save_or_update_to_db(
+        lesson.full_photo_id,
+        date_by_format(lesson.date),
+        lesson.grade,
+    )
+    for photo_id, letter in zip(lesson.class_photo_ids, "АБВ"):
+        await class_lessons.save_or_update_to_db(
+            photo_id,
+            date_by_format(lesson.date),
+            lesson.grade,
+            letter,
+        )

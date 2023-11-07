@@ -1,7 +1,7 @@
 from typing import Any
 
 from sqlalchemy import MetaData
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, Mapped
 from sqlalchemy.orm.exc import DetachedInstanceError
 
 
@@ -27,9 +27,11 @@ class AlchemyBaseModel(DeclarativeBase):
         )
 
     def _repr(self, **fields: Any) -> str:
-        """Помощник __repr__.
-        Взят с https://stackoverflow.com/questions/55713664/sqlalchemy-best-way-to-define-repr-for-large-tables
-        """  # noqa
+        """
+        Помощник __repr__.
+
+        Взят с https://stackoverflow.com/a/55749579
+        """
         field_strings = []
         at_least_one_attached_attribute = False
 
@@ -51,4 +53,4 @@ class UserRelatedModel(AlchemyBaseModel):
 
     __abstract__ = True
 
-    user_id: int
+    user_id: Mapped[int]

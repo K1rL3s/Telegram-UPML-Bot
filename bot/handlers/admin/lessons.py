@@ -6,7 +6,6 @@ from aiogram.types import InputMediaPhoto
 
 from bot.callbacks import AdminEditMenu, EditLessons, InStateData
 from bot.filters import HasLessonsRole
-from bot.types import Album
 from bot.funcs.admin.lessons import (
     all_good_lessons_func,
     choose_dates_func,
@@ -18,8 +17,10 @@ from bot.funcs.admin.lessons import (
 from bot.keyboards import (
     cancel_state_keyboard,
     choose_parallel_keyboard,
+    confirm_cancel_keyboard,
     go_to_main_menu_keyboard,
 )
+from bot.types import Album
 from bot.utils.enums import Actions, Menus
 from bot.utils.states import EditingLessons
 
@@ -27,8 +28,8 @@ if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
     from aiogram.types import CallbackQuery, Message
 
-    from bot.settings import Settings
     from bot.database.repository.repository import Repository
+    from bot.settings import Settings
 
 
 router = Router(name=__name__)
@@ -82,7 +83,7 @@ async def process_lessons_album_handler(
     album: "Album",
 ) -> None:
     """Обработчки фотографий расписаний при нескольких штуках."""
-    text, keyboard = await process_lessons_album_func(
+    text = await process_lessons_album_func(
         album,
         message.bot,
         state,
@@ -90,7 +91,7 @@ async def process_lessons_album_handler(
     )
     await message.reply(
         text=text,
-        reply_markup=keyboard,
+        reply_markup=confirm_cancel_keyboard,
     )
 
 
@@ -104,16 +105,16 @@ async def all_good_lessons_handler(
     repo: "Repository",
 ) -> None:
     """Обработка кнопки "Подтвердить" при всех верных расписаниях."""
-    text, keyboard = await all_good_lessons_func(
+    text = await all_good_lessons_func(
         callback.message.chat.id,
         callback.bot,
         state,
-        repo.lessons,
+        repo,
     )
 
     await callback.message.answer(
         text=text,
-        reply_markup=keyboard,
+        reply_markup=go_to_main_menu_keyboard,
     )
 
 
@@ -199,7 +200,7 @@ async def confirm_edit_lessons_handler(
         callback.message.chat.id,
         callback.bot,
         state,
-        repo.lessons,
+        repo,
     )
 
     await callback.message.answer(

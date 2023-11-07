@@ -16,6 +16,7 @@ from bot.keyboards import (
 )
 from bot.middlewares.inner.save_user import SaveUpdateUserMiddleware
 from bot.utils.enums import Actions, Menus, SlashCommands, TextCommands, UserCallback
+from bot.utils.phrases import SET_TIMER_TEXT, SETTINGS_WELCOME_TEXT
 from bot.utils.states import EditingSettings
 
 if TYPE_CHECKING:
@@ -27,16 +28,6 @@ if TYPE_CHECKING:
 
 router = Router(name=__name__)
 router.message.middleware(SaveUpdateUserMiddleware())
-
-SETTINGS_WELCOME_TEXT = """
-Привет! Я - настройки!
-
-<b>Класс</b> - твой класс.
-<b>Уроки</b> - уведомления при изменении расписания.
-<b>Новости</b> - уведомления о мероприятиях, новостях.
-<b>Стирка</b> - время таймера для стирки.
-<b>Сушка</b> - время таймера для сушки.
-""".strip()
 
 
 @router.callback_query(OpenMenu.filter(F.menu == Menus.SETTINGS))
@@ -117,15 +108,10 @@ async def edit_laundry_start_handler(
         start_id=callback.message.message_id,
         attr=callback_data.attr,
     )
-
-    text = (
-        "🕛 Чтобы установить таймер на срабатывание через какое-то время, "
-        "введите часы и минуты через точку, запятую или пробел "
-        "<i>(0.30, 1 0, 12,45)</i>.\n"
-        "⏰ Чтобы установить таймер на срабатывание в какое-то время, "
-        "введите это время через двоеточие <i>(12:30, 16:00, 19:50)</i>"
+    await callback.message.edit_text(
+        text=SET_TIMER_TEXT,
+        reply_markup=cancel_state_keyboard,
     )
-    await callback.message.edit_text(text=text, reply_markup=cancel_state_keyboard)
 
 
 @router.message(StateFilter(EditingSettings.writing))

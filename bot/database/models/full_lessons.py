@@ -21,4 +21,4 @@ class FullLessons(AlchemyBaseModel):
 
     date: Mapped[dt.date] = mapped_column(Date, nullable=False)
     grade: Mapped[str] = mapped_column(String(2), nullable=False)  # 10 или 11
-    image: Mapped[str] = mapped_column(String, nullable=False)
+    file_id: Mapped[str] = mapped_column(String(128), nullable=False)

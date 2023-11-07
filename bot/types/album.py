@@ -14,7 +14,6 @@ from aiogram.types import (
 )
 from pydantic import Field
 
-
 Media = PhotoSize | Video | Audio | Document
 InputMedia = InputMediaPhoto | InputMediaVideo | InputMediaAudio | InputMediaDocument
 

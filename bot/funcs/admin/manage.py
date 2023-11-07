@@ -4,22 +4,18 @@ from bot.keyboards import (
     admins_list_keyboard,
     cancel_state_keyboard,
     check_admin_roles_keyboard,
-    confirm_cancel_keyboard,
     edit_roles_keyboard,
-    roles_actions_keyboard,
 )
-from bot.utils.enums import Actions, Roles
+from bot.utils.enums import Roles
 from bot.utils.funcs import name_link
 from bot.utils.states import EditingRoles
-from bot.utils.translate import ACTIONS_TRANSLATE, ROLES_TRANSLATE
-
+from bot.utils.translate import ROLES_TRANSLATE
 
 if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
     from aiogram.types import InlineKeyboardMarkup
 
-    from bot.database.repository.repository import Repository
-    from bot.database.repository import RoleRepository, UserRepository
+    from bot.database.repository import UserRepository, UserRoleRepository
 
 
 async def admins_list_func(
@@ -79,12 +75,6 @@ async def edit_role_directly_func(
     :return: Сообщение и клавиатура администратору.
     """
     username = (await repo.get(user_id)).username
-
-    await state.set_state(EditingRoles.action)
-    await state.update_data(
-        user_id=user_id,
-        username=username,
-    )
     return await edit_role_username_func(username, state, repo)
 
 
@@ -99,7 +89,7 @@ async def edit_role_username_func(
     :param text: Сообщение пользователя.
     :param state: Состояние пользователя.
     :param repo: Репозиторий пользователей.
-    :return: Сообщение и клавиатура пользователю.
+    :return: Сообщение и клавиатура администратору.
     """
     username = text.split("/")[-1].lstrip("@")
 
@@ -107,63 +97,26 @@ async def edit_role_username_func(
         text = "Не могу найти у себя такого пользователя."
         return text, cancel_state_keyboard
 
-    await state.set_state(EditingRoles.action)
-    await state.update_data(user_id=user_id, username=username, roles=[])
-
-    text = f"Что будем делать с ролями {name_link(username, user_id)}?"
-    return text, roles_actions_keyboard
-
-
-async def edit_role_action_func(
-    action: str,
-    message_id: int,
-    state: "FSMContext",
-    user_repo: "UserRepository",
-    role_repo: "RoleRepository",
-) -> tuple[str, "InlineKeyboardMarkup"]:
-    """
-    Обработчик кнопок действия с ролями (добавить или удалить).
-
-    :param action: Добавить или удалить.
-    :param message_id: Айди сообщения бота.
-    :param state: Состояние пользователя.
-    :param user_repo: Репозиторий пользователей.
-    :param role_repo: Репозиторий пользователей.
-    :return: Сообщение и клавиатура пользователю.
-    """
+    all_roles = Roles.all_roles()
+    choosed_roles = [role.role for role in (await repo.get(user_id)).roles]
     await state.set_state(EditingRoles.roles)
-    data = await state.get_data()
-    user_id: int = data["user_id"]
-    username: str = data["username"]
-
-    user_roles = [role.role for role in (await user_repo.get(user_id)).roles]
-
-    if action == Actions.ADD:
-        all_roles = [role.role for role in await role_repo.get_all()]
-        for role in user_roles:
-            if role in all_roles:
-                all_roles.remove(role)
-    else:  # action == Actions.REMOVE
-        all_roles = user_roles
-
     await state.update_data(
-        start_id=message_id,
-        action=action,
+        user_id=user_id,
+        username=username,
         all_roles=all_roles,
-        choosed_roles=[],
+        choosed_roles=choosed_roles,
     )
 
     return (
-        "Выберите роли, которые надо "
-        f"{ACTIONS_TRANSLATE[action]} {name_link(username, user_id)}",
-        edit_roles_keyboard(all_roles, [], action),
+        f"Выберите роли, которые будут у {name_link(username, user_id)}",
+        edit_roles_keyboard(all_roles, choosed_roles),
     )
 
 
 async def edit_role_choose_role_func(
     role: str,
     state: "FSMContext",
-) -> tuple[str, "InlineKeyboardMarkup", int]:
+) -> tuple[str, "InlineKeyboardMarkup"]:
     """
     Обработчик кнопок с ролями при редактировании ролей пользователя.
 
@@ -172,8 +125,6 @@ async def edit_role_choose_role_func(
     :return Сообщение, клавиатура пользователю и айди начального сообщения бота.
     """
     data = await state.get_data()
-    start_id: int = data["start_id"]
-    action: str = data["action"]
     all_roles: list[str] = data["all_roles"]
     choosed_roles: list[str] = data["choosed_roles"]
     user_id: int = data["user_id"]
@@ -187,16 +138,12 @@ async def edit_role_choose_role_func(
     await state.update_data(choosed_roles=choosed_roles)
 
     return (
-        "Выберите роли, которые надо "
-        f"{ACTIONS_TRANSLATE[action]} {name_link(username, user_id)}",
-        edit_roles_keyboard(all_roles, choosed_roles, action),
-        start_id,
+        f"Выберите роли, которые будут у {name_link(username, user_id)}",
+        edit_roles_keyboard(all_roles, choosed_roles),
     )
 
 
-async def edit_role_confirm_func(
-    state: "FSMContext",
-) -> tuple[str, "InlineKeyboardMarkup", int]:
+async def edit_role_confirm_func(state: "FSMContext") -> str:
     """
     Обработчик кнопки "Подтвердить" при изменении ролей.
 
@@ -205,27 +152,24 @@ async def edit_role_confirm_func(
     """
     await state.set_state(EditingRoles.confirm)
     data = await state.get_data()
-    start_id: int = data["start_id"]
-    action: str = data["action"]
     user_id: int = data["user_id"]
     username: str = data["username"]
     choosed_roles: list[str] = data["choosed_roles"]
 
-    foramtted_roles = ", ".join(
-        ROLES_TRANSLATE[role].capitalize() for role in choosed_roles
+    foramtted_roles = (
+        ", ".join(ROLES_TRANSLATE[role].capitalize() for role in choosed_roles)
+        or "Нет ролей"
     )
     return (
-        f"Вы уверены, что хотите {ACTIONS_TRANSLATE[action]} "
-        f'роль(-и) "{foramtted_roles}" {name_link(username, user_id)}?',
-        confirm_cancel_keyboard,
-        start_id,
+        f"Вы уверены, что у {name_link(username, user_id)} будут роль(-и):\n"
+        f"{foramtted_roles} ?"
     )
 
 
 async def edit_role_confirm_sure_func(
     state: "FSMContext",
-    repo: "Repository",
-) -> tuple[str, int]:
+    repo: "UserRoleRepository",
+) -> str:
     """
     Обработчик кнопки "Подтвердить" при подтверждении изменения ролей.
 
@@ -234,17 +178,11 @@ async def edit_role_confirm_sure_func(
     :return Сообщение администратору и айди начального сообщения бота.
     """
     data = await state.get_data()
-    start_id: int = data["start_id"]
-    action: str = data["action"]
     user_id: int = data["user_id"]
     choosed_roles: list[str] = data["choosed_roles"]
 
-    if action == Actions.ADD:
-        crud = repo.add_role_to_user
-    else:
-        crud = repo.remove_role_from_user
-
+    await repo.remove_all_roles_from_user(user_id)
     for role in choosed_roles:
-        await crud(user_id, role)
+        await repo.add_role_to_user(user_id, role)
 
-    return "Успешно!", start_id
+    return "Успешно!"
