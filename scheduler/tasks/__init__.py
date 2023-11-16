@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from scheduler.tasks.laundry_notify import check_laundry_timers
 from scheduler.tasks.update_cafe_menu import update_cafe_menu
+from scheduler.tasks.update_educators import update_educators
 
 if TYPE_CHECKING:
     from aiogram import Bot
@@ -37,5 +38,14 @@ def add_schedule_jobs(
         trigger="cron",
         args=[bot, session_maker],
         minute="*",
+        second=0,
+    )
+    scheduler.add_job(
+        update_educators,
+        trigger="cron",
+        args=[session_maker],
+        day="*",
+        hour=0,
+        minute=0,
         second=0,
     )

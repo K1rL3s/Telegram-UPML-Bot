@@ -91,4 +91,4 @@ class MenuRepository(BaseRepository):
         """
         monday_menu = await self.get(get_this_week_monday())
         today_menu = await self.get(date_today())
-        return bool(monday_menu or today_menu)
+        return bool(monday_menu and today_menu)

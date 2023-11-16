@@ -39,13 +39,12 @@ async def load_educators_from_xlsx(repo: "EducatorsScheduleRepository") -> None:
     rooms_ws: "Worksheet" = wb_room.active
 
     while current_date.month == today.month:
-        schedule = parse_educators_excels(current_date, schedule_ws, rooms_ws)
-
-        await repo.save_or_update_to_db(
-            date=current_date,
-            schedule_text=schedule,
-        )
-
+        if await repo.get(current_date) is None:
+            schedule = parse_educators_excels(current_date, schedule_ws, rooms_ws)
+            await repo.save_or_update_to_db(
+                date=current_date,
+                schedule_text=schedule,
+            )
         current_date += dt.timedelta(days=1)
 
 
@@ -205,11 +204,10 @@ class EducatorsList:
         is_rooms = educators[-1].is_room and educators[-2].is_room
         is_wrong_order = is_rooms and educators[-1].room > educators[-2].room
         if is_wrong_order:
-            if educators[-2].room > educators[-1].room:
-                educators[-2], educators[-1] = (
-                    educators[-1],
-                    educators[-2],
-                )
+            educators[-2], educators[-1] = (
+                educators[-1],
+                educators[-2],
+            )
 
     def educators(self) -> list["Educator"]:
         return self._educators
