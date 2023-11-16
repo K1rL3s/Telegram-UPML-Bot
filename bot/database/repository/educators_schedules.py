@@ -34,7 +34,7 @@ class EducatorsScheduleRepository(BaseRepository):
         self,
         date: "dt.date",
         schedule_text: str,
-        edit_by: int | None = None
+        edit_by: int | None = None,
     ) -> None:
         """
         Сохраняет или обновляет расписание воспитателей.
