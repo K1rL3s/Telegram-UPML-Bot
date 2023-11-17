@@ -202,7 +202,7 @@ class EducatorsList:
             )
 
         is_rooms = educators[-1].is_room and educators[-2].is_room
-        is_wrong_order = is_rooms and educators[-1].room > educators[-2].room
+        is_wrong_order = is_rooms and educators[-2].room > educators[-1].room
         if is_wrong_order:
             educators[-2], educators[-1] = (
                 educators[-1],
