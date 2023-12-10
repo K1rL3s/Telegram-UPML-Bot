@@ -1,5 +1,5 @@
 # Телеграм-бот для Югорского физико-математического лицея-интерната
-### Индвидуальный проект [Лесового Кирилла](https://hello.k1rles.ru)
+#### Индивидуальный проект [Лесового Кирилла](https://hello.k1rles.ru)
 
 ## Запуск
 
@@ -24,9 +24,12 @@
     POSTGRES_DB=<str>
     POSTGRES_USER=<str>
     POSTGRES_PASSWORD=<str>
-    ```
 
-<br>
+    REDIS_HOST=<ip>
+    REDIS_HOST_PORT=<int>
+    REDIS_OUTSIDE_PORT=<int>
+    REDIS_PASSWORD=<str>
+    ```
 
 - ### Docker:
 
@@ -41,5 +44,5 @@
 3. После запуска сделать миграцию базы данных:
 
     ```
-    docker compose exec upml-bot alembic upgrade head
+    docker compose exec bot alembic upgrade head
     ```

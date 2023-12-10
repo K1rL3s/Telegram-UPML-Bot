@@ -1,15 +1,14 @@
 from typing import TYPE_CHECKING
 
-from aiogram.utils.keyboard import (
-    InlineKeyboardBuilder,
-    InlineKeyboardButton,
-)
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from bot.callbacks import LaundryData
 from bot.keyboards.universal import (
-    go_to_main_menu_button,
-    go_to_settings_button,
+    main_menu_button,
+    settings_button,
 )
-from bot.utils.consts import UserCallback
+from bot.utils.enums import Actions, UserCallback
+from bot.utils.phrases import NO
 
 if TYPE_CHECKING:
     from aiogram.utils.keyboard import InlineKeyboardMarkup
@@ -17,31 +16,39 @@ if TYPE_CHECKING:
     from bot.database.models.laundries import Laundry
 
 
+START_WASHING = "🏖Запустить стирку"
+START_DRYING = "💨Запустить сушку"
+CANCEL_TIMER = f"{NO}Отменить таймер"
+
+
 async def laundry_keyboard(
     laundry: "Laundry",
-    add_cancel_if_timer: bool = True,
+    add_cancel_button: bool = True,
 ) -> "InlineKeyboardMarkup":
     """Клавиатура меню прачечной."""
-    keyboard = InlineKeyboardBuilder().add(
-        InlineKeyboardButton(
-            text="🏖Запустить стирку",
-            callback_data=UserCallback.START_WASHING_TIMER,
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(
+        text=START_WASHING,
+        callback_data=LaundryData(
+            action=Actions.START,
+            attr=UserCallback.WASHING,
         ),
-        InlineKeyboardButton(
-            text="💨Запустить сушку",
-            callback_data=UserCallback.START_DRYING_TIMER,
+    )
+    keyboard.button(
+        text=START_DRYING,
+        callback_data=LaundryData(
+            action=Actions.START,
+            attr=UserCallback.DRYING,
         ),
     )
 
-    if add_cancel_if_timer and laundry.is_active:
-        keyboard.add(
-            InlineKeyboardButton(
-                text="❌Отменить таймер",
-                callback_data=UserCallback.CANCEL_LAUNDRY_TIMER,
-            ),
+    if add_cancel_button and laundry.is_active:
+        keyboard.button(
+            text=CANCEL_TIMER,
+            callback_data=LaundryData(action=Actions.CANCEL),
         )
 
-    keyboard.add(go_to_main_menu_button, go_to_settings_button)
+    keyboard.add(main_menu_button, settings_button)
 
     keyboard.adjust(2, repeat=True)
 

@@ -1,6 +1,12 @@
 from aiogram.fsm.state import State, StatesGroup
 
 
+class EditingSettings(StatesGroup):
+    """Пользовательское состояние для редактирования настроек, требующих ввода."""
+
+    writing = State()
+
+
 class EditingMenu(StatesGroup):
     """Админские состояния для редактирования приёмов пищи."""
 
@@ -16,26 +22,27 @@ class EditingEducators(StatesGroup):
     writing = State()
 
 
-class LoadingLessons(StatesGroup):
+class EditingLessons(StatesGroup):
     """Админское состояние для отправки расписания уроков."""
 
-    image = State()
-
-
-class AddingNewAdmin(StatesGroup):
-    """Админские состояния для добавляения нового админа."""
-
-    username = State()
+    input_images = State()
+    all_good = State()
+    something_bad = State()
+    choose_grade = State()
+    choose_date = State()
     confirm = State()
 
 
-class DoNotify(StatesGroup):
+class EditingRoles(StatesGroup):
+    """Админские состояния для добавляения нового админа."""
+
+    username = State()
+    choose_user = State()  # Если никнеймы совпадают, то админ попадает сюда
+    roles = State()
+    confirm = State()
+
+
+class DoingNotify(StatesGroup):
     """Админское состояние для отправки уведомления."""
-
-    writing = State()
-
-
-class EditingSettings(StatesGroup):
-    """Пользовательское состояние для редактирования настроек, требующий ввода."""
 
     writing = State()

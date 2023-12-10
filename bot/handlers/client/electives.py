@@ -3,8 +3,9 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import Command
 
-from bot.keyboards import main_menu_inline_keyboard
-from bot.utils.consts import SlashCommands, TextCommands, UserCallback
+from bot.callbacks import OpenMenu
+from bot.keyboards import main_menu_keyboard
+from bot.utils.enums import Menus, SlashCommands, TextCommands
 
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(F.data == UserCallback.OPEN_ELECTIVES)
+@router.callback_query(OpenMenu.filter(F.menu == Menus.ELECTIVES))
 async def electives_callback_handler(
     callback: "CallbackQuery",
 ) -> None:
@@ -35,5 +36,5 @@ async def electives_message_handler(
     """Обработчик команды "/electives"."""
     await message.answer(
         text="🥲",
-        reply_markup=await main_menu_inline_keyboard(repo, message.from_user.id),
+        reply_markup=await main_menu_keyboard(repo.user, message.from_user.id),
     )

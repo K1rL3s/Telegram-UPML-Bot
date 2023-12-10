@@ -3,7 +3,7 @@ import datetime as dt
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from bot.database.models.base_models import UserRelatedModel
+from bot.database.base import UserRelatedModel
 
 
 class Laundry(UserRelatedModel):
@@ -24,27 +24,22 @@ class Laundry(UserRelatedModel):
         nullable=False,
     )
 
-    # Когда был запущен таймер
-    start_time: Mapped[dt.datetime] = mapped_column(
-        DateTime,
-        nullable=True,
-    )
-    # Когда он должен закончится
-    end_time: Mapped[dt.datetime] = mapped_column(
+    # Когда таймер должен закончиться
+    end_time: Mapped[dt.datetime | None] = mapped_column(
         DateTime,
         nullable=True,
     )
     # Сколько раз было уведомление
-    rings: Mapped[int] = mapped_column(
+    rings: Mapped[int | None] = mapped_column(
         Integer,
-        nullable=True,
         default=0,
+        nullable=True,
     )
     # Активен ли таймер
-    is_active: Mapped[bool] = mapped_column(
+    is_active: Mapped[bool | None] = mapped_column(
         Boolean,
-        nullable=True,
         default=False,
+        nullable=True,
     )
 
     user = relationship("User", back_populates="laundry", lazy="selectin")

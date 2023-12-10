@@ -3,54 +3,31 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import Command
 
-from bot.funcs.laundry import (
+from bot.callbacks import LaundryData, OpenMenu
+from bot.funcs.client.laundry import (
     laundry_cancel_timer_func,
+    laundry_func,
     laundry_start_timer_func,
-    laundry_welcome_func,
 )
-from bot.keyboards import go_to_main_menu_keyboard, laundry_keyboard
-from bot.utils.consts import LAUNDRY_REPEAT, SlashCommands, TextCommands, UserCallback
+from bot.keyboards import go_to_main_menu_keyboard
 from bot.utils.datehelp import format_datetime
+from bot.utils.enums import Actions, Menus, SlashCommands, TextCommands
 
 if TYPE_CHECKING:
-    from aiogram.types import CallbackQuery, InlineKeyboardMarkup, Message
+    from aiogram.types import CallbackQuery, Message
 
     from bot.database.repository.repository import Repository
-
 
 router = Router(name=__name__)
 
 
-async def laundry_handler(
-    user_id: int,
-    repo: "Repository",
-) -> tuple[str, "InlineKeyboardMarkup"]:
-    """
-    Текст и клавиатура при переходе в таймеры для прачечной.
-
-    :param user_id: ТГ Айди.
-    :param repo: Доступ к базе данных.
-    :return: Сообщение пользователю и клавиатура.
-    """
-    text = f"""Привет! Я - таймер для прачечной.
-После конца таймер запустится ещё три раза на *{LAUNDRY_REPEAT}* минут."""
-
-    laundry = await repo.laundry.get(user_id)
-    keyboard = await laundry_keyboard(laundry)
-
-    if (minutes := await laundry_welcome_func(laundry)) is not None:
-        text += f"\n\nВремя до конца таймера: *{minutes}* минут"
-
-    return text, keyboard
-
-
-@router.callback_query(F.data == UserCallback.OPEN_LAUNDRY)
+@router.callback_query(OpenMenu.filter(F.menu == Menus.LAUNDRY))
 async def laundry_callback_handler(
     callback: "CallbackQuery",
     repo: "Repository",
 ) -> None:
     """Обработчик кнопки "Прачечная"."""
-    text, keyboard = await laundry_handler(callback.from_user.id, repo)
+    text, keyboard = await laundry_func(callback.from_user.id, repo.laundry)
     await callback.message.edit_text(
         text=text,
         reply_markup=keyboard,
@@ -63,26 +40,28 @@ async def laundry_message_handler(
     message: "Message",
     repo: "Repository",
 ) -> None:
-    """Обработчик кнопки "Прачечная"."""
-    text, keyboard = await laundry_handler(message.from_user.id, repo)
+    """Обработчик команды "Прачечная"."""
+    text, keyboard = await laundry_func(message.from_user.id, repo.laundry)
     await message.answer(text=text, reply_markup=keyboard)
 
 
-@router.callback_query(F.data.startswith(UserCallback.START_LAUNDRY_PREFIX))
+@router.callback_query(LaundryData.filter(F.action == Actions.START))
 async def laundry_start_timer_handler(
     callback: "CallbackQuery",
+    callback_data: "LaundryData",
     repo: "Repository",
 ) -> None:
     """Обработчик кнопок "Запустить стирку", "Запустить сушку"."""
     minutes, end_time = await laundry_start_timer_func(
-        repo,
+        repo.settings,
+        repo.laundry,
         callback.from_user.id,
-        callback.data,
+        callback_data.attr,
     )
 
     text = (
         f"⏰Таймер запущен!\n"
-        f"Уведомление придёт через *~{minutes} минут* "
+        f"Уведомление придёт через <b>~{minutes} минут</b> "
         f"({format_datetime(end_time)})"
     )
     keyboard = go_to_main_menu_keyboard
@@ -90,14 +69,15 @@ async def laundry_start_timer_handler(
     await callback.message.edit_text(text=text, reply_markup=keyboard)
 
 
-@router.callback_query(F.data == UserCallback.CANCEL_LAUNDRY_TIMER)
+@router.callback_query(LaundryData.filter(F.action == Actions.CANCEL))
 async def laundry_cancel_timer_handler(
     callback: "CallbackQuery",
     repo: "Repository",
 ) -> None:
     """Обработчик кнопки "Отменить таймер"."""
-    await laundry_cancel_timer_func(repo, callback.from_user.id)
+    await laundry_cancel_timer_func(repo.laundry, callback.from_user.id)
+
     text = "Таймер отменён."
-    keyboard = go_to_main_menu_keyboard
+    _, keyboard = await laundry_func(callback.from_user.id, repo.laundry)
 
     await callback.message.edit_text(text=text, reply_markup=keyboard)

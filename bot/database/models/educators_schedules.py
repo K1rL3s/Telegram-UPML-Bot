@@ -3,10 +3,10 @@ import datetime as dt
 from sqlalchemy import Date, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from bot.database.models.base_models import BaseModel
+from bot.database.base import AlchemyBaseModel
 
 
-class EducatorsSchedule(BaseModel):
+class EducatorsSchedule(AlchemyBaseModel):
     """Модель для хранения расписания воспитателей на определённую дату."""
 
     __tablename__ = "educators_schedules"
@@ -25,11 +25,8 @@ class EducatorsSchedule(BaseModel):
         nullable=False,
         index=True,
     )
-
-    edit_by: Mapped[int] = mapped_column(
+    edit_by: Mapped[int | None] = mapped_column(
         ForeignKey("users.user_id"),
-        default=0,
-        nullable=False,
+        nullable=True,
     )
-
     schedule: Mapped[str] = mapped_column(String(1024), nullable=True)

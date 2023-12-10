@@ -3,10 +3,10 @@ import datetime as dt
 from sqlalchemy import Date, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from bot.database.models.base_models import BaseModel
+from bot.database.base import AlchemyBaseModel
 
 
-class FullLessons(BaseModel):
+class FullLessons(AlchemyBaseModel):
     """Модель для хранения расписания уроков для конкретной параллели."""
 
     __tablename__ = "full_lessons"
@@ -20,7 +20,5 @@ class FullLessons(BaseModel):
     )
 
     date: Mapped[dt.date] = mapped_column(Date, nullable=False)
-
     grade: Mapped[str] = mapped_column(String(2), nullable=False)  # 10 или 11
-    # Айди изображения из тг
-    image: Mapped[str] = mapped_column(String, nullable=False)
+    file_id: Mapped[str] = mapped_column(String(128), nullable=False)

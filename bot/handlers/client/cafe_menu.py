@@ -3,10 +3,12 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import Command
 
-from bot.funcs.cafe_menu import get_format_menu_by_date
+from bot.callbacks import OpenMenu
+from bot.funcs.client.cafe_menu import get_format_menu_by_date
 from bot.keyboards import cafe_menu_keyboard
-from bot.utils.consts import SlashCommands, TextCommands, UserCallback
+from bot.utils.consts import TODAY
 from bot.utils.datehelp import date_by_format
+from bot.utils.enums import Menus, SlashCommands, TextCommands
 
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message
@@ -17,16 +19,17 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(F.data.startswith(UserCallback.OPEN_CAFE_MENU_ON_))
-async def date_cafe_menu_callback_handler(
+@router.callback_query(OpenMenu.filter(F.menu == Menus.CAFE_MENU))
+async def cafe_menu_callback_handler(
     callback: "CallbackQuery",
+    callback_data: "OpenMenu",
     repo: "Repository",
 ) -> None:
     """Обработчик команды кнопки "Меню", открывает расписание еды."""
-    date_ = callback.data.replace(UserCallback.OPEN_CAFE_MENU_ON_, "")
-    menu_date = date_by_format(date_)
+    date = callback_data.date
+    menu_date = date_by_format(date)
 
-    text = await get_format_menu_by_date(repo, menu_date)
+    text = await get_format_menu_by_date(repo.menu, menu_date)
 
     await callback.message.edit_text(
         text=text,
@@ -36,14 +39,13 @@ async def date_cafe_menu_callback_handler(
 
 @router.message(F.text == TextCommands.CAFE)
 @router.message(Command(SlashCommands.CAFE))
-async def date_cafe_menu_message_handler(
+async def cafe_menu_message_handler(
     message: "Message",
     repo: "Repository",
 ) -> None:
     """Обработчик команды "/cafe", открывает расписание еды."""
-    date_ = "today"
-    menu_date = date_by_format(date_)
+    menu_date = date_by_format(TODAY)
 
-    text = await get_format_menu_by_date(repo, menu_date)
+    text = await get_format_menu_by_date(repo.menu, menu_date)
 
     await message.answer(text=text, reply_markup=cafe_menu_keyboard(menu_date))

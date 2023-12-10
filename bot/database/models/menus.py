@@ -3,10 +3,10 @@ import datetime as dt
 from sqlalchemy import Date, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from bot.database.models.base_models import BaseModel
+from bot.database.base import AlchemyBaseModel
 
 
-class Menu(BaseModel):
+class Menu(AlchemyBaseModel):
     """Модель для хранения расписания еды на определённую дату."""
 
     __tablename__ = "menus"
@@ -26,14 +26,13 @@ class Menu(BaseModel):
         index=True,
     )
 
-    edit_by: Mapped[int] = mapped_column(
+    edit_by: Mapped[int | None] = mapped_column(
         ForeignKey("users.user_id"),
-        default=0,
-        nullable=False,
+        nullable=True,
     )
 
-    breakfast: Mapped[str] = mapped_column(String, nullable=True)
-    lunch: Mapped[str] = mapped_column(String, nullable=True)
-    dinner: Mapped[str] = mapped_column(String, nullable=True)
-    snack: Mapped[str] = mapped_column(String, nullable=True)
-    supper: Mapped[str] = mapped_column(String, nullable=True)
+    breakfast: Mapped[str | None] = mapped_column(String, nullable=True)
+    lunch: Mapped[str | None] = mapped_column(String, nullable=True)
+    dinner: Mapped[str | None] = mapped_column(String, nullable=True)
+    snack: Mapped[str | None] = mapped_column(String, nullable=True)
+    supper: Mapped[str | None] = mapped_column(String, nullable=True)

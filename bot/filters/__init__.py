@@ -1,10 +1,19 @@
-from bot.filters.roles import IsAdmin, IsSuperAdmin, RoleAccess
-from bot.filters.save_user import SaveUser
+from bot.filters.roles import (
+    HasCafeMenuRole,
+    HasEducatorsRole,
+    HasLessonsRole,
+    HasNotifyRole,
+    IsAdmin,
+    IsSuperAdmin,
+    RoleAccess,
+)
 
-
-__all__ = [
-    "RoleAccess",
+__all__ = (
+    "HasCafeMenuRole",
+    "HasEducatorsRole",
+    "HasLessonsRole",
+    "HasNotifyRole",
     "IsAdmin",
     "IsSuperAdmin",
-    "SaveUser",
-]
+    "RoleAccess",
+)

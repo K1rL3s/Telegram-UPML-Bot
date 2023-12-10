@@ -1,4 +1,4 @@
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 from sqlalchemy import select
 
@@ -14,7 +14,7 @@ class LaundryRepository(BaseRepository):
     """Класс для работы с таймерами прачечной в базе данных."""
 
     def __init__(self, session: "AsyncSession") -> None:
-        self.session = session
+        self._session = session
 
     async def get(self, user_id: int) -> "Optional[Laundry]":
         """
@@ -23,7 +23,8 @@ class LaundryRepository(BaseRepository):
         :param user_id: ТГ Айди.
         :return: Модель Laundry.
         """
-        return await self._get_user_related_model(Laundry, user_id)
+        query = select(Laundry).where(Laundry.user_id == user_id)
+        return await self._session.scalar(query)
 
     async def get_expired(self) -> list["Laundry"]:
         """
@@ -31,11 +32,11 @@ class LaundryRepository(BaseRepository):
 
         :return: Список с Laundry.
         """
-        now = datetime_now()
         query = select(Laundry).where(
-            Laundry.is_active == True, Laundry.end_time <= now  # noqa
+            Laundry.is_active == True,  # noqa
+            Laundry.end_time <= datetime_now(),
         )
-        return list((await self.session.scalars(query)).all())
+        return await self.select_query_to_list(query)
 
     async def save_or_update_to_db(
         self,
@@ -53,6 +54,6 @@ class LaundryRepository(BaseRepository):
                 setattr(laundry, k, v)
         else:
             laundry = Laundry(user_id=user_id, **fields)
-            self.session.add(laundry)
+            self._session.add(laundry)
 
-        await self.session.commit()
+        await self._session.flush()

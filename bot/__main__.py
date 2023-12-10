@@ -1,40 +1,43 @@
 import asyncio
+import contextlib
 
-from loguru import logger
-
-from bot.database.db_session import database_init
-from bot.middlewares import setup_middlewares
-from bot.setup import make_bot, make_dispatcher, setup_logs
-from bot.schedule import run_schedule_jobs
+from bot.database import database_init, redis_init
+from bot.middlewares import setup_global_middlewares
 from bot.settings import get_settings
+from bot.setup import configure_logs, make_bot, make_dispatcher
+
+"""На будущее:
+1. Cделать в фильтре RoleAccess временный кэш (?).
+3.1 Нормально назвать переменные там, где плохо названо xd.
+3.2 Вынести обработку фото расписаний в отдельный поток с помощью докера.
+4. Сделать загрузку картинок/файлов на меню с элективами.
+5. Проверить и исправить, что слои database – logic – view сильно не перемешаны.
+7. Сделать удаление расписаний уроков.
+8. Решить проблему с добавлением новых ролей в бд.
+"""
 
 
 async def main() -> None:
     """И поехали! :)."""
-    setup_logs()
+    configure_logs()
+
     settings = get_settings()
+    redis = await redis_init(settings.redis)
+    session_maker = await database_init(settings.db)
 
-    await database_init(settings.db)
+    bot = await make_bot(settings.bot.token)
+    dp = make_dispatcher(settings, redis)
 
-    bot = await make_bot(settings.bot.BOT_TOKEN)
-    dp = make_dispatcher()
-    dp["settings"] = settings
-
-    setup_middlewares(bot, dp)
-
-    asyncio.create_task(run_schedule_jobs(bot, settings.other.TIMEOUT))
-
-    logger.info("Запуск пулинга...")
+    setup_global_middlewares(bot, dp, session_maker)
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(
         bot,
-        polling_timeout=settings.other.TIMEOUT,
+        polling_timeout=settings.other.timeout,
         allowed_updates=dp.resolve_used_update_types(),
     )
 
-    logger.info("Бот выключен")
-
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    with contextlib.suppress(KeyboardInterrupt):
+        asyncio.run(main())

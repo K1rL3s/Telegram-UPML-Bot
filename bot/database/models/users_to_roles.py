@@ -1,12 +1,13 @@
-from sqlalchemy import Column, ForeignKey, Table
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 
-from bot.database.db_session import SqlAlchemyBase
+from bot.database.base import AlchemyBaseModel
 
 
-# Подумать над записью таблицы через класс
-users_to_roles = Table(
-    "users_to_roles",
-    SqlAlchemyBase.metadata,
-    Column("user_id", ForeignKey("users.user_id"), primary_key=True),
-    Column("role_id", ForeignKey("roles.id"), primary_key=True),
-)
+class UsersToRoles(AlchemyBaseModel):
+    """Модель M2M связи пользователей и ролей доступа."""
+
+    __tablename__ = "users_to_roles"
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), primary_key=True)
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), primary_key=True)

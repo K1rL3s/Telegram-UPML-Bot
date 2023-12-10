@@ -3,10 +3,12 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import Command
 
-from bot.funcs.educators import get_format_educators_by_date
+from bot.callbacks import OpenMenu
+from bot.funcs.client.educators import get_format_educators_by_date
 from bot.keyboards import educators_keyboard
-from bot.utils.consts import SlashCommands, TextCommands, UserCallback
+from bot.utils.consts import TODAY
 from bot.utils.datehelp import date_by_format
+from bot.utils.enums import Menus, SlashCommands, TextCommands
 
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message
@@ -17,21 +19,21 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(F.data.startswith(UserCallback.OPEN_EDUCATORS_ON_))
+@router.callback_query(OpenMenu.filter(F.menu == Menus.EDUCATORS))
 async def educators_callback_handler(
     callback: "CallbackQuery",
+    callback_data: "OpenMenu",
     repo: "Repository",
 ) -> None:
     """Обработчик кнопки "Воспитатели"."""
-    date_ = callback.data.replace(UserCallback.OPEN_EDUCATORS_ON_, "")
+    date_ = callback_data.date
     schedule_date = date_by_format(date_)
 
-    text = await get_format_educators_by_date(repo, schedule_date)
+    text = await get_format_educators_by_date(repo.educators, schedule_date)
 
     await callback.message.edit_text(
         text=text,
         reply_markup=educators_keyboard(schedule_date),
-        parse_mode="html",
     )
 
 
@@ -42,13 +44,11 @@ async def educators_message_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик команды "/educators"."""
-    date_ = "today"
-    schedule_date = date_by_format(date_)
+    schedule_date = date_by_format(TODAY)
 
-    text = await get_format_educators_by_date(repo, schedule_date)
+    text = await get_format_educators_by_date(repo.educators, schedule_date)
 
     await message.answer(
         text=text,
         reply_markup=educators_keyboard(schedule_date),
-        parse_mode="html",
     )

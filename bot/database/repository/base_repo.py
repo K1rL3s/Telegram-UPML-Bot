@@ -1,31 +1,18 @@
 from abc import ABC
-from typing import Optional, TYPE_CHECKING
-
-from sqlalchemy import select
+from typing import TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
+    from sqlalchemy import Select
     from sqlalchemy.ext.asyncio import AsyncSession
 
-    from bot.database.models.base_models import UserRelatedModel
+
+T = TypeVar("T")
 
 
 class BaseRepository(ABC):
     """Базовый класс для репозиториев, нужен для переиспользования кода."""
 
-    session: "AsyncSession"
+    _session: "AsyncSession"
 
-    async def _get_user_related_model(
-        self,
-        model: type["UserRelatedModel"],
-        user_id: int,
-    ) -> "Optional[UserRelatedModel]":
-        """
-        Возвращает связанную с юзером модель по айди пользователя.
-
-        :param model: Модель-наследник от UserRelatedModel.
-        :param user_id: ТГ Айди юзера.
-        :return: Модель model.
-        """
-        # noinspection PyTypeChecker
-        query = select(model).where(model.user_id == user_id)
-        return await self.session.scalar(query)
+    async def select_query_to_list(self, query: "Select[tuple[T]]") -> list[T]:
+        return list((await self._session.scalars(query)).all())

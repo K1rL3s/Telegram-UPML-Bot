@@ -1,28 +1,77 @@
-from io import BytesIO
+import asyncio
 import datetime as dt
-from typing import Optional, TYPE_CHECKING
+from io import BytesIO
+from typing import TYPE_CHECKING, Optional
 
-from httpx import AsyncClient
+from aiohttp import ClientSession, ClientTimeout
 from loguru import logger
 from pypdf import PdfReader
+
 from bot.utils.datehelp import format_date, get_this_week_monday
+from bot.utils.translate import CAFE_MENU_TRANSLATE
 
 if TYPE_CHECKING:
-    from bot.database.repository.repository import Repository
+    from bot.database.repository import MenuRepository
 
 
-async def process_cafe_menu(repo: "Repository", timeout: int) -> tuple[bool, str]:
+async def process_cafe_menu(repo: "MenuRepository", timeout: int) -> str:
     """
-    Основная функция в файле, выполняет всю работу, вызывая другие функции.
+    Поиск, составление и сохранение расписания еды в столовой.
 
-    :param repo: Доступ к базе данных.
+    :param repo: Репозиторий расписаний столовой.
     :param timeout: Таймаут для запроса на сайт лицея.
-    :return: Сохранилось/Обновилось ли меню.
+    :return: Сохранилось/Обновилось ли меню, текст результата.
     """
-    if (pdf_reader := await _get_pdf_menu(timeout)) is None:
+    if (pdf_reader := await __get_pdf_menu(timeout)) is None:
         logger.warning(text := "Не удалось найти PDF с меню")
-        return False, text
+        return text
 
+    if (menu_date := __compare_pdf_date(pdf_reader)) is None:
+        logger.warning(text := "Не удалось сравнять дату PDF и текущей недели")
+        return text
+
+    await __parse_pdf_menu(repo, pdf_reader, menu_date)
+
+    logger.info(text := "Расписание еды обновлено!")
+    return text
+
+
+async def __get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
+    """
+    Ищет и возвращает файл с недельным расписанием питания с сайта лицея.
+
+    :return: PdfReader если файл существует, иначе None
+    """
+    # В формат передавать число, месяц, год
+    pdf_url = (
+        "https://yufmli.gosuslugi.ru/netcat_files/47/515/"
+        "Menyu_{0:0>2}_{1:0>2}_{2}_krugl.pdf"
+    )
+
+    menu_date = get_this_week_monday() - dt.timedelta(days=1)
+    # Поиск с воскресенья по воскресенье
+    # Число и месяц изменяются сами, поэтому ссылка будет корректной
+    async with ClientSession(timeout=ClientTimeout(total=timeout)) as session:
+        for _ in range(7):
+            async with session.get(
+                pdf_url.format(menu_date.day, menu_date.month, menu_date.year),
+            ) as response:
+                if response.headers.get("content-type") == "application/pdf":
+                    return PdfReader(BytesIO(await response.read()))
+
+            menu_date += dt.timedelta(days=1)
+            await asyncio.sleep(0.25)  # На случай, чтобы госуслуги не легли от нагрузки
+
+    return None
+
+
+def __compare_pdf_date(pdf_reader: "PdfReader") -> "Optional[dt.date]":
+    """
+    Возвращает дату, с которой начинается расписание еды в пдф файле.
+
+    :param pdf_reader: PDF файл.
+    :return: Дата начала расписания еды или None, если не удалось сравнять дату.
+    """
     menu_date = get_this_week_monday()
     add_counter = 0
 
@@ -32,14 +81,57 @@ async def process_cafe_menu(repo: "Repository", timeout: int) -> tuple[bool, str
         add_counter += 1
 
     if add_counter >= 7:
-        logger.warning(text := "Не удалось сравнять дату PDF и текущей недели")
-        return False, text
+        return None
 
-    await _process_pdf_menu(repo, pdf_reader, menu_date)
-    return True, "Расписание еды обновлено!"
+    return menu_date
 
 
-def _get_meal(menu: str, start_sub: str, end_sub: str) -> tuple[str, int, int]:
+async def __parse_pdf_menu(
+    repo: "MenuRepository",
+    pdf_reader: "PdfReader",
+    date: "dt.date",
+) -> None:
+    """
+    Идёт по PDF недельного расписания меню и добавляет меню каждого дня в бд.
+
+    :param repo: Репозиторий расписаний столовой.
+    :param pdf_reader: PDF файл.
+    :param date: Дата, с которой начинается расписание в файле.
+    """
+    for page in pdf_reader.pages:
+        text_menu = " ".join(page.extract_text().split())
+        meals = __parse_page_to_meals(text_menu)
+        meals_to_info = dict(zip(CAFE_MENU_TRANSLATE.keys(), meals))
+        await repo.save_or_update_to_db(date, **meals_to_info)
+
+        date += dt.timedelta(days=1)
+
+
+def __parse_page_to_meals(text_menu: str) -> list[str]:
+    """
+    Разбение текста страницы расписания еды на приёмы пищи.
+
+    :param text_menu: Текст страницы.
+    :return: Расписание еды по распорядку дня.
+    """
+    food_times = [
+        ("автрак", "автрак"),
+        ("автрак", "обед"),
+        ("обед", "полдник"),
+        ("полдник", "ужин"),
+        ("ужин", "итого"),
+    ]
+
+    meals = []
+    for start_sub, end_sub in food_times:
+        meal, _, end = __get_meal(text_menu, start_sub, end_sub)
+        meals.append(__normalize_meal(meal))
+        text_menu = text_menu[end:]
+
+    return meals
+
+
+def __get_meal(menu: str, start_sub: str, end_sub: str) -> tuple[str, int, int]:
     """
     Возвращает строку с едой для конкретного приёма пищи.
 
@@ -56,10 +148,10 @@ def _get_meal(menu: str, start_sub: str, end_sub: str) -> tuple[str, int, int]:
     return menu[start_index:end_index].strip(), start_index, end_index
 
 
-# РАБОТАЕТ НЕ ТРОГАТЬ РАБОТАЕТ НЕ ТРОГАТЬ РАБОТАЕТ НЕ ТРОГАТЬ
-def _normalize_meal(one_meal: str) -> str:
+# Это самое жуткое, что я когда-либо писал, и оно работает :(
+def __normalize_meal(one_meal: str) -> str:
     """
-    Принимает строку из ``def get_string_meal`` и переделывает её в читаемый вид.
+    Принимает строку из ``def __get_meal`` и переделывает её в читаемый вид.
 
     (Каждое блюдо с новой строки без лишних символов).
 
@@ -85,65 +177,3 @@ def _normalize_meal(one_meal: str) -> str:
             dish += char
 
     return "\n".join(dishes)
-
-
-async def _get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
-    """
-    Ищет и возвращает файл с недельным расписанием питания с сайта лицея.
-
-    :return: PdfReader если файл существует, иначе None
-    """
-    # Передавать число, месяц, год - print(pdf_url(2, 5, 2023))
-    pdf_url = (
-        "https://ugrafmsh.ru/wp-content/uploads/{2}/{1:0>2}"
-        "/menyu-{0:0>2}-{1:0>2}-{2}-krugl.pdf"
-    )
-
-    menu_date = get_this_week_monday() - dt.timedelta(days=1)
-
-    # Ищем в воскресенье, понедельник, вторник и среду.
-    # Число и месяц изменяются сами, поэтому ссылка будет корректной.
-    async_session = AsyncClient(timeout=timeout)
-    for _ in range(4):
-        response = await async_session.get(
-            pdf_url.format(menu_date.day, menu_date.month, menu_date.year),
-        )
-        if response.headers.get("content-type") == "application/pdf":
-            return PdfReader(BytesIO(response.content))
-
-        menu_date += dt.timedelta(days=1)
-
-    return None
-
-
-async def _process_pdf_menu(
-    repo: "Repository",
-    pdf_reader: "PdfReader",
-    menu_date: "dt.date",
-) -> None:
-    """
-    Идёт по PDF недельного расписания меню и добавляет меню каждого дня в бд.
-
-    :param repo: Доступ к базе данных.
-    :param pdf_reader: PDF файл.
-    :param menu_date: Дата, с которой начинается расписание в файле.
-    """
-    for page in pdf_reader.pages:
-        text_menu = " ".join(page.extract_text().split())
-        food_times = [
-            ("автрак", "автрак"),
-            ("автрак", "обед"),
-            ("обед", "полдник"),
-            ("полдник", "ужин"),
-            ("ужин", "итого"),
-        ]
-
-        meals = []
-        for start_sub, end_sub in food_times:
-            meal, _, end = _get_meal(text_menu, start_sub, end_sub)
-            meals.append(_normalize_meal(meal))
-            text_menu = text_menu[end:]
-
-        await repo.menu.save_or_update_to_db(menu_date, *meals)
-
-        menu_date += dt.timedelta(days=1)

@@ -1,13 +1,9 @@
-import datetime as dt
-
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, Boolean, DateTime, Integer, String
+from sqlalchemy import BigInteger, Boolean, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from bot.database.models.base_models import UserRelatedModel
-from bot.database.models.users_to_roles import users_to_roles
-from bot.utils.datehelp import datetime_now
+from bot.database.base import UserRelatedModel
 
 if TYPE_CHECKING:
     from bot.database.models.laundries import Laundry
@@ -33,9 +29,11 @@ class User(UserRelatedModel):
         nullable=False,
         index=True,
     )
-
-    # ТГ Никнейм пользователя
-    username: Mapped[str] = mapped_column(String(32), default=None)
+    # ТГ Никнейм пользователя (64?)
+    username: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+    )
 
     # Активный ли, False - заблокировал бота итп
     is_active: Mapped[bool] = mapped_column(
@@ -44,25 +42,6 @@ class User(UserRelatedModel):
         nullable=False,
     )
 
-    # Первый заход в бота
-    createad_time: Mapped[dt.datetime] = mapped_column(
-        DateTime,
-        default=datetime_now,
-        nullable=False,
-    )
-    # Обновление ника или статуса
-    modified_time: Mapped[dt.datetime] = mapped_column(
-        DateTime,
-        default=datetime_now,
-        onupdate=datetime_now,
-        nullable=False,
-    )
-
-    # Роли пользователя
-    roles: Mapped[list["Role"]] = relationship(
-        secondary=users_to_roles,
-        lazy="selectin",
-    )
     # Настройки пользователя
     settings: Mapped["Settings"] = relationship(
         "Settings",
@@ -75,7 +54,22 @@ class User(UserRelatedModel):
         back_populates="user",
         lazy="selectin",
     )
+    # Роли пользователя
+    roles: Mapped[list["Role"]] = relationship(
+        secondary="users_to_roles",
+        lazy="selectin",
+    )
 
+    @property
     def short_info(self) -> str:
         """Краткая информация о пользователе."""
         return f"User(id={self.id}, user_id={self.user_id}, username={self.username})"
+
+    def should_be_updated(self, username: str) -> bool:
+        """
+        Нужно ли активировать пользователя или обновить ему имя.
+
+        :param username: Имя пользователя в ТГ.
+        :return: Нужно ли поставить новый никнейм или изменить статус на активный.
+        """
+        return not self.is_active or self.username != username

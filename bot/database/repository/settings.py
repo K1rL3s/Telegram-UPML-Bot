@@ -1,4 +1,6 @@
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
+
+from sqlalchemy import select
 
 from bot.database.models.settings import Settings
 from bot.database.repository.base_repo import BaseRepository
@@ -11,7 +13,7 @@ class SettingsRepository(BaseRepository):
     """Класс для работы с настройками пользователей в базе данных."""
 
     def __init__(self, session: "AsyncSession") -> None:
-        self.session = session
+        self._session = session
 
     async def get(self, user_id: int) -> "Optional[Settings]":
         """
@@ -20,7 +22,8 @@ class SettingsRepository(BaseRepository):
         :param user_id: ТГ Айди.
         :return: Модель Settings.
         """
-        return await self._get_user_related_model(Settings, user_id)
+        query = select(Settings).where(Settings.user_id == user_id)
+        return await self._session.scalar(query)
 
     async def save_or_update_to_db(
         self,
@@ -38,6 +41,6 @@ class SettingsRepository(BaseRepository):
                 setattr(settings, k, v)
         else:
             settings = Settings(user_id=user_id, **fields)
-            self.session.add(settings)
+            self._session.add(settings)
 
-        await self.session.commit()
+        await self._session.flush()

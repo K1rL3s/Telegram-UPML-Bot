@@ -6,82 +6,88 @@ from aiogram.utils.keyboard import (
     InlineKeyboardMarkup,
 )
 
-from bot.utils.consts import AdminCallback, TextCommands, UserCallback
+from bot.callbacks import InStateData, OpenMenu
+from bot.utils.consts import TODAY
 from bot.utils.datehelp import date_today, format_date
+from bot.utils.enums import Actions, Menus, TextCommands
+from bot.utils.phrases import NO, YES
+
+MAIN_MENU = "🏠Главное меню"
+CANCEL = f"{NO}Отмена"
+CONFIRM = f"{YES}Подтвердить"
 
 
-go_to_main_menu_button = InlineKeyboardButton(
-    text="🏠Главное меню",
-    callback_data=UserCallback.OPEN_MAIN_MENU,
+main_menu_button = InlineKeyboardButton(
+    text=MAIN_MENU,
+    callback_data=OpenMenu(menu=Menus.MAIN_MENU).pack(),
 )
-
-go_to_settings_button = InlineKeyboardButton(
+settings_button = InlineKeyboardButton(
     text=TextCommands.SETTINGS,
-    callback_data=UserCallback.OPEN_SETTINGS,
+    callback_data=OpenMenu(menu=Menus.SETTINGS).pack(),
 )
-
-go_to_admin_panel_button = InlineKeyboardButton(
+admin_panel_button = InlineKeyboardButton(
     text=TextCommands.ADMIN_PANEL,
-    callback_data=AdminCallback.OPEN_ADMIN_PANEL,
+    callback_data=OpenMenu(menu=Menus.ADMIN_PANEL).pack(),
 )
-
+confirm_state_button = InlineKeyboardButton(
+    text=CONFIRM,
+    callback_data=InStateData(action=Actions.CONFIRM).pack(),
+)
 cancel_state_button = InlineKeyboardButton(
-    text="❌Отмена",
-    callback_data=UserCallback.CANCEL_STATE,
+    text=CANCEL,
+    callback_data=InStateData(action=Actions.CANCEL).pack(),
 )
 
 cancel_state_keyboard = InlineKeyboardMarkup(inline_keyboard=[[cancel_state_button]])
 
+confirm_cancel_keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[[confirm_state_button, cancel_state_button]],
+)
 
-def _keyboard_for_left_right_menu(
-    open_smt_on_callback: str,
-    open_smt_today_callback: str,
+
+def _left_right_keyboard_navigation(
+    bot_menu: str,
     today_smile: str,
-    curr_date: "dt.date" = None,
+    date: "dt.date" = None,
 ) -> "InlineKeyboardMarkup":
     """Клавиатура для меню с навигацией влево-вправо по датам.
 
-    :param open_smt_on_callback: Строка формата "open_{smt}_on_{date}".
-    :param open_smt_today_callback: Строка формата "open_{smt}_on_today".
+    :param bot_menu: Какое меню открывается.
     :param today_smile: Смайлик на кнопке "Сегодня".
-    :param curr_date: Дата, на которой открыта навигация. None - сегодня.
+    :param date: Дата, на которой открыта навигация. None - сегодня.
     :return: Клавиатура меню навигации влево-вправо.
     """
     today = date_today()
 
-    if curr_date is None:
-        curr_date = today
+    if date is None:
+        date = today
 
-    tomorrow = curr_date + dt.timedelta(days=1)
-    yesterday = curr_date - dt.timedelta(days=1)
-    tomorrow_str = format_date(tomorrow)
-    yesterday_str = format_date(yesterday)
+    tomorrow = date + dt.timedelta(days=1)
+    yesterday = date - dt.timedelta(days=1)
+    tomorrow_str = format_date(tomorrow, with_year=False)
+    yesterday_str = format_date(yesterday, with_year=False)
+    tomorrow_data = format_date(tomorrow)
+    yesterday_data = format_date(yesterday)
 
     keyboard = InlineKeyboardBuilder()
 
     if abs((today - yesterday).days) < 7:
-        keyboard.add(
-            InlineKeyboardButton(
-                text=f"⬅️{yesterday_str}",
-                callback_data=open_smt_on_callback + yesterday_str,
-            ),
+        keyboard.button(
+            text=f"⬅️ {yesterday_str}",
+            callback_data=OpenMenu(menu=bot_menu, date=yesterday_data),
         )
 
-    keyboard.add(
-        InlineKeyboardButton(
-            text=f"{today_smile}Сегодня",
-            callback_data=open_smt_today_callback,
-        ),
+    keyboard.button(
+        text=f"{today_smile}Сегодня",
+        callback_data=OpenMenu(menu=bot_menu, date=TODAY),
     )
 
     if abs((today - tomorrow).days) < 7:
-        keyboard.add(
-            InlineKeyboardButton(
-                text=f"{tomorrow_str}➡️",
-                callback_data=open_smt_on_callback + tomorrow_str,
-            ),
+        keyboard.button(
+            text=f"{tomorrow_str} ➡️",
+            callback_data=OpenMenu(menu=bot_menu, date=tomorrow_data),
         )
 
-    keyboard.row(go_to_main_menu_button)
+    keyboard.row(main_menu_button)
 
     return keyboard.as_markup()
