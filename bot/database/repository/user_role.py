@@ -1,6 +1,10 @@
 import contextlib
 from typing import TYPE_CHECKING, Union
 
+import sqlalchemy as sa
+
+from bot.database.models import User
+from bot.database.repository.base_repo import BaseRepository
 from bot.utils.enums import Roles
 
 if TYPE_CHECKING:
@@ -9,7 +13,7 @@ if TYPE_CHECKING:
     from bot.database.repository import RoleRepository, UserRepository
 
 
-class UserRoleRepository:
+class UserRoleRepository(BaseRepository):
     """Класс для работы с ролями и пользователями в базе данных."""
 
     def __init__(
@@ -21,6 +25,19 @@ class UserRoleRepository:
         self._session = session
         self._user = user_repo
         self._role = role_repo
+
+    async def get_users_with_any_roles(
+        self,
+    ) -> list["User"]:
+        """
+        Возвращает всех пользователей, у которых есть какая-либо роль.
+
+        :return: Список юзеров.
+        """
+
+        query = sa.select(User).join(User.roles).distinct()
+
+        return await self.select_query_to_list(query)
 
     async def remove_role_from_user(
         self,

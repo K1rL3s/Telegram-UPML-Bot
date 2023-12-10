@@ -36,7 +36,7 @@ class LaundryRepository(BaseRepository):
             Laundry.is_active == True,  # noqa
             Laundry.end_time <= datetime_now(),
         )
-        return list((await self._session.scalars(query)).all())
+        return await self.select_query_to_list(query)
 
     async def save_or_update_to_db(
         self,

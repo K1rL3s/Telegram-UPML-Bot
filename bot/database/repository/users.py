@@ -3,9 +3,8 @@ from typing import TYPE_CHECKING, Any, Optional, Union
 
 import sqlalchemy as sa
 from loguru import logger
-from sqlalchemy.orm import MappedColumn, selectinload
+from sqlalchemy.orm import MappedColumn
 
-from bot.database.models.roles import Role
 from bot.database.models.settings import Settings
 from bot.database.models.users import User
 from bot.database.repository.base_repo import BaseRepository
@@ -50,34 +49,12 @@ class UserRepository(BaseRepository):
         query_conditions = sa.or_(*conditions) if or_mode else sa.and_(*conditions)
         query = sa.select(User).join(Settings).where(query_conditions)
 
-        return list((await self._session.scalars(query)).all())
+        return await self.select_query_to_list(query)
 
-    async def get_with_role(
-        self,
-        role: "Union[Roles, str]",
-    ) -> list["User"]:
-        """
-        Возвращает всех пользователей, у которых есть роль.
-
-        :param role: Роль.
-        :return: Список юзеров.
-        """
-        if isinstance(role, Enum):
-            role = role.value
-
-        subquery = sa.select(Role.id).where(Role.role == role)
-        query = (
-            sa.select(User)
-            .where(User.roles.any(sa.cast(subquery.as_scalar(), sa.Boolean)))
-            .options(selectinload(User.roles))
-        )
-
-        return list((await self._session.scalars(query)).all())
-
-    async def get_user_id_by_username(
+    async def get_user_ids_by_username(
         self,
         username: str,
-    ) -> int | None:
+    ) -> list[int]:
         """
         Возвращает айди пользователя по его имени в базе.
 
@@ -85,15 +62,15 @@ class UserRepository(BaseRepository):
         :return: Айди юзера.
         """
         query = sa.select(User.user_id).where(User.username == username)
-        return await self._session.scalar(query)
+        return await self.select_query_to_list(query)
 
-    async def save_new_to_db(
+    async def save_or_update_to_db(
         self,
         user_id: int,
         username: str,
     ) -> None:
         """
-        Сохраняет пользователя в базе данных, создаёт Settings и Laundry.
+        Сохраняет пользователя в базе данных.
 
         Если пользователь уже существует, то обновляет статус ``is_active`` и никнейм,
 
@@ -104,7 +81,7 @@ class UserRepository(BaseRepository):
             user = User(user_id=user_id, username=username)
             self._session.add(user)
             logger.info("Новый пользователь {user}", user=user)
-        elif user.should_activate(username):
+        elif user.should_be_updated(username):
             user.is_active = True
             user.username = username
 

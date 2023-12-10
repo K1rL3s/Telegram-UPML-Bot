@@ -43,7 +43,7 @@ async def admins_list_handler(
     """Обработчик кнопки "Список админов"."""
     text, keyboard = await admins_list_func(
         callback_data.page,
-        repo.user,
+        repo.user_role,
     )
     await callback.message.edit_text(text=text, reply_markup=keyboard)
 

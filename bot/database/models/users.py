@@ -1,11 +1,9 @@
-import datetime as dt
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, Boolean, DateTime, Integer, String
+from sqlalchemy import BigInteger, Boolean, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from bot.database.base import UserRelatedModel
-from bot.utils.datehelp import datetime_now
 
 if TYPE_CHECKING:
     from bot.database.models.laundries import Laundry
@@ -32,26 +30,15 @@ class User(UserRelatedModel):
         index=True,
     )
     # ТГ Никнейм пользователя (64?)
-    username: Mapped[str] = mapped_column(String(32), default=None)
+    username: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+    )
 
     # Активный ли, False - заблокировал бота итп
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
-        nullable=False,
-    )
-
-    # Первый заход в бота  UNUSED !!
-    createad_time: Mapped[dt.datetime] = mapped_column(
-        DateTime,
-        default=datetime_now,
-        nullable=False,
-    )
-    # Обновление ника или статуса  UNUSED !!
-    modified_time: Mapped[dt.datetime] = mapped_column(
-        DateTime,
-        default=datetime_now,
-        onupdate=datetime_now,
         nullable=False,
     )
 
@@ -78,7 +65,7 @@ class User(UserRelatedModel):
         """Краткая информация о пользователе."""
         return f"User(id={self.id}, user_id={self.user_id}, username={self.username})"
 
-    def should_activate(self, username: str) -> bool:
+    def should_be_updated(self, username: str) -> bool:
         """
         Нужно ли активировать пользователя или обновить ему имя.
 

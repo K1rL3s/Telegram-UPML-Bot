@@ -24,11 +24,6 @@ class Laundry(UserRelatedModel):
         nullable=False,
     )
 
-    # Когда был запущен таймер.  UNUSED !!
-    start_time: Mapped[dt.datetime | None] = mapped_column(
-        DateTime,
-        nullable=True,
-    )
     # Когда таймер должен закончиться
     end_time: Mapped[dt.datetime | None] = mapped_column(
         DateTime,
