@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 async def admins_list_func(
     page: int,
-    repo: "UserRepository",
+    repo: "UserRoleRepository",
 ) -> tuple[str, "InlineKeyboardMarkup"]:
     """
     Обработчик кнопки "Список админов".
@@ -30,7 +30,7 @@ async def admins_list_func(
     :return: Сообщение и клавиатура пользователю.
     """
     admins = [
-        (user.username, user.user_id) for user in await repo.get_with_role(Roles.ADMIN)
+        (user.username, user.user_id) for user in await repo.get_users_with_any_roles()
     ]
 
     text = "Список админов:"
@@ -93,9 +93,15 @@ async def edit_role_username_func(
     """
     username = text.split("/")[-1].lstrip("@")
 
-    if (user_id := await repo.get_user_id_by_username(username)) is None:
+    if not (user_ids := await repo.get_user_ids_by_username(username)):
         text = "Не могу найти у себя такого пользователя."
         return text, cancel_state_keyboard
+
+    # TODO: сделать обработку случая, когда в бд есть одинаковые юзернеймы
+    if len(user_ids) > 1:
+        pass
+
+    user_id = user_ids[0]
 
     all_roles = Roles.all_roles()
     choosed_roles = [role.role for role in (await repo.get(user_id)).roles]

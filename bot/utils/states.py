@@ -37,6 +37,7 @@ class EditingRoles(StatesGroup):
     """Админские состояния для добавляения нового админа."""
 
     username = State()
+    choose_user = State()  # Если никнеймы совпадают, то админ попадает сюда
     roles = State()
     confirm = State()
 

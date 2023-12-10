@@ -45,6 +45,6 @@ class Repository:
         :param user_id: ТГ Айди.
         :param username: Имя пользователя.
         """
-        await self.user.save_new_to_db(user_id, username)
+        await self.user.save_or_update_to_db(user_id, username)
         await self.settings.save_or_update_to_db(user_id)
         await self.laundry.save_or_update_to_db(user_id)
