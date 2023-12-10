@@ -19,7 +19,7 @@ jobs:
           echo BOT_TOKEN=${{ secrets.BOT_TOKEN }} >> .env
           echo TESSERACT_PATH=${{ secrets.TESSERACT_PATH }} >> .env
           echo TIMEZONE_OFFSET=${{ secrets.TIMEZONE_OFFSET }} >> .env
-          echo TIMEOUT=${{ secrets.TIMEZONE }} >> .env
+          echo TIMEOUT=${{ secrets.TIMEOUT }} >> .env
 
           echo POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} >> .env
           echo POSTGRES_HOST_PORT=${{ secrets.POSTGRES_HOST_PORT }} >> .env
@@ -37,4 +37,4 @@ jobs:
         run: docker compose up -d --build
 
       - name: Run Migrations
-        run: docker compose exec upml-bot alembic upgrade head
+        run: docker compose exec bot alembic upgrade head
