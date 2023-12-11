@@ -30,5 +30,5 @@ async def all_errors(event: "ErrorEvent") -> None:
     """Логгер всех ошибок при обработке событий телеграма."""
     # f-строка, потому что loguru cannot pickle 'weakref.ReferenceType' object
     logger.error(
-        f"Exception while handling: {event.exception} | {event.update}",
+        f"Exception while handling: {repr(event.exception)} | {event.update}",
     )

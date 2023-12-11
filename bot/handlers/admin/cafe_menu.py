@@ -17,7 +17,7 @@ from bot.keyboards import (
     cancel_state_keyboard,
     confirm_cancel_keyboard,
 )
-from bot.upml.save_cafe_menu import process_cafe_menu
+from bot.upml.cafe_menu import process_cafe_menu
 from bot.utils.enums import Actions, Meals, Menus
 from bot.utils.states import EditingMenu
 

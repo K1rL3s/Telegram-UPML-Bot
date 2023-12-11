@@ -42,10 +42,9 @@ async def __get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
 
     :return: PdfReader если файл существует, иначе None
     """
-    # В формат передавать число, месяц, год
     pdf_url = (
         "https://yufmli.gosuslugi.ru/netcat_files/47/515/"
-        "Menyu_{0:0>2}_{1:0>2}_{2}_krugl.pdf"
+        "Menyu_{day:0>2}_{month:0>2}_{year}_krugl.pdf"
     )
 
     menu_date = get_this_week_monday() - dt.timedelta(days=1)
@@ -54,7 +53,11 @@ async def __get_pdf_menu(timeout: int = 5) -> "Optional[PdfReader]":
     async with ClientSession(timeout=ClientTimeout(total=timeout)) as session:
         for _ in range(7):
             async with session.get(
-                pdf_url.format(menu_date.day, menu_date.month, menu_date.year),
+                pdf_url.format(
+                    day=menu_date.day,
+                    month=menu_date.month,
+                    year=menu_date.year,
+                ),
             ) as response:
                 if response.headers.get("content-type") == "application/pdf":
                     return PdfReader(BytesIO(await response.read()))
@@ -72,18 +75,19 @@ def __compare_pdf_date(pdf_reader: "PdfReader") -> "Optional[dt.date]":
     :param pdf_reader: PDF файл.
     :return: Дата начала расписания еды или None, если не удалось сравнять дату.
     """
-    menu_date = get_this_week_monday()
-    add_counter = 0
+    pages = linearize_pdf_pages(pdf_reader)
 
-    menu = " ".join(pdf_reader.pages[0].extract_text().split())
-    while add_counter < 7 and format_date(menu_date) not in menu:
-        menu_date += dt.timedelta(days=1)
-        add_counter += 1
+    for i, page in enumerate(pages):
+        check_date = get_this_week_monday()
+        for _ in range(7):
+            if format_date(check_date) in page:
+                return check_date - dt.timedelta(days=i)
+            check_date += dt.timedelta(days=1)
+    return None
 
-    if add_counter >= 7:
-        return None
 
-    return menu_date
+def linearize_pdf_pages(pdf_reader: "PdfReader") -> list[str]:
+    return [" ".join(page.extract_text().split()) for page in pdf_reader.pages]
 
 
 async def __parse_pdf_menu(
