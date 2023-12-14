@@ -1,7 +1,7 @@
 import datetime as dt
 from typing import Optional
 
-from shared.settings import get_settings
+from shared.core.settings import get_settings
 from shared.utils.consts import TODAY
 
 # Смещение часового пояса по умолчанию, используется при работе бота.

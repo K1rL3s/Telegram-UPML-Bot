@@ -4,10 +4,13 @@ from aiogram import F, Router
 from aiogram.filters import Command, CommandStart, StateFilter
 
 from bot.callbacks import OpenMenu
-from bot.keyboards import main_menu_keyboard, start_reply_keyboard
+from bot.keyboards import (
+    go_to_main_menu_keyboard,
+    main_menu_keyboard,
+    start_reply_keyboard,
+)
 from bot.middlewares.inner.save_user import SaveUpdateUserMiddleware
 from shared.utils.enums import Menus, SlashCommands, TextCommands
-from shared.utils.phrases import MAIN_MENU_TEXT, USER_START_TEXT
 
 if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
@@ -18,6 +21,33 @@ if TYPE_CHECKING:
 
 router = Router(name=__name__)
 router.message.middleware(SaveUpdateUserMiddleware())
+
+START_TEXT = """
+👋 Привет! Я - стартовое меню
+/help - Подробнее о том, что я могу
+
+📞 <a href="https://hello.k1rles.ru/">Связь с разработчиком</a> 📱
+🐍 <a href="https://github.com/K1rL3s/Telegram-UPML-Bot">Код бота</a> ⭐
+""".strip()
+
+MAIN_MENU_TEXT = "🏠 Я - главное меню"
+
+HELP_TEXT = """
+🤖 Я - Бот-помощник для учеников Югорского физико-математического лицея-интерната
+С моей помощью можно узнать расписание уроков и элективов, еду в столовой и поставить таймер для прачечной
+
+🔵 Для навигации вы можете использовать кнопки на клавиатуре или эти команды:
+/start - Стартовое меню, перезапуск бота
+/help - Информации обо мне
+/menu - Начальная точка навигации
+/cafe - Меню в столовой
+/lessons - Расписание уроков
+/laundry - Таймер для прачечной
+/electives - Расписание элективов
+/educators - Расписание работы воспитателей
+/settings - Ваши настройки: класс, время таймеров и оповещения
+/cancel - Отмена ввода, если бот его ждёт
+"""  # noqa
 
 
 @router.message(F.text == TextCommands.START, StateFilter("*"))
@@ -30,7 +60,7 @@ async def start_handler(
     """Обработчик команды "/start"."""
     await state.clear()
     await message.reply(
-        text=USER_START_TEXT,
+        text=START_TEXT,
         reply_markup=await start_reply_keyboard(repo.user, message.from_user.id),
     )
 
@@ -60,4 +90,4 @@ async def main_menu_message_handler(
 @router.message(Command(SlashCommands.HELP))
 async def help_handler(message: "Message") -> None:
     """Обработчик команды "/help"."""
-    await message.reply("Помощь!")
+    await message.reply(text=HELP_TEXT, reply_markup=go_to_main_menu_keyboard)

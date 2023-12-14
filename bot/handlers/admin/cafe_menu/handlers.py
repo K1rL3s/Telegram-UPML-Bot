@@ -25,8 +25,8 @@ if TYPE_CHECKING:
     from aiogram.fsm.context import FSMContext
     from aiogram.types import CallbackQuery, Message
 
+    from shared.core.settings import Settings
     from shared.database.repository.repository import Repository
-    from shared.settings import Settings
 
 
 router = Router(name=__name__)

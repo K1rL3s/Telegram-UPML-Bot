@@ -147,5 +147,5 @@ async def _edit_minutes_laundry(
     hours, minutes = minutes_to_hours_minutes(minutes)
     return (
         f"{YES} <b>{LAUNDRY_TIMERS_TRANSLATE[attr].capitalize()}</b> "
-        f"установлено на <b>{hours} часов, {minutes} минут</b>."
+        f"установлено на <b>{hours} часов, {minutes} минут</b>"
     )

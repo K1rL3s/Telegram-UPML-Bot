@@ -8,9 +8,9 @@ from loguru import logger
 from sqlalchemy.orm import close_all_sessions
 
 from scheduler.tasks import add_schedule_jobs
+from shared.core.log import configure_logs
+from shared.core.settings import get_settings
 from shared.database import database_init
-from shared.log import configure_logs
-from shared.settings import get_settings
 
 
 async def main() -> None:

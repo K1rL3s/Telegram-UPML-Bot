@@ -14,7 +14,7 @@ from shared.utils.enums import SlashCommands
 if TYPE_CHECKING:
     from redis.asyncio import Redis
 
-    from shared.settings import Settings
+    from shared.core.settings import Settings
 
 
 async def on_startup(bot: "Bot") -> None:
@@ -47,8 +47,9 @@ async def set_commands(bot: "Bot") -> bool:
     commands: dict[str, str] = {
         SlashCommands.START: "Старт",
         SlashCommands.HELP: "Помощь",
-        SlashCommands.SETTINGS: "Настройки",
         SlashCommands.MENU: "Меню",
+        SlashCommands.SETTINGS: "Настройки",
+        SlashCommands.CANCEL: "Отмена ввода",
     }
 
     return await bot.set_my_commands(

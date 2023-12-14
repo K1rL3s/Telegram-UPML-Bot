@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from shared.database.base import AlchemyBaseModel, UserRelatedModel
 
 if TYPE_CHECKING:
-    from shared.settings import DBSettings, RedisSettings
+    from shared.core.settings import DBSettings, RedisSettings
 
 
 __all__ = (

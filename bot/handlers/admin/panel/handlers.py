@@ -5,7 +5,6 @@ from aiogram import F, Router
 from bot.callbacks import OpenMenu
 from bot.keyboards import admin_panel_keyboard
 from shared.utils.enums import Menus, TextCommands
-from shared.utils.phrases import ADMIN_START_TEXT
 
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message
@@ -14,6 +13,15 @@ if TYPE_CHECKING:
 
 
 router = Router(name=__name__)
+
+ADMIN_START_TEXT = """
+❗Я - админ панель. Вот мои команды:
+<b>Загрузить меню</b> - автоматическое обновление еды информацией с сайта лицея
+<b>Изменить меню</b> - ручное изменение еды
+<b>Загрузить уроки</b> - ручная загрузка изображений с расписанием уроков
+<b>Уведомление</b> - сделать оповещение
+<b>Изменить расписание воспитателей</b> - ручное изменение расписания воспитателей
+""".strip()
 
 
 @router.callback_query(OpenMenu.filter(F.menu == Menus.ADMIN_PANEL))

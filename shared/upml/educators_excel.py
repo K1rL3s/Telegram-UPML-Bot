@@ -8,9 +8,9 @@ from openpyxl.cell.cell import Cell
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from shared.core.settings import get_settings
 from shared.database import database_init
 from shared.database.repository.repository import Repository
-from shared.settings import get_settings
 from shared.utils.datehelp import date_today
 
 if TYPE_CHECKING:

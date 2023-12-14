@@ -1,11 +1,11 @@
 import asyncio
 import contextlib
 
+from bot.base import make_bot, make_dispatcher
 from bot.middlewares import setup_global_middlewares
-from bot.setup import make_bot, make_dispatcher
+from shared.core.log import configure_logs
+from shared.core.settings import get_settings
 from shared.database import database_init, redis_init
-from shared.log import configure_logs
-from shared.settings import get_settings
 
 """На будущее:
 1. Cделать в фильтре RoleAccess временный кэш (?).
