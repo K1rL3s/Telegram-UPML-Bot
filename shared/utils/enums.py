@@ -113,5 +113,14 @@ class Roles(str, Enum):
 
     @staticmethod
     def all_roles() -> list[str]:
-        """Названия всех ролей."""
+        """Все роли."""
         return [role.value if isinstance(role, Enum) else role for role in Roles]
+
+    @staticmethod
+    def roles_which_can_be_edited() -> list[str]:
+        """Роли, которые можно редактировать юзерам."""
+        return [
+            role.value if isinstance(role, Enum) else role
+            for role in Roles
+            if role != Roles.SUPERADMIN
+        ]

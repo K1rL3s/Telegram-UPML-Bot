@@ -100,6 +100,7 @@ async def edit_roles_handler(
 
     text = "Введите имя пользователя, у которого хотите изменить роли."
     await callback.message.edit_text(text=text, reply_markup=cancel_state_keyboard)
+    await state.update_data(start_id=callback.message.message_id)
 
 
 @router.message(StateFilter(EditingRoles.username))
@@ -109,13 +110,14 @@ async def edit_roles_username_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик сообщения с юзернеймом, которому хотят изменить роли."""
-    text, keyboard = await edit_role_username_func(
+    text, keyboard, start_id = await edit_role_username_func(
         message.text,
         state,
         repo.user,
     )
 
     await message.answer(text=text, reply_markup=keyboard)
+    await message.bot.delete_message(message.chat.id, start_id)
     await message.delete()
 
 

@@ -12,7 +12,7 @@ from shared.database.repository import ClassLessonsRepository, FullLessonsReposi
 from shared.upml.album_lessons import tesseract_lessons
 from shared.utils.datehelp import date_by_format, format_date, weekday_by_date
 from shared.utils.funcs import multi_bytes_to_ids
-from shared.utils.phrases import DONT_UNDERSTAND_DATE
+from shared.utils.phrases import DONT_UNDERSTAND_DATE, YES
 from shared.utils.states import EditingLessons
 
 if TYPE_CHECKING:
@@ -85,7 +85,7 @@ async def all_good_lessons_func(
 
     await state.clear()
 
-    return "Успешно!"
+    return f"{YES} Успешно!"
 
 
 async def start_choose_grades_func(
@@ -232,7 +232,7 @@ async def confirm_edit_lessons_func(
 
     await state.clear()
 
-    return "Успешно!"
+    return f"{YES} Успешно!"
 
 
 async def save_lessons_collection_to_db(

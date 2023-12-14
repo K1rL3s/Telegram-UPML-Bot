@@ -16,7 +16,7 @@ from bot.keyboards import (
 )
 from bot.middlewares.inner.save_user import SaveUpdateUserMiddleware
 from shared.utils.enums import Actions, Menus, SlashCommands, TextCommands, UserCallback
-from shared.utils.phrases import SET_TIMER_TEXT
+from shared.utils.phrases import NO, SET_TIMER_TEXT, YES
 from shared.utils.states import EditingSettings
 
 if TYPE_CHECKING:
@@ -38,6 +38,8 @@ SETTINGS_WELCOME_TEXT = """
 <b>Стирка</b> - время таймера для стирки
 <b>Сушка</b> - время таймера для сушки
 """.strip()
+YES_NOTIFY = f"{YES} Теперь будут приходить уведомления этого типа"
+NO_NOTIFY = f"{NO} Теперь не будут приходить уведомления этого типа"
 
 
 @router.callback_query(OpenMenu.filter(F.menu == Menus.SETTINGS))
@@ -73,7 +75,7 @@ async def edit_bool_settings_handler(
     repo: "Repository",
 ) -> None:
     """Обработчик кнопок уведомлений "Уроки" и "Новости"."""
-    await edit_bool_settings_func(
+    new_value = await edit_bool_settings_func(
         repo.settings,
         callback.from_user.id,
         callback_data.attr,
@@ -82,6 +84,10 @@ async def edit_bool_settings_handler(
     keyboard = await settings_keyboard(repo.settings, callback.from_user.id)
 
     await callback.message.edit_text(text=SETTINGS_WELCOME_TEXT, reply_markup=keyboard)
+    await callback.answer(
+        text=YES_NOTIFY if new_value else NO_NOTIFY,
+        show_alert=False,
+    )
 
 
 @router.callback_query(SettingsData.filter(F.action == UserCallback.CHANGE_GRADE))

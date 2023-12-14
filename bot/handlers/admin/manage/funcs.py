@@ -8,6 +8,7 @@ from bot.keyboards import (
 )
 from shared.utils.enums import Roles
 from shared.utils.funcs import name_link
+from shared.utils.phrases import YES
 from shared.utils.states import EditingRoles
 from shared.utils.translate import ROLES_TRANSLATE
 
@@ -33,7 +34,7 @@ async def admins_list_func(
         (user.username, user.user_id) for user in await repo.get_users_with_any_roles()
     ]
 
-    text = "Список админов:"
+    text = "👮‍♀️Список админов:"
     keyboard = admins_list_keyboard(admins, page)
 
     return text, keyboard
@@ -75,27 +76,28 @@ async def edit_role_directly_func(
     :return: Сообщение и клавиатура администратору.
     """
     username = (await repo.get(user_id)).username
-    return await edit_role_username_func(username, state, repo)
+    text, keyboard, _ = await edit_role_username_func(username, state, repo)
+    return text, keyboard
 
 
 async def edit_role_username_func(
     text: str,
     state: "FSMContext",
     repo: "UserRepository",
-) -> tuple[str, "InlineKeyboardMarkup"]:
+) -> tuple[str, "InlineKeyboardMarkup", int]:
     """
     Обработчик сообщения с юзернеймом, у которого хотят изменить роли.
 
     :param text: Сообщение пользователя.
     :param state: Состояние пользователя.
     :param repo: Репозиторий пользователей.
-    :return: Сообщение и клавиатура администратору.
+    :return: Сообщение, клавиатура администратору и айди первого сообщения бота.
     """
     username = text.split("/")[-1].lstrip("@")
 
     if not (user_ids := await repo.get_user_ids_by_username(username)):
         text = "Не могу найти у себя такого пользователя."
-        return text, cancel_state_keyboard
+        return text, cancel_state_keyboard, -1
 
     # TODO: сделать обработку случая, когда в бд есть одинаковые юзернеймы
     if len(user_ids) > 1:
@@ -103,10 +105,10 @@ async def edit_role_username_func(
 
     user_id = user_ids[0]
 
-    all_roles = Roles.all_roles()
+    all_roles = Roles.roles_which_can_be_edited()
     choosed_roles = [role.role for role in (await repo.get(user_id)).roles]
     await state.set_state(EditingRoles.roles)
-    await state.update_data(
+    data = await state.update_data(
         user_id=user_id,
         username=username,
         all_roles=all_roles,
@@ -116,6 +118,7 @@ async def edit_role_username_func(
     return (
         f"Выберите роли, которые будут у {name_link(username, user_id)}",
         edit_roles_keyboard(all_roles, choosed_roles),
+        data.get("start_id", -1),
     )
 
 
@@ -191,4 +194,4 @@ async def edit_role_confirm_sure_func(
     for role in choosed_roles:
         await repo.add_role_to_user(user_id, role)
 
-    return "Успешно!"
+    return f"{YES} Успешно!"

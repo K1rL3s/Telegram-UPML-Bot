@@ -46,3 +46,10 @@
     ```
     docker compose exec bot alembic upgrade head
     ```
+
+4. Опционально, загрузить расписание воспитателей:
+
+    ```
+    docker compose exec -it bot bash
+    PYTHONPATH=/app python ./shared/upml/educators_excel.py
+    ```

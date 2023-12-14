@@ -84,8 +84,8 @@ async def edit_cafe_menu_meal_func(
     data = await state.update_data(edit_meal=edit_meal)
 
     edit_date: "dt.date" = date_by_format(data["edit_date"])
+    menu = getattr(await repo.get(edit_date), edit_meal, None) or NO_DATA
     meal = CAFE_MENU_TRANSLATE[edit_meal].capitalize()
-    menu = getattr(await repo.get(edit_date), meal, None) or NO_DATA
 
     return (
         f"<b>Дата</b>: <code>{format_date(edit_date)}</code> "

@@ -25,7 +25,7 @@ async def edit_bool_settings_func(
     repo: "SettingsRepository",
     user_id: int,
     attr: "Literal[UserCallback.LESSONS_NOTIFY, UserCallback.NEWS_NOTIFY]",
-) -> None:
+) -> bool:
     """
     Обработчик нажатия кнопки булевского типа.
 
@@ -34,10 +34,12 @@ async def edit_bool_settings_func(
     :param attr: Атрибут модели юзера.
     """
     settings = await repo.get(user_id)
+    new_value = not getattr(settings, attr)
     await repo.save_or_update_to_db(
         user_id,
         **{attr: not getattr(settings, attr)},
     )
+    return new_value
 
 
 async def edit_grade_setting_func(

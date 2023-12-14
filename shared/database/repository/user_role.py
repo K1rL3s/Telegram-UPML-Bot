@@ -26,16 +26,14 @@ class UserRoleRepository(BaseRepository):
         self._user = user_repo
         self._role = role_repo
 
-    async def get_users_with_any_roles(
-        self,
-    ) -> list["User"]:
+    async def get_users_with_any_roles(self) -> list["User"]:
         """
         Возвращает всех пользователей, у которых есть какая-либо роль.
 
         :return: Список юзеров.
         """
 
-        query = sa.select(User).join(User.roles).distinct()
+        query = sa.select(User).join(User.roles).order_by(User.username).distinct()
 
         return await self.select_query_to_list(query)
 
