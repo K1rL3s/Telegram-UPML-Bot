@@ -3,8 +3,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 
 from bot.callbacks import DoNotify
 from bot.keyboards.universal import admin_panel_button
-from bot.utils.consts import GRADES
-from bot.utils.enums import NotifyTypes
+from shared.utils.consts import GRADES
+from shared.utils.enums import NotifyTypes
 
 notify_menu_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[

@@ -10,8 +10,8 @@ from typing import Union
 import sqlalchemy as sa
 from alembic import op
 
-from bot.database.models import Role
-from bot.utils.enums import Roles
+from shared.database.models import Role
+from shared.utils.enums import Roles
 
 # revision identifiers, used by Alembic.
 revision: str = "0001"

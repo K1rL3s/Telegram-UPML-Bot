@@ -14,11 +14,11 @@ from bot.keyboards.universal import (
     main_menu_button,
     settings_button,
 )
-from bot.utils.consts import TODAY
-from bot.utils.enums import Menus, Roles, TextCommands
+from shared.utils.consts import TODAY
+from shared.utils.enums import Menus, Roles, TextCommands
 
 if TYPE_CHECKING:
-    from bot.database.repository import UserRepository
+    from shared.database.repository import UserRepository
 
 
 go_to_main_menu_keyboard = InlineKeyboardMarkup(

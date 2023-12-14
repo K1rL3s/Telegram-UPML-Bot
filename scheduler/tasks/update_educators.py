@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from bot.database.repository.repository import Repository
-from bot.upml.educators_excel import load_educators_from_xlsx
+from shared.database.repository.repository import Repository
+from shared.upml.educators_excel import load_educators_from_xlsx
 
 
 async def update_educators(session_maker: "async_sessionmaker[AsyncSession]") -> None:

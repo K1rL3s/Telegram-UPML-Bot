@@ -1,21 +1,21 @@
 from typing import TYPE_CHECKING, Any
 
 from bot.middlewares.base import BaseInfoMiddleware
-from bot.utils.funcs import extract_username
+from shared.utils.funcs import extract_username
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
 
     from aiogram.types import Message
 
-    from bot.database.repository.repository import Repository
+    from shared.database.repository.repository import Repository
 
 
 class SaveUpdateUserMiddleware(BaseInfoMiddleware):
     """
     Мидлварь, который сохраняет или обновляет информацию о пользователе в бд.
 
-    Используется в bot/handlers/client/start.py и settings.py,
+    Используется в bot/handlers/client/start и bot/handlers/client/settings,
     чтобы юзер точно был в базе.
     """
 

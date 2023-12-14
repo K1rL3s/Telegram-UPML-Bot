@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 from aiogram import BaseMiddleware
 
-from bot.database.repository.repository import Repository
+from shared.database.repository.repository import Repository
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable

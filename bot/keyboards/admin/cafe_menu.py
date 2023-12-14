@@ -6,8 +6,8 @@ from aiogram.utils.keyboard import (
 
 from bot.callbacks import EditMeal
 from bot.keyboards.universal import cancel_state_button
-from bot.utils.consts import BEAUTIFY_MEALS
-from bot.utils.enums import Meals
+from shared.utils.consts import BEAUTIFY_MEALS
+from shared.utils.enums import Meals
 
 choose_meal_keyboard: "InlineKeyboardMarkup" = (
     InlineKeyboardBuilder()

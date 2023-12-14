@@ -5,10 +5,10 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup
 from bot.callbacks import AdminEditMenu, EditMeal, OpenMenu
 from bot.keyboards.admin.manage import admins_list_button
 from bot.keyboards.universal import main_menu_button
-from bot.utils.enums import Meals, Menus, Roles
+from shared.utils.enums import Meals, Menus, Roles
 
 if TYPE_CHECKING:
-    from bot.database.repository import UserRepository
+    from shared.database.repository import UserRepository
 
 
 AUTO_UPDATE_CAFE_MENU = "🍴Загрузить меню"

@@ -3,18 +3,17 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from bot.database.repository.repository import Repository
-from bot.funcs.client.laundry import laundry_cancel_timer_func
 from bot.keyboards import laundry_keyboard
-from bot.utils.consts import REPEAT_LAUNDRY_TIMER
-from bot.utils.datehelp import datetime_now
-from bot.utils.notify import do_one_notify
+from shared.database.repository.repository import Repository
+from shared.utils.consts import REPEAT_LAUNDRY_TIMER
+from shared.utils.datehelp import datetime_now
+from shared.utils.notify import do_one_notify
 
 if TYPE_CHECKING:
     from aiogram import Bot
 
-    from bot.database.models import Laundry
-    from bot.database.repository import LaundryRepository
+    from shared.database.models import Laundry
+    from shared.database.repository import LaundryRepository
 
 
 LAUNDRY_TIMER_EXPIRED = "🔔Таймер прачечной вышел! ({0})".format
@@ -48,7 +47,7 @@ async def check_expired_timer(
     )
 
     if rings >= 2 or not is_notify_sent:
-        await laundry_cancel_timer_func(repo.laundry, laundry.user.user_id)
+        await repo.laundry.cancel_timer(laundry.user_id)
     else:
         await increment_timer(rings, laundry, repo.laundry)
 

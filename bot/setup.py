@@ -1,5 +1,4 @@
 import datetime as dt
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from aiogram import Bot, Dispatcher
@@ -10,12 +9,12 @@ from loguru import logger
 from sqlalchemy.orm import close_all_sessions
 
 from bot.handlers import include_routers
-from bot.utils.enums import SlashCommands
+from shared.utils.enums import SlashCommands
 
 if TYPE_CHECKING:
     from redis.asyncio import Redis
 
-    from bot.settings import Settings
+    from shared.settings import Settings
 
 
 async def on_startup(bot: "Bot") -> None:
@@ -94,15 +93,3 @@ async def make_bot(bot_token: str, parse_mode: str = ParseMode.HTML) -> "Bot":
     await set_commands(bot)
 
     return bot
-
-
-def configure_logs() -> None:
-    """Задаёт формат логов и указывает путь записи."""
-    logger.add(
-        Path().cwd().absolute() / "logs" / "logs.log",
-        level="DEBUG",
-        format="{time:YYYY-MM-DD HH:mm:ss.SSS} {level:<7} {message}",
-        rotation="1 week",
-        compression="zip",
-        enqueue=True,
-    )

@@ -7,10 +7,10 @@ from aiogram.utils.keyboard import (
 )
 
 from bot.callbacks import InStateData, OpenMenu
-from bot.utils.consts import TODAY
-from bot.utils.datehelp import date_today, format_date
-from bot.utils.enums import Actions, Menus, TextCommands
-from bot.utils.phrases import NO, YES
+from shared.utils.consts import TODAY
+from shared.utils.datehelp import date_today, format_date
+from shared.utils.enums import Actions, Menus, TextCommands
+from shared.utils.phrases import NO, YES
 
 MAIN_MENU = "🏠Главное меню"
 CANCEL = f"{NO}Отмена"

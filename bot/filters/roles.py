@@ -2,12 +2,12 @@ from typing import TYPE_CHECKING, Union
 
 from aiogram.filters import Filter
 
-from bot.utils.enums import Roles
+from shared.utils.enums import Roles
 
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message
 
-    from bot.database.repository.repository import Repository
+    from shared.database.repository.repository import Repository
 
 
 class RoleAccess(Filter):

@@ -8,13 +8,13 @@ from aiogram.utils.keyboard import (
 
 from bot.callbacks import OpenMenu, SettingsData
 from bot.keyboards.universal import main_menu_button
-from bot.utils.consts import GRADES
-from bot.utils.datehelp import format_time
-from bot.utils.enums import Actions, Menus, UserCallback
-from bot.utils.phrases import NO, QUESTION, YES
+from shared.utils.consts import GRADES
+from shared.utils.datehelp import format_time
+from shared.utils.enums import Actions, Menus, UserCallback
+from shared.utils.phrases import NO, QUESTION, YES
 
 if TYPE_CHECKING:
-    from bot.database.repository import SettingsRepository
+    from shared.database.repository import SettingsRepository
 
 
 USER_CLASS = "Класс {0}".format

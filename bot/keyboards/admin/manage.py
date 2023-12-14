@@ -12,8 +12,8 @@ from bot.keyboards.universal import (
     cancel_state_button,
     confirm_state_button,
 )
-from bot.utils.enums import Actions, Roles
-from bot.utils.translate import ROLES_TRANSLATE
+from shared.utils.enums import Actions, Roles
+from shared.utils.translate import ROLES_TRANSLATE
 
 ADMIN_LIST = "👮‍♀️Список админов"
 EDIT_PERMISSIONS = "🔎Изменить роли"

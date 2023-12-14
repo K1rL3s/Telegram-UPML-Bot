@@ -7,13 +7,13 @@ from bot.keyboards.universal import (
     main_menu_button,
     settings_button,
 )
-from bot.utils.enums import Actions, UserCallback
-from bot.utils.phrases import NO
+from shared.utils.enums import Actions, UserCallback
+from shared.utils.phrases import NO
 
 if TYPE_CHECKING:
     from aiogram.utils.keyboard import InlineKeyboardMarkup
 
-    from bot.database.models.laundries import Laundry
+    from shared.database.models.laundries import Laundry
 
 
 START_WASHING = "🏖Запустить стирку"
