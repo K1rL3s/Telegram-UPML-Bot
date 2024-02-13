@@ -18,6 +18,11 @@ from bot.keyboards.client.educators import educators_keyboard
 from bot.keyboards.client.enrollee import enrollee_keyboard
 from bot.keyboards.client.laundry import laundry_keyboard
 from bot.keyboards.client.lessons import lessons_keyboard
+from bot.keyboards.client.olymps import (
+    olymps_subjects_keyboard,
+    olymps_titles_keyboard,
+    one_olymp_keyboard,
+)
 from bot.keyboards.client.settings import choose_grade_keyboard, settings_keyboard
 from bot.keyboards.client.start import (
     go_to_main_menu_keyboard,
@@ -48,4 +53,7 @@ __all__ = (
     "settings_keyboard",
     "start_reply_keyboard",
     "enrollee_keyboard",
+    "olymps_subjects_keyboard",
+    "olymps_titles_keyboard",
+    "one_olymp_keyboard",
 )

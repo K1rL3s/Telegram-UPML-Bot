@@ -17,6 +17,6 @@ class Olymp(AlchemyBaseModel):
         nullable=False,
     )
 
-    name: Mapped[str] = mapped_column(String(64), nullable=False)
+    title: Mapped[str] = mapped_column(String(64), nullable=False)
     subject: Mapped[str] = mapped_column(String(32), nullable=False)
     description: Mapped[str] = mapped_column(String(4096), nullable=False)

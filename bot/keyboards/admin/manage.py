@@ -55,7 +55,7 @@ def admins_list_keyboard(
     ]
     additional_buttons = [edit_permissions_button, admin_panel_button]
 
-    return paginate_keyboard(buttons, page, menu, rows, width, additional_buttons)
+    return paginate_keyboard(buttons, menu, page, rows, width, additional_buttons)
 
 
 def check_admin_roles_keyboard(

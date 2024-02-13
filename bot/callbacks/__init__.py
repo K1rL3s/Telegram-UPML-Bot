@@ -6,8 +6,8 @@ from bot.callbacks.admin import (
     EditLessons,
     EditMeal,
 )
-from bot.callbacks.client import LaundryData, OlympsData, SettingsData
-from bot.callbacks.paginate import Paginator
+from bot.callbacks.client import LaundryData, OlympData, SettingsData
+from bot.callbacks.paginate import OlympPaginator, Paginator
 from bot.callbacks.universal import InStateData, OpenMenu
 
 __all__ = (
@@ -22,5 +22,6 @@ __all__ = (
     "OpenMenu",
     "SettingsData",
     "Paginator",
-    "OlympsData",
+    "OlympData",
+    "OlympPaginator",
 )

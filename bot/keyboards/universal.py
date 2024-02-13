@@ -55,7 +55,7 @@ enrollee_menu_button = InlineKeyboardButton(
 )
 univers_menu_button = InlineKeyboardButton(
     text=TextCommand.UNIVERS,
-    callback_data=OpenMenu(menu=BotMenu.UNVIVERS).pack(),
+    callback_data=OpenMenu(menu=BotMenu.UNIVERS).pack(),
 )
 olymps_menu_button = InlineKeyboardButton(
     text=TextCommand.OLYMPS,

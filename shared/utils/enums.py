@@ -70,8 +70,19 @@ class BotMenu(str, Enum):
     ADMIN_PANEL = "admin_panel"
     NOTIFY = "notify"
     ENROLLEE = "enrollee"
-    UNVIVERS = "univers"
+    UNIVERS = "univers"
     OLYMPS = "olymps"
+
+
+class PageMenu(str, Enum):
+    """
+    Callback'и для менюшек в менюшках.
+
+    Чтобы не засорять BotMenu при использовании Paginator'а.
+    """
+
+    UNIVERS = "univers_list"
+    OLYMPS_LIST = "olymps_list"
 
 
 class Action(str, Enum):

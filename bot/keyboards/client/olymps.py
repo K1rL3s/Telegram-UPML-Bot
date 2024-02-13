@@ -1,21 +1,24 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot.callbacks import OlympsData
+from bot.callbacks import OlympData, OlympPaginator
 from bot.keyboards.paginate import paginate_keyboard
-from bot.keyboards.universal import enrollee_menu_button
+from bot.keyboards.universal import (
+    enrollee_menu_button,
+    main_menu_button,
+    olymps_menu_button,
+)
 from shared.database.repository import OlympRepository
-from shared.utils.enums import BotMenu
+from shared.utils.enums import BotMenu, PageMenu
 
 
 async def olymps_subjects_keyboard(
-    page: int, olymp_repo: OlympRepository
+    page: int,
+    olymp_repo: OlympRepository,
 ) -> InlineKeyboardMarkup:
-    menu = BotMenu.OLYMPS
-
     subjects = [
         InlineKeyboardButton(
-            text=subject.capitalize(),
-            callback_data=OlympsData(subject=subject).pack(),
+            text=subject,
+            callback_data=OlympData(subject=subject, page=page).pack(),
         )
         for subject in await olymp_repo.get_subjects()
     ]
@@ -23,8 +26,51 @@ async def olymps_subjects_keyboard(
     return paginate_keyboard(
         buttons=subjects,
         page=page,
-        menu=menu,
+        menu=BotMenu.OLYMPS,
         rows=3,
         width=2,
         additional_buttons=[enrollee_menu_button],
+    )
+
+
+async def olymps_titles_keyboard(
+    page: int,
+    subject: str,
+    olymp_repo: OlympRepository,
+) -> InlineKeyboardMarkup:
+    olymps = [
+        InlineKeyboardButton(
+            text=olymp.title,
+            callback_data=OlympData(subject=subject, id=olymp.id, page=page).pack(),
+        )
+        for olymp in await olymp_repo.get_olymps_by_subject(subject)
+    ]
+
+    return paginate_keyboard(
+        buttons=olymps,
+        page=page,
+        menu=PageMenu.OLYMPS_LIST,
+        rows=3,
+        width=2,
+        additional_buttons=[olymps_menu_button],
+        fabric=OlympPaginator,
+        subject=subject,
+    )
+
+
+def one_olymp_keyboard(subject: str, page: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text=f"🏆 {subject}",
+                    callback_data=OlympPaginator(
+                        menu=PageMenu.OLYMPS_LIST,
+                        page=page,
+                        subject=subject,
+                    ).pack(),
+                )
+            ],
+            [main_menu_button],
+        ]
     )

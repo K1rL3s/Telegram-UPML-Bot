@@ -1,3 +1,5 @@
+from typing import Any
+
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import ButtonType, InlineKeyboardBuilder
 
@@ -10,12 +12,17 @@ PAGE_FORWARD = "➡️Вперёд"
 
 def paginate_keyboard(
     buttons: list[ButtonType],
-    page: int,
     menu: str,
+    page: int = 0,
     rows: int = 3,
     width: int = 2,
     additional_buttons: list[InlineKeyboardButton] = None,
+    fabric: type[Paginator] = Paginator,
+    **data: Any,
 ) -> InlineKeyboardMarkup:
+    if data:
+        fabric = fabric.init_wrapper(**data)
+
     builder = InlineKeyboardBuilder()
     bpp = rows * width  # Кнопок на страницу (buttons per page)
 
@@ -29,14 +36,14 @@ def paginate_keyboard(
         left_right.append(
             InlineKeyboardButton(
                 text=PAGE_BACK,
-                callback_data=Paginator(menu=menu, page=page - 1).pack(),
+                callback_data=fabric(menu=menu, page=page - 1).pack(),
             )
         )
     if end < len(buttons):
         left_right.append(
             InlineKeyboardButton(
                 text=PAGE_FORWARD,
-                callback_data=Paginator(menu=menu, page=page + 1).pack(),
+                callback_data=fabric(menu=menu, page=page + 1).pack(),
             )
         )
     builder.row(*left_right, width=2)

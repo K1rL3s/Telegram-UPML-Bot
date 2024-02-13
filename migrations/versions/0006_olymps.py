@@ -24,7 +24,7 @@ def upgrade() -> None:
     op.create_table(
         "olymps",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column("name", sa.String(length=64), nullable=False),
+        sa.Column("title", sa.String(length=64), nullable=False),
         sa.Column("subject", sa.String(length=32), nullable=False),
         sa.Column("description", sa.String(length=4096), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_olymps")),

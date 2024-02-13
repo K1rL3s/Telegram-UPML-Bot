@@ -1,18 +1,25 @@
 from aiogram import F, Router
-from aiogram.types import CallbackQuery
+from aiogram.filters import Command
+from aiogram.types import CallbackQuery, Message
 
-from bot.callbacks import OpenMenu, Paginator
-from bot.keyboards.client.olymps import olymps_subjects_keyboard
+from bot.callbacks import OlympData, OlympPaginator, OpenMenu, Paginator
+from bot.handlers.client.olymps.funcs import olymps_open_title_func
+from bot.keyboards import (
+    olymps_subjects_keyboard,
+    olymps_titles_keyboard,
+    one_olymp_keyboard,
+)
 from shared.database.repository.repository import Repository
-from shared.utils.enums import BotMenu
+from shared.utils.enums import BotMenu, PageMenu, SlashCommand, TextCommand
 
 router = Router(name=__name__)
 
 OLYMPS_SUBJECTS_TEXT = "Привет! Я - Олимпиады Предметы"
+OLYMPS_TITLES_TEXT = "Привет! Я - Олимпиады {}".format
 
 
 @router.callback_query(OpenMenu.filter(F.menu == BotMenu.OLYMPS))
-async def olypms_default_handler(
+async def olymps_callback_handler(
     callback: CallbackQuery,
     repo: Repository,
 ) -> None:
@@ -20,8 +27,18 @@ async def olypms_default_handler(
     await callback.message.edit_text(text=OLYMPS_SUBJECTS_TEXT, reply_markup=keyboard)
 
 
+@router.message(F.text == TextCommand.OLYMPS)
+@router.message(Command(SlashCommand.OLYMPS))
+async def olymps_message_handler(
+    message: Message,
+    repo: Repository,
+) -> None:
+    keyboard = await olymps_subjects_keyboard(page=0, olymp_repo=repo.olympiads)
+    await message.answer(text=OLYMPS_SUBJECTS_TEXT, reply_markup=keyboard)
+
+
 @router.callback_query(Paginator.filter(F.menu == BotMenu.OLYMPS))
-async def olymps_paginate_handler(
+async def olymps_subjects_paginate_handler(
     callback: CallbackQuery,
     callback_data: Paginator,
     repo: Repository,
@@ -31,3 +48,54 @@ async def olymps_paginate_handler(
         olymp_repo=repo.olympiads,
     )
     await callback.message.edit_text(text=OLYMPS_SUBJECTS_TEXT, reply_markup=keyboard)
+
+
+@router.callback_query(
+    OlympData.filter(F.subject),
+    OlympData.filter(F.id.is_(None)),
+)
+async def olymps_titles_start_handler(
+    callback: CallbackQuery,
+    callback_data: OlympData,
+    repo: Repository,
+) -> None:
+    keyboard = await olymps_titles_keyboard(
+        page=0,
+        subject=callback_data.subject,
+        olymp_repo=repo.olympiads,
+    )
+    await callback.message.edit_text(
+        text=OLYMPS_TITLES_TEXT(callback_data.subject),
+        reply_markup=keyboard,
+    )
+
+
+@router.callback_query(OlympPaginator.filter(F.menu == PageMenu.OLYMPS_LIST))
+async def olymps_titles_paginator_handler(
+    callback: CallbackQuery,
+    callback_data: OlympPaginator,
+    repo: Repository,
+) -> None:
+    keyboard = await olymps_titles_keyboard(
+        page=callback_data.page,
+        subject=callback_data.subject,
+        olymp_repo=repo.olympiads,
+    )
+    await callback.message.edit_text(
+        text=OLYMPS_TITLES_TEXT(callback_data.subject),
+        reply_markup=keyboard,
+    )
+
+
+@router.callback_query(OlympData.filter(F.subject), OlympData.filter(F.id.is_not(None)))
+async def olymps_open_title_handler(
+    callback: CallbackQuery,
+    callback_data: OlympData,
+    repo: Repository,
+) -> None:
+    keyboard = one_olymp_keyboard(
+        subject=callback_data.subject,
+        page=callback_data.page,
+    )
+    text = await olymps_open_title_func(callback_data.id, repo.olympiads)
+    await callback.message.edit_text(text=text, reply_markup=keyboard)
