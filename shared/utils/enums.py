@@ -81,7 +81,7 @@ class PageMenu(str, Enum):
     Чтобы не засорять BotMenu при использовании Paginator'а.
     """
 
-    UNIVERS = "univers_list"
+    UNIVERS_LIST = "univers_list"
     OLYMPS_LIST = "olymps_list"
 
 

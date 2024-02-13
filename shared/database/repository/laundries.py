@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Optional
+from typing import Any, Optional
 
 from sqlalchemy import select
 
@@ -6,15 +6,9 @@ from shared.database.models.laundries import Laundry
 from shared.database.repository.base_repo import BaseRepository
 from shared.utils.datehelp import datetime_now
 
-if TYPE_CHECKING:
-    from sqlalchemy.ext.asyncio import AsyncSession
-
 
 class LaundryRepository(BaseRepository):
     """Класс для работы с таймерами прачечной в базе данных."""
-
-    def __init__(self, session: "AsyncSession") -> None:
-        self._session = session
 
     async def get(self, user_id: int) -> "Optional[Laundry]":
         """

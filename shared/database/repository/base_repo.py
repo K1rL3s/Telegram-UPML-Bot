@@ -14,5 +14,8 @@ class BaseRepository(ABC):
 
     _session: "AsyncSession"
 
+    def __init__(self, session: "AsyncSession") -> None:
+        self._session = session
+
     async def select_query_to_list(self, query: "Select[tuple[T]]") -> list[T]:
         return list((await self._session.scalars(query)).all())

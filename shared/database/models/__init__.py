@@ -9,6 +9,7 @@ from shared.database.models.menus import Menu
 from shared.database.models.olymps import Olymp
 from shared.database.models.roles import Role
 from shared.database.models.settings import Settings
+from shared.database.models.univers import Univer
 from shared.database.models.users import User
 from shared.database.models.users_to_roles import UsersToRoles
 
@@ -25,4 +26,5 @@ __all__ = (
     "FullLessons",
     "EducatorsSchedule",
     "UsersToRoles",
+    "Univer",
 )

@@ -1,21 +1,14 @@
-from typing import TYPE_CHECKING, Optional
+import datetime as dt
+from typing import Optional
 
 from sqlalchemy import delete, select
 
 from shared.database.models.class_lessons import ClassLessons
 from shared.database.repository.base_repo import BaseRepository
 
-if TYPE_CHECKING:
-    import datetime as dt
-
-    from sqlalchemy.ext.asyncio import AsyncSession
-
 
 class ClassLessonsRepository(BaseRepository):
     """Класс для работы с расписаниями уроков в базе данных."""
-
-    def __init__(self, session: "AsyncSession") -> None:
-        self._session = session
 
     async def delete(
         self,

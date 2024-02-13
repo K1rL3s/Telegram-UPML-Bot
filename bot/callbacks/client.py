@@ -15,9 +15,17 @@ class SettingsData(CallbackData, prefix="settings"):
     attr: str | None = None
 
 
-class OlympData(CallbackData, prefix="olymps"):
+class OlympData(CallbackData, prefix="olymp"):
     """Фабрика для открытия олимпиад."""
 
     subject: str
+    id: int | None = None
+    page: int = 0
+
+
+class UniverData(CallbackData, prefix="univer"):
+    """Фабрика для открытия ВУЗов."""
+
+    city: str
     id: int | None = None
     page: int = 0

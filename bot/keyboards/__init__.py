@@ -29,6 +29,11 @@ from bot.keyboards.client.start import (
     main_menu_keyboard,
     start_reply_keyboard,
 )
+from bot.keyboards.client.univers import (
+    one_univer_keyboard,
+    univers_cities_keyboard,
+    univers_titles_keyboard,
+)
 from bot.keyboards.universal import cancel_state_keyboard, confirm_cancel_keyboard
 
 __all__ = (
@@ -56,4 +61,7 @@ __all__ = (
     "olymps_subjects_keyboard",
     "olymps_titles_keyboard",
     "one_olymp_keyboard",
+    "univers_cities_keyboard",
+    "univers_titles_keyboard",
+    "one_univer_keyboard",
 )

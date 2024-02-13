@@ -6,6 +6,7 @@ from shared.database.repository.menus import MenuRepository
 from shared.database.repository.olymps import OlympRepository
 from shared.database.repository.roles import RoleRepository
 from shared.database.repository.settings import SettingsRepository
+from shared.database.repository.univers import UniverRepository
 from shared.database.repository.user_role import UserRoleRepository
 from shared.database.repository.users import UserRepository
 
@@ -18,6 +19,7 @@ __all__ = (
     "OlympRepository",
     "RoleRepository",
     "SettingsRepository",
+    "UniverRepository",
     "UserRepository",
     "UserRoleRepository",
 )

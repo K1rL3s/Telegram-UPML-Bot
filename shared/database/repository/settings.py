@@ -1,19 +1,13 @@
-from typing import TYPE_CHECKING, Any, Optional
+from typing import Any, Optional
 
 from sqlalchemy import select
 
 from shared.database.models.settings import Settings
 from shared.database.repository.base_repo import BaseRepository
 
-if TYPE_CHECKING:
-    from sqlalchemy.ext.asyncio import AsyncSession
-
 
 class SettingsRepository(BaseRepository):
     """Класс для работы с настройками пользователей в базе данных."""
-
-    def __init__(self, session: "AsyncSession") -> None:
-        self._session = session
 
     async def get(self, user_id: int) -> "Optional[Settings]":
         """

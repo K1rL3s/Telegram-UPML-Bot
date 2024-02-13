@@ -9,7 +9,7 @@ from shared.utils.enums import BotMenu
 def educators_keyboard(date: "dt.date" = None) -> "InlineKeyboardMarkup":
     """Клавиатура для расписания воспитателей с перемоткой влево-вправо по дням."""
     return _left_right_keyboard_navigation(
-        bot_menu=BotMenu.EDUCATORS,
+        menu=BotMenu.EDUCATORS,
         today_smile="👩‍✈️",
         date=date,
     )

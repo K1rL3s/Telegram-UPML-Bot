@@ -1,16 +1,14 @@
 import contextlib
-from typing import TYPE_CHECKING, Union
+from typing import Union
 
 import sqlalchemy as sa
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.database.models import User
 from shared.database.repository.base_repo import BaseRepository
+from shared.database.repository.roles import RoleRepository
+from shared.database.repository.users import UserRepository
 from shared.utils.enums import RoleEnum
-
-if TYPE_CHECKING:
-    from sqlalchemy.ext.asyncio import AsyncSession
-
-    from shared.database.repository import RoleRepository, UserRepository
 
 
 class UserRoleRepository(BaseRepository):
@@ -22,7 +20,7 @@ class UserRoleRepository(BaseRepository):
         user_repo: "UserRepository",
         role_repo: "RoleRepository",
     ) -> None:
-        self._session = session
+        super().__init__(session)
         self._user = user_repo
         self._role = role_repo
 
@@ -40,7 +38,7 @@ class UserRoleRepository(BaseRepository):
     async def remove_role_from_user(
         self,
         user_id: int,
-        role: "Union[RoleEnum | str]",
+        role: "Union[RoleEnum, str]",
     ) -> None:
         """
         Удаляет роль у юзера.

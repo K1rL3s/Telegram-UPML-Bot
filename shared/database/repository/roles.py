@@ -1,22 +1,15 @@
 from enum import Enum
-from typing import TYPE_CHECKING, Optional, Union
+from typing import Optional, Union
 
 from sqlalchemy import select
 
 from shared.database.models.roles import Role
 from shared.database.repository.base_repo import BaseRepository
-
-if TYPE_CHECKING:
-    from sqlalchemy.ext.asyncio import AsyncSession
-
-    from shared.utils.enums import RoleEnum
+from shared.utils.enums import RoleEnum
 
 
 class RoleRepository(BaseRepository):
     """Класс для работы с ролями в базе данных."""
-
-    def __init__(self, session: "AsyncSession") -> None:
-        self._session = session
 
     async def get(
         self,

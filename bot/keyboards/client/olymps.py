@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot.callbacks import OlympData, OlympPaginator
+from bot.callbacks import OlympData, OlympsPaginator
 from bot.keyboards.paginate import paginate_keyboard
 from bot.keyboards.universal import (
     enrollee_menu_button,
@@ -53,7 +53,7 @@ async def olymps_titles_keyboard(
         rows=3,
         width=2,
         additional_buttons=[olymps_menu_button],
-        fabric=OlympPaginator,
+        fabric=OlympsPaginator,
         subject=subject,
     )
 
@@ -64,7 +64,7 @@ def one_olymp_keyboard(subject: str, page: int) -> InlineKeyboardMarkup:
             [
                 InlineKeyboardButton(
                     text=f"🏆 {subject}",
-                    callback_data=OlympPaginator(
+                    callback_data=OlympsPaginator(
                         menu=PageMenu.OLYMPS_LIST,
                         page=page,
                         subject=subject,

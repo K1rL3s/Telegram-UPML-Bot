@@ -77,13 +77,13 @@ confirm_cancel_keyboard = InlineKeyboardMarkup(
 
 
 def _left_right_keyboard_navigation(
-    bot_menu: str,
+    menu: str,
     today_smile: str,
     date: "dt.date" = None,
 ) -> "InlineKeyboardMarkup":
     """Клавиатура для меню с навигацией влево-вправо по датам.
 
-    :param bot_menu: Какое меню открывается.
+    :param menu: Какое меню открывается.
     :param today_smile: Смайлик на кнопке "Сегодня".
     :param date: Дата, на которой открыта навигация. None - сегодня.
     :return: Клавиатура меню навигации влево-вправо.
@@ -105,18 +105,18 @@ def _left_right_keyboard_navigation(
     if abs((today - yesterday).days) < 7:
         keyboard.button(
             text=f"⬅️ {yesterday_str}",
-            callback_data=OpenMenu(menu=bot_menu, date=yesterday_data),
+            callback_data=OpenMenu(menu=menu, date=yesterday_data),
         )
 
     keyboard.button(
         text=f"{today_smile}Сегодня",
-        callback_data=OpenMenu(menu=bot_menu, date=TODAY),
+        callback_data=OpenMenu(menu=menu, date=TODAY),
     )
 
     if abs((today - tomorrow).days) < 7:
         keyboard.button(
             text=f"{tomorrow_str} ➡️",
-            callback_data=OpenMenu(menu=bot_menu, date=tomorrow_data),
+            callback_data=OpenMenu(menu=menu, date=tomorrow_data),
         )
 
     keyboard.row(main_menu_button)

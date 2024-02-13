@@ -16,5 +16,9 @@ class Paginator(CallbackData, prefix="paginator"):
         return wrapped_init
 
 
-class OlympPaginator(Paginator, prefix="olymps_paginator"):
+class OlympsPaginator(Paginator, prefix="olymps_paginator"):
     subject: str
+
+
+class UniversPaginator(Paginator, prefix="univers_paginator"):
+    city: str

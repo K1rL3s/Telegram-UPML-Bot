@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import Any, Optional, Union
 
 import sqlalchemy as sa
 from loguru import logger
@@ -8,18 +8,11 @@ from sqlalchemy.orm import MappedColumn
 from shared.database.models.settings import Settings
 from shared.database.models.users import User
 from shared.database.repository.base_repo import BaseRepository
-
-if TYPE_CHECKING:
-    from sqlalchemy.ext.asyncio import AsyncSession
-
-    from shared.utils.enums import RoleEnum
+from shared.utils.enums import RoleEnum
 
 
 class UserRepository(BaseRepository):
     """Класс для работы с пользователями в базе данных."""
-
-    def __init__(self, session: "AsyncSession") -> None:
-        self._session = session
 
     async def get(self, user_id: int) -> "Optional[User]":
         """

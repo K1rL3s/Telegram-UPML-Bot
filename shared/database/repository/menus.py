@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Any
+import datetime as dt
+from typing import Any
 
 from sqlalchemy import select
 
@@ -7,17 +8,9 @@ from shared.database.repository.base_repo import BaseRepository
 from shared.utils.datehelp import date_today, get_this_week_monday
 from shared.utils.translate import CAFE_MENU_TRANSLATE
 
-if TYPE_CHECKING:
-    import datetime as dt
-
-    from sqlalchemy.ext.asyncio import AsyncSession
-
 
 class MenuRepository(BaseRepository):
     """Класс для работы с расписаниями столовой в базе данных."""
-
-    def __init__(self, session: "AsyncSession") -> None:
-        self._session = session
 
     async def get(
         self,

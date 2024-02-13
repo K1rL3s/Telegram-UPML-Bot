@@ -1,21 +1,13 @@
-from typing import TYPE_CHECKING
+import datetime as dt
 
 from sqlalchemy import select
 
 from shared.database.models.educators_schedules import EducatorsSchedule
 from shared.database.repository.base_repo import BaseRepository
 
-if TYPE_CHECKING:
-    import datetime as dt
-
-    from sqlalchemy.ext.asyncio import AsyncSession
-
 
 class EducatorsScheduleRepository(BaseRepository):
     """Класс для работы с расписаниями воспитателей в базе данных."""
-
-    def __init__(self, session: "AsyncSession") -> None:
-        self._session = session
 
     async def get(
         self,
