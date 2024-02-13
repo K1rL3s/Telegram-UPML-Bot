@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class SlashCommands(str, Enum):
+class SlashCommand(str, Enum):
     """Слэш команды бота."""
 
     START = "start"
@@ -13,11 +13,14 @@ class SlashCommands(str, Enum):
     LAUNDRY = "laundry"
     ELECTIVES = "electives"
     EDUCATORS = "educators"
+    ENROLLEE = "enrollee"
+    UNIVERS = "univers"
+    OLYMPS = "olymps"
     CANCEL = "cancel"
     STOP = "stop"
 
 
-class TextCommands(str, Enum):
+class TextCommand(str, Enum):
     """Текстовые команды бота."""
 
     START = "Старт"
@@ -29,12 +32,15 @@ class TextCommands(str, Enum):
     LAUNDRY = "💦Прачечная"
     ELECTIVES = "📖Элективы"
     EDUCATORS = "👩‍✈️Воспитатели"
+    ENROLLEE = "📚 Поступающим"
+    UNIVERS = "🏢 ВУЗы"
+    OLYMPS = "🏆 Олимпиады"
     ADMIN_PANEL = "❗Админ панель"
     CANCEL = "Отмена"
     STOP = CANCEL
 
 
-class NotifyTypes(str, Enum):
+class NotifyType(str, Enum):
     """Типы уведомлений для пользователей."""
 
     ALL = "all"
@@ -44,14 +50,14 @@ class NotifyTypes(str, Enum):
     GRADE_11 = "grade_11"
 
 
-class Grades(str, Enum):
+class Grade(str, Enum):
     """Учебные параллели."""
 
     GRADE_10 = "10"
     GRADE_11 = "11"
 
 
-class Menus(str, Enum):
+class BotMenu(str, Enum):
     """Callback'и для менюшек бота."""
 
     MAIN_MENU = "main_menu"
@@ -63,9 +69,12 @@ class Menus(str, Enum):
     LESSONS = "lessons"
     ADMIN_PANEL = "admin_panel"
     NOTIFY = "notify"
+    ENROLLEE = "enrollee"
+    UNVIVERS = "univers"
+    OLYMPS = "olymps"
 
 
-class Actions(str, Enum):
+class Action(str, Enum):
     """Callback'и для действий пользователей."""
 
     CONFIRM = "confirm"
@@ -90,7 +99,7 @@ class UserCallback(str, Enum):
     NEWS_NOTIFY = "news_notify"
 
 
-class Meals(str, Enum):
+class Meal(str, Enum):
     """Callback'и для названий приёмов пищи."""
 
     AUTO_ALL = "auto_all"
@@ -101,7 +110,7 @@ class Meals(str, Enum):
     SUPPER = "supper"
 
 
-class Roles(str, Enum):
+class RoleEnum(str, Enum):
     """Роли (права доступа) пользователей."""
 
     SUPERADMIN = "superadmin"
@@ -114,13 +123,13 @@ class Roles(str, Enum):
     @staticmethod
     def all_roles() -> list[str]:
         """Все роли."""
-        return [role.value if isinstance(role, Enum) else role for role in Roles]
+        return [role.value if isinstance(role, Enum) else role for role in RoleEnum]
 
     @staticmethod
     def roles_which_can_be_edited() -> list[str]:
         """Роли, которые можно редактировать юзерам."""
         return [
             role.value if isinstance(role, Enum) else role
-            for role in Roles
-            if role != Roles.SUPERADMIN
+            for role in RoleEnum
+            if role != RoleEnum.SUPERADMIN
         ]

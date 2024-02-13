@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from aiogram import F, Router
 from aiogram.filters import StateFilter
 
-from bot.callbacks import AdminCheck, AdminEditRole, AdminList, InStateData
+from bot.callbacks import AdminCheck, AdminEditRole, InStateData, Paginator
 from bot.filters import IsSuperAdmin
 from bot.handlers.admin.manage.funcs import (
     admins_list_func,
@@ -19,7 +19,7 @@ from bot.keyboards import (
     cancel_state_keyboard,
     confirm_cancel_keyboard,
 )
-from shared.utils.enums import Actions
+from shared.utils.enums import Action, BotMenu
 from shared.utils.states import EditingRoles
 
 if TYPE_CHECKING:
@@ -34,10 +34,10 @@ router.message.filter(IsSuperAdmin())
 router.callback_query.filter(IsSuperAdmin())
 
 
-@router.callback_query(AdminList.filter())
+@router.callback_query(Paginator.filter(F.menu == BotMenu.ADMIN_PANEL))
 async def admins_list_handler(
     callback: "CallbackQuery",
-    callback_data: "AdminList",
+    callback_data: "Paginator",
     repo: "Repository",
 ) -> None:
     """Обработчик кнопки "Список админов"."""
@@ -88,7 +88,7 @@ async def edit_roles_directly_handler(
 
 
 @router.callback_query(
-    AdminEditRole.filter(F.action == Actions.EDIT),
+    AdminEditRole.filter(F.action == Action.EDIT),
     AdminEditRole.filter(F.user_id.is_(None)),
 )
 async def edit_roles_handler(
@@ -143,7 +143,7 @@ async def edit_roles_choose_role_handler(
 
 @router.callback_query(
     StateFilter(EditingRoles.roles),
-    InStateData.filter(F.action == Actions.CONFIRM),
+    InStateData.filter(F.action == Action.CONFIRM),
 )
 async def edit_roles_confirm_handler(
     callback: "CallbackQuery",
@@ -159,7 +159,7 @@ async def edit_roles_confirm_handler(
 
 @router.callback_query(
     StateFilter(EditingRoles.confirm),
-    InStateData.filter(F.action == Actions.CONFIRM),
+    InStateData.filter(F.action == Action.CONFIRM),
 )
 async def edit_roles_confirm_sure_handler(
     callback: "CallbackQuery",

@@ -15,6 +15,7 @@ from bot.keyboards.admin.notifies import (
 )
 from bot.keyboards.client.cafe_menu import cafe_menu_keyboard
 from bot.keyboards.client.educators import educators_keyboard
+from bot.keyboards.client.enrollee import enrollee_keyboard
 from bot.keyboards.client.laundry import laundry_keyboard
 from bot.keyboards.client.lessons import lessons_keyboard
 from bot.keyboards.client.settings import choose_grade_keyboard, settings_keyboard
@@ -46,4 +47,5 @@ __all__ = (
     "notify_menu_keyboard",
     "settings_keyboard",
     "start_reply_keyboard",
+    "enrollee_keyboard",
 )

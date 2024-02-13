@@ -8,7 +8,7 @@ from bot.keyboards import (
     notify_for_grade_keyboard,
 )
 from shared.database.models import Settings, User
-from shared.utils.enums import NotifyTypes
+from shared.utils.enums import NotifyType
 from shared.utils.notify import do_admin_notify
 from shared.utils.states import DoingNotify
 from shared.utils.translate import NOTIFIES_TYPES_TRANSLATE
@@ -36,10 +36,10 @@ async def notify_for_who_func(
     :param state: Состояние пользователя.
     :return: Сообщение и клавиатура для пользователя.
     """
-    if notify_type == NotifyTypes.GRADE:
+    if notify_type == NotifyType.GRADE:
         text = "Выберите, каким классам сделать уведомление"
         keyboard = notify_for_grade_keyboard
-    elif notify_type == NotifyTypes.CLASS:
+    elif notify_type == NotifyType.CLASS:
         text = "Выберите, какому классу сделать уведомление"
         keyboard = notify_for_class_keyboard
     else:

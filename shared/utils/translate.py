@@ -1,13 +1,13 @@
 from typing import Final
 
-from shared.utils.enums import Meals, Roles, UserCallback
+from shared.utils.enums import Meal, RoleEnum, UserCallback
 
 CAFE_MENU_TRANSLATE: Final[dict[str, str]] = {
-    Meals.BREAKFAST: "завтрак",
-    Meals.LUNCH: "второй завтрак",
-    Meals.DINNER: "обед",
-    Meals.SNACK: "полдник",
-    Meals.SUPPER: "ужин",
+    Meal.BREAKFAST: "завтрак",
+    Meal.LUNCH: "второй завтрак",
+    Meal.DINNER: "обед",
+    Meal.SNACK: "полдник",
+    Meal.SUPPER: "ужин",
 }
 NOTIFIES_TYPES_TRANSLATE: Final[dict[str, str]] = {
     "all": "всем",
@@ -19,10 +19,10 @@ LAUNDRY_TIMERS_TRANSLATE: Final[dict[str, str]] = {
     UserCallback.DRYING: "время сушки",
 }
 ROLES_TRANSLATE: Final[dict[str, str]] = {
-    Roles.SUPERADMIN: "супер-админ",
-    Roles.ADMIN: "админ",
-    Roles.NOTIFY: "уведомления",
-    Roles.LESSONS: "уроки",
-    Roles.CAFE_MENU: "столовая",
-    Roles.EDUCATORS: "воспитатели",
+    RoleEnum.SUPERADMIN: "супер-админ",
+    RoleEnum.ADMIN: "админ",
+    RoleEnum.NOTIFY: "уведомления",
+    RoleEnum.LESSONS: "уроки",
+    RoleEnum.CAFE_MENU: "столовая",
+    RoleEnum.EDUCATORS: "воспитатели",
 }

@@ -9,7 +9,7 @@ from shared.database.repository.base_repo import BaseRepository
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
-    from shared.utils.enums import Roles
+    from shared.utils.enums import RoleEnum
 
 
 class RoleRepository(BaseRepository):
@@ -20,7 +20,7 @@ class RoleRepository(BaseRepository):
 
     async def get(
         self,
-        role: "Union[Roles | str]",
+        role: "Union[RoleEnum | str]",
     ) -> "Optional[Role]":
         """
         Возвращает модель Role по названию роли.

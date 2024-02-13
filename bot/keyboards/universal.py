@@ -9,7 +9,7 @@ from aiogram.utils.keyboard import (
 from bot.callbacks import InStateData, OpenMenu
 from shared.utils.consts import TODAY
 from shared.utils.datehelp import date_today, format_date
-from shared.utils.enums import Actions, Menus, TextCommands
+from shared.utils.enums import Action, BotMenu, TextCommand
 from shared.utils.phrases import NO, YES
 
 MAIN_MENU = "🏠Главное меню"
@@ -19,25 +19,56 @@ CONFIRM = f"{YES}Подтвердить"
 
 main_menu_button = InlineKeyboardButton(
     text=MAIN_MENU,
-    callback_data=OpenMenu(menu=Menus.MAIN_MENU).pack(),
+    callback_data=OpenMenu(menu=BotMenu.MAIN_MENU).pack(),
 )
 settings_button = InlineKeyboardButton(
-    text=TextCommands.SETTINGS,
-    callback_data=OpenMenu(menu=Menus.SETTINGS).pack(),
+    text=TextCommand.SETTINGS,
+    callback_data=OpenMenu(menu=BotMenu.SETTINGS).pack(),
 )
 admin_panel_button = InlineKeyboardButton(
-    text=TextCommands.ADMIN_PANEL,
-    callback_data=OpenMenu(menu=Menus.ADMIN_PANEL).pack(),
+    text=TextCommand.ADMIN_PANEL,
+    callback_data=OpenMenu(menu=BotMenu.ADMIN_PANEL).pack(),
+)
+cafe_menu_button = InlineKeyboardButton(
+    text=TextCommand.CAFE,
+    callback_data=OpenMenu(menu=BotMenu.CAFE_MENU, date=TODAY).pack(),
+)
+lessons_menu_button = InlineKeyboardButton(
+    text=TextCommand.LESSONS,
+    callback_data=OpenMenu(menu=BotMenu.LESSONS, date=TODAY).pack(),
+)
+laundry_menu_button = InlineKeyboardButton(
+    text=TextCommand.LAUNDRY,
+    callback_data=OpenMenu(menu=BotMenu.LAUNDRY).pack(),
+)
+electives_menu_button = InlineKeyboardButton(
+    text=TextCommand.ELECTIVES,
+    callback_data=OpenMenu(menu=BotMenu.ELECTIVES, date=TODAY).pack(),
+)
+educators_menu_button = InlineKeyboardButton(
+    text=TextCommand.EDUCATORS,
+    callback_data=OpenMenu(menu=BotMenu.EDUCATORS, date=TODAY).pack(),
+)
+enrollee_menu_button = InlineKeyboardButton(
+    text=TextCommand.ENROLLEE,
+    callback_data=OpenMenu(menu=BotMenu.ENROLLEE).pack(),
+)
+univers_menu_button = InlineKeyboardButton(
+    text=TextCommand.UNIVERS,
+    callback_data=OpenMenu(menu=BotMenu.UNVIVERS).pack(),
+)
+olymps_menu_button = InlineKeyboardButton(
+    text=TextCommand.OLYMPS,
+    callback_data=OpenMenu(menu=BotMenu.OLYMPS).pack(),
 )
 confirm_state_button = InlineKeyboardButton(
     text=CONFIRM,
-    callback_data=InStateData(action=Actions.CONFIRM).pack(),
+    callback_data=InStateData(action=Action.CONFIRM).pack(),
 )
 cancel_state_button = InlineKeyboardButton(
     text=CANCEL,
-    callback_data=InStateData(action=Actions.CANCEL).pack(),
+    callback_data=InStateData(action=Action.CANCEL).pack(),
 )
-
 cancel_state_keyboard = InlineKeyboardMarkup(inline_keyboard=[[cancel_state_button]])
 
 confirm_cancel_keyboard = InlineKeyboardMarkup(

@@ -1,16 +1,13 @@
 import datetime as dt
 from math import ceil
-from typing import TYPE_CHECKING
+
+from aiogram.types import InlineKeyboardMarkup
 
 from bot.keyboards import laundry_keyboard
+from shared.database.models.laundries import Laundry
+from shared.database.repository import LaundryRepository, SettingsRepository
 from shared.utils.consts import REPEAT_LAUNDRY_TIMER
 from shared.utils.datehelp import datetime_now, datetime_time_delta
-
-if TYPE_CHECKING:
-    from aiogram.types import InlineKeyboardMarkup
-
-    from shared.database.models.laundries import Laundry
-    from shared.database.repository import LaundryRepository, SettingsRepository
 
 
 async def laundry_func(

@@ -15,7 +15,7 @@ from bot.keyboards import (
     confirm_cancel_keyboard,
     notify_menu_keyboard,
 )
-from shared.utils.enums import Actions, Menus
+from shared.utils.enums import Action, BotMenu
 from shared.utils.states import DoingNotify
 
 if TYPE_CHECKING:
@@ -30,7 +30,7 @@ router.message.filter(HasNotifyRole())
 router.callback_query.filter(HasNotifyRole())
 
 
-@router.callback_query(OpenMenu.filter(F.menu == Menus.NOTIFY))
+@router.callback_query(OpenMenu.filter(F.menu == BotMenu.NOTIFY))
 async def notify_panel_handler(callback: "CallbackQuery") -> None:
     """Обработчик кнопки "Уведомление"."""
     text = """
@@ -79,7 +79,7 @@ async def notify_message_handler(
 
 
 @router.callback_query(
-    InStateData.filter(F.action == Actions.CONFIRM),
+    InStateData.filter(F.action == Action.CONFIRM),
     StateFilter(DoingNotify.writing),
 )
 async def notify_confirm_handler(

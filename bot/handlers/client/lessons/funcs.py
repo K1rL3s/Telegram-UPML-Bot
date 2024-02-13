@@ -1,17 +1,12 @@
-from typing import TYPE_CHECKING
+import datetime as dt
 
+from aiogram import Bot
 from aiogram.types import InputMediaPhoto
 
 from bot.keyboards import lessons_keyboard
+from shared.database.repository.repository import Repository
 from shared.utils.datehelp import format_date, weekday_by_date
 from shared.utils.phrases import QUESTION
-
-if TYPE_CHECKING:
-    import datetime as dt
-
-    from aiogram import Bot
-
-    from shared.database.repository.repository import Repository
 
 
 async def send_lessons_images(

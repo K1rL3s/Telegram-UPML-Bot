@@ -1,25 +1,19 @@
-from typing import TYPE_CHECKING
-
 from aiogram import F, Router
 from aiogram.filters import Command
+from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import OpenMenu
 from bot.handlers.client.cafe_menu.funcs import get_format_menu_by_date
 from bot.keyboards import cafe_menu_keyboard
+from shared.database.repository.repository import Repository
 from shared.utils.consts import TODAY
 from shared.utils.datehelp import date_by_format
-from shared.utils.enums import Menus, SlashCommands, TextCommands
-
-if TYPE_CHECKING:
-    from aiogram.types import CallbackQuery, Message
-
-    from shared.database.repository.repository import Repository
-
+from shared.utils.enums import BotMenu, SlashCommand, TextCommand
 
 router = Router(name=__name__)
 
 
-@router.callback_query(OpenMenu.filter(F.menu == Menus.CAFE_MENU))
+@router.callback_query(OpenMenu.filter(F.menu == BotMenu.CAFE_MENU))
 async def cafe_menu_callback_handler(
     callback: "CallbackQuery",
     callback_data: "OpenMenu",
@@ -37,8 +31,8 @@ async def cafe_menu_callback_handler(
     )
 
 
-@router.message(F.text == TextCommands.CAFE)
-@router.message(Command(SlashCommands.CAFE))
+@router.message(F.text == TextCommand.CAFE)
+@router.message(Command(SlashCommand.CAFE))
 async def cafe_menu_message_handler(
     message: "Message",
     repo: "Repository",

@@ -6,7 +6,7 @@ from bot.keyboards import (
     check_admin_roles_keyboard,
     edit_roles_keyboard,
 )
-from shared.utils.enums import Roles
+from shared.utils.enums import RoleEnum
 from shared.utils.funcs import name_link
 from shared.utils.phrases import YES
 from shared.utils.states import EditingRoles
@@ -105,7 +105,7 @@ async def edit_role_username_func(
 
     user_id = user_ids[0]
 
-    all_roles = Roles.roles_which_can_be_edited()
+    all_roles = RoleEnum.roles_which_can_be_edited()
     choosed_roles = [role.role for role in (await repo.get(user_id)).roles]
     await state.set_state(EditingRoles.roles)
     data = await state.update_data(

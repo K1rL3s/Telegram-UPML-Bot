@@ -4,6 +4,7 @@ Revision ID: 0001
 Revises:
 Create Date: 2023-08-12 01:48:40.873630
 """
+
 from collections.abc import Sequence
 from typing import Union
 
@@ -11,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 
 from shared.database.models import Role
-from shared.utils.enums import Roles
+from shared.utils.enums import RoleEnum
 
 # revision identifiers, used by Alembic.
 revision: str = "0001"
@@ -134,7 +135,7 @@ def upgrade() -> None:
     )
 
     conn = op.get_bind()
-    for role in Roles.all_roles():
+    for role in RoleEnum.all_roles():
         conn.execute(sa.insert(Role).values(role=role))
 
     op.create_unique_constraint(op.f("uq_class_lessons_id"), "class_lessons", ["id"])

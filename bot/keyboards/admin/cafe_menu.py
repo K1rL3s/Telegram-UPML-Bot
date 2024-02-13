@@ -7,7 +7,7 @@ from aiogram.utils.keyboard import (
 from bot.callbacks import EditMeal
 from bot.keyboards.universal import cancel_state_button
 from shared.utils.consts import BEAUTIFY_MEALS
-from shared.utils.enums import Meals
+from shared.utils.enums import Meal
 
 choose_meal_keyboard: "InlineKeyboardMarkup" = (
     InlineKeyboardBuilder()
@@ -17,11 +17,11 @@ choose_meal_keyboard: "InlineKeyboardMarkup" = (
             for dish, callback_data in zip(
                 BEAUTIFY_MEALS,
                 (
-                    EditMeal(meal=Meals.BREAKFAST),
-                    EditMeal(meal=Meals.LUNCH),
-                    EditMeal(meal=Meals.DINNER),
-                    EditMeal(meal=Meals.SNACK),
-                    EditMeal(meal=Meals.SUPPER),
+                    EditMeal(meal=Meal.BREAKFAST),
+                    EditMeal(meal=Meal.LUNCH),
+                    EditMeal(meal=Meal.DINNER),
+                    EditMeal(meal=Meal.SNACK),
+                    EditMeal(meal=Meal.SUPPER),
                 ),
             )
         ),

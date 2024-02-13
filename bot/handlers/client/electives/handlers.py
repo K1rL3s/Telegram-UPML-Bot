@@ -5,7 +5,7 @@ from aiogram.filters import Command
 
 from bot.callbacks import OpenMenu
 from bot.keyboards import main_menu_keyboard
-from shared.utils.enums import Menus, SlashCommands, TextCommands
+from shared.utils.enums import BotMenu, SlashCommand, TextCommand
 
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 router = Router(name=__name__)
 
 
-@router.callback_query(OpenMenu.filter(F.menu == Menus.ELECTIVES))
+@router.callback_query(OpenMenu.filter(F.menu == BotMenu.ELECTIVES))
 async def electives_callback_handler(
     callback: "CallbackQuery",
 ) -> None:
@@ -27,8 +27,8 @@ async def electives_callback_handler(
     )
 
 
-@router.message(F.text == TextCommands.ELECTIVES)
-@router.message(Command(SlashCommands.ELECTIVES))
+@router.message(F.text == TextCommand.ELECTIVES)
+@router.message(Command(SlashCommand.ELECTIVES))
 async def electives_message_handler(
     message: "Message",
     repo: "Repository",

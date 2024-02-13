@@ -1,20 +1,16 @@
 import datetime as dt
-from typing import TYPE_CHECKING
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.types import BotCommand, BotCommandScopeAllPrivateChats
 from loguru import logger
+from redis.asyncio import Redis
 from sqlalchemy.orm import close_all_sessions
 
 from bot.handlers import include_routers
-from shared.utils.enums import SlashCommands
-
-if TYPE_CHECKING:
-    from redis.asyncio import Redis
-
-    from shared.core.settings import Settings
+from shared.core.settings import Settings
+from shared.utils.enums import SlashCommand
 
 
 async def on_startup(bot: "Bot") -> None:
@@ -45,11 +41,11 @@ async def on_shutdown(bot: "Bot", redis: "Redis") -> None:
 async def set_commands(bot: "Bot") -> bool:
     """Установка команд для бота."""
     commands: dict[str, str] = {
-        SlashCommands.START: "Старт",
-        SlashCommands.HELP: "Помощь",
-        SlashCommands.MENU: "Меню",
-        SlashCommands.SETTINGS: "Настройки",
-        SlashCommands.CANCEL: "Отмена ввода",
+        SlashCommand.START: "Старт",
+        SlashCommand.HELP: "Помощь",
+        SlashCommand.MENU: "Меню",
+        SlashCommand.SETTINGS: "Настройки",
+        SlashCommand.CANCEL: "Отмена ввода",
     }
 
     return await bot.set_my_commands(

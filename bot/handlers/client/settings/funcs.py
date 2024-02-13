@@ -1,6 +1,11 @@
-from typing import TYPE_CHECKING, Literal
+import datetime as dt
+from typing import Literal
+
+from aiogram.fsm.context import FSMContext
+from aiogram.types import InlineKeyboardMarkup
 
 from bot.keyboards import cancel_state_keyboard, settings_keyboard
+from shared.database.repository import SettingsRepository
 from shared.utils.datehelp import (
     format_time,
     hours_minutes_to_minutes,
@@ -11,14 +16,6 @@ from shared.utils.enums import UserCallback
 from shared.utils.funcs import laundry_limit_min_max
 from shared.utils.phrases import DONT_UNDERSTAND_TIMER, YES
 from shared.utils.translate import LAUNDRY_TIMERS_TRANSLATE
-
-if TYPE_CHECKING:
-    import datetime as dt
-
-    from aiogram.fsm.context import FSMContext
-    from aiogram.types import InlineKeyboardMarkup
-
-    from shared.database.repository import SettingsRepository
 
 
 async def edit_bool_settings_func(

@@ -1,7 +1,7 @@
-from typing import TYPE_CHECKING
-
 from aiogram import F, Router
 from aiogram.filters import Command, CommandStart, StateFilter
+from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import OpenMenu
 from bot.keyboards import (
@@ -10,14 +10,8 @@ from bot.keyboards import (
     start_reply_keyboard,
 )
 from bot.middlewares.inner.save_user import SaveUpdateUserMiddleware
-from shared.utils.enums import Menus, SlashCommands, TextCommands
-
-if TYPE_CHECKING:
-    from aiogram.fsm.context import FSMContext
-    from aiogram.types import CallbackQuery, Message
-
-    from shared.database.repository.repository import Repository
-
+from shared.database.repository.repository import Repository
+from shared.utils.enums import BotMenu, SlashCommand, TextCommand
 
 router = Router(name=__name__)
 router.message.middleware(SaveUpdateUserMiddleware())
@@ -50,7 +44,7 @@ HELP_TEXT = """
 """  # noqa
 
 
-@router.message(F.text == TextCommands.START, StateFilter("*"))
+@router.message(F.text == TextCommand.START, StateFilter("*"))
 @router.message(CommandStart(), StateFilter("*"))
 async def start_handler(
     message: "Message",
@@ -65,7 +59,7 @@ async def start_handler(
     )
 
 
-@router.callback_query(OpenMenu.filter(F.menu == Menus.MAIN_MENU))
+@router.callback_query(OpenMenu.filter(F.menu == BotMenu.MAIN_MENU))
 async def main_menu_callback_handler(
     callback: "CallbackQuery",
     repo: "Repository",
@@ -75,8 +69,8 @@ async def main_menu_callback_handler(
     await callback.message.edit_text(text=MAIN_MENU_TEXT, reply_markup=keyboard)
 
 
-@router.message(F.text == TextCommands.MENU)
-@router.message(Command(SlashCommands.MENU))
+@router.message(F.text == TextCommand.MENU)
+@router.message(Command(SlashCommand.MENU))
 async def main_menu_message_handler(
     message: "Message",
     repo: "Repository",
@@ -86,8 +80,8 @@ async def main_menu_message_handler(
     await message.reply(text=MAIN_MENU_TEXT, reply_markup=keyboard)
 
 
-@router.message(F.text == TextCommands.HELP)
-@router.message(Command(SlashCommands.HELP))
+@router.message(F.text == TextCommand.HELP)
+@router.message(Command(SlashCommand.HELP))
 async def help_handler(message: "Message") -> None:
     """Обработчик команды "/help"."""
     await message.reply(text=HELP_TEXT, reply_markup=go_to_main_menu_keyboard)

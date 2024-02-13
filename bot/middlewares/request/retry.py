@@ -34,8 +34,10 @@ class RetryRequestMiddleware(BaseRequestMiddleware):
 
     def __init__(
         self,
+        attempts: int = 5,
         backoff_config: BackoffConfig = DEFAULT_BACKOFF_CONFIG,
     ) -> None:
+        self.attempts = attempts
         self.backoff_config = backoff_config
 
     async def __call__(
@@ -46,19 +48,19 @@ class RetryRequestMiddleware(BaseRequestMiddleware):
     ) -> "Response[TelegramType]":
         backoff = Backoff(config=self.backoff_config)
 
-        while True:
+        for i in range(self.attempts):
             try:
                 return await make_request(bot, method)
             except TelegramRetryAfter as e:
                 logger.error(
-                    f"Request '{type(method).__name__}' "
+                    f"Request #{i} '{type(method).__name__}' "
                     f"failed due to rate limit. Sleeping {e.retry_after}",
                 )
                 backoff.reset()
                 await asyncio.sleep(e.retry_after)
             except (TelegramServerError, TelegramNetworkError) as e:
                 logger.error(
-                    f"Request '{type(method).__name__}' "
+                    f"Request #{i} '{type(method).__name__}' "
                     f"failed due to {type(e).__name__} - {e}. "
                     f"Sleeping {backoff.next_delay}",
                 )

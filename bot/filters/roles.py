@@ -1,19 +1,16 @@
-from typing import TYPE_CHECKING, Union
+from typing import Union
 
 from aiogram.filters import Filter
+from aiogram.types import CallbackQuery, Message
 
-from shared.utils.enums import Roles
-
-if TYPE_CHECKING:
-    from aiogram.types import CallbackQuery, Message
-
-    from shared.database.repository.repository import Repository
+from shared.database.repository.repository import Repository
+from shared.utils.enums import RoleEnum
 
 
 class RoleAccess(Filter):
     """Фильтр доступа к обработчику по роли (уровню доступа)."""
 
-    def __init__(self, roles: "list[Union[Roles, str]]") -> None:
+    def __init__(self, roles: "list[Union[RoleEnum, str]]") -> None:
         self.roles = roles
 
     async def __call__(
@@ -28,46 +25,46 @@ class IsSuperAdmin(RoleAccess):
     """Фильтр по роли SUPERADMIN."""
 
     def __init__(self) -> None:
-        super().__init__([Roles.SUPERADMIN])
+        super().__init__([RoleEnum.SUPERADMIN])
 
 
 class IsAdmin(RoleAccess):
     """Фильтр по ролям SUPERADMIN и ADMIN."""
 
     def __init__(self) -> None:
-        super().__init__([Roles.SUPERADMIN, Roles.ADMIN])
+        super().__init__([RoleEnum.SUPERADMIN, RoleEnum.ADMIN])
 
 
 class HasAnyRole(RoleAccess):
     """Фильтр доступа к админ-панели. Любой, у кого есть роль - имеет доступ."""
 
     def __init__(self) -> None:
-        super().__init__(Roles.all_roles())
+        super().__init__(RoleEnum.all_roles())
 
 
 class HasNotifyRole(RoleAccess):
     """Фильтр доступа к рассылке уведомлений."""
 
     def __init__(self) -> None:
-        super().__init__([Roles.SUPERADMIN, Roles.ADMIN, Roles.NOTIFY])
+        super().__init__([RoleEnum.SUPERADMIN, RoleEnum.ADMIN, RoleEnum.NOTIFY])
 
 
 class HasLessonsRole(RoleAccess):
     """Фильтр доступа к редактированию уроков."""
 
     def __init__(self) -> None:
-        super().__init__([Roles.SUPERADMIN, Roles.ADMIN, Roles.LESSONS])
+        super().__init__([RoleEnum.SUPERADMIN, RoleEnum.ADMIN, RoleEnum.LESSONS])
 
 
 class HasCafeMenuRole(RoleAccess):
     """Фильтр доступа к редактированию расписаний столовой."""
 
     def __init__(self) -> None:
-        super().__init__([Roles.SUPERADMIN, Roles.ADMIN, Roles.CAFE_MENU])
+        super().__init__([RoleEnum.SUPERADMIN, RoleEnum.ADMIN, RoleEnum.CAFE_MENU])
 
 
 class HasEducatorsRole(RoleAccess):
     """Фильтр доступа к редактированию расписаний воспитателей."""
 
     def __init__(self) -> None:
-        super().__init__([Roles.SUPERADMIN, Roles.ADMIN, Roles.EDUCATORS])
+        super().__init__([RoleEnum.SUPERADMIN, RoleEnum.ADMIN, RoleEnum.EDUCATORS])

@@ -6,29 +6,28 @@ from aiogram.utils.keyboard import (
     InlineKeyboardMarkup,
 )
 
-from bot.callbacks import AdminCheck, AdminEditRole, AdminList
+from bot.callbacks import AdminCheck, AdminEditRole, Paginator
+from bot.keyboards.paginate import paginate_keyboard
 from bot.keyboards.universal import (
     admin_panel_button,
     cancel_state_button,
     confirm_state_button,
 )
-from shared.utils.enums import Actions, Roles
+from shared.utils.enums import Action, BotMenu, RoleEnum
 from shared.utils.translate import ROLES_TRANSLATE
 
 ADMIN_LIST = "👮‍♀️Список админов"
 EDIT_PERMISSIONS = "🔎Изменить роли"
-PAGE_BACK = "⬅️Назад"
-PAGE_FORWARD = "➡️Вперёд"
 ADD_ROLE = "✅Дать"
 REMOVE_ROLE = "🚫Снять"
 
 admins_list_button = InlineKeyboardButton(
     text=ADMIN_LIST,
-    callback_data=AdminList(page=0).pack(),
+    callback_data=Paginator(menu=BotMenu.ADMIN_PANEL, page=0).pack(),
 )
 edit_permissions_button = InlineKeyboardButton(
     text=EDIT_PERMISSIONS,
-    callback_data=AdminEditRole(action=Actions.EDIT).pack(),
+    callback_data=AdminEditRole(action=Action.EDIT).pack(),
 )
 
 
@@ -42,38 +41,21 @@ def admins_list_keyboard(
     :param users: Список с кортежами (имя, айди) об админах.
     :param page: Страница.
     """
-    upp = 6  # 6 пользователей на страницу (users per page)
-    keyboard = InlineKeyboardBuilder()
-
-    for name, user_id in users[page * upp : page * upp + upp]:
-        keyboard.button(
+    rows, width = 3, 2
+    menu = BotMenu.ADMIN_PANEL
+    buttons = [
+        InlineKeyboardButton(
             text=name,
             callback_data=AdminCheck(
                 user_id=user_id,
                 page=page,
-            ),
+            ).pack(),
         )
+        for name, user_id in users
+    ]
+    additional_buttons = [edit_permissions_button, admin_panel_button]
 
-    if page > 0:
-        keyboard.button(
-            text=PAGE_BACK,
-            callback_data=AdminList(page=page - 1),
-        )
-
-    if page * upp + upp < len(users):
-        keyboard.button(
-            text=PAGE_FORWARD,
-            callback_data=AdminList(page=page + 1),
-        )
-
-    keyboard.add(
-        edit_permissions_button,
-        admin_panel_button,
-    )
-
-    keyboard.adjust(2, repeat=True)
-
-    return keyboard.as_markup()
+    return paginate_keyboard(buttons, page, menu, rows, width, additional_buttons)
 
 
 def check_admin_roles_keyboard(
@@ -91,12 +73,12 @@ def check_admin_roles_keyboard(
     """
     keyboard = InlineKeyboardBuilder()
     for role in roles:
-        if isinstance(role, Roles):
+        if isinstance(role, RoleEnum):
             role = role.value
         keyboard.button(
             text=ROLES_TRANSLATE[role].capitalize(),
             callback_data=AdminEditRole(
-                action=Actions.EDIT,
+                action=Action.EDIT,
                 user_id=user_id,
                 role=role,
             ),
@@ -106,7 +88,7 @@ def check_admin_roles_keyboard(
     keyboard.row(
         InlineKeyboardButton(
             text=ADMIN_LIST,
-            callback_data=AdminList(page=page).pack(),
+            callback_data=Paginator(menu=BotMenu.ADMIN_PANEL, page=page).pack(),
         ),
         admin_panel_button,
     )

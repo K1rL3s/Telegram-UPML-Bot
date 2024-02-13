@@ -12,7 +12,7 @@ from shared.database.repository.base_repo import BaseRepository
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
-    from shared.utils.enums import Roles
+    from shared.utils.enums import RoleEnum
 
 
 class UserRepository(BaseRepository):
@@ -105,7 +105,7 @@ class UserRepository(BaseRepository):
     async def is_has_any_role(
         self,
         user_id: int,
-        roles: "list[Union[Roles, str]]",
+        roles: "list[Union[RoleEnum, str]]",
     ) -> bool:
         """
         Имеет ли юзер хотя бы одну роль из переданных.

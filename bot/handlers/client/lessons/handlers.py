@@ -1,25 +1,19 @@
-from typing import TYPE_CHECKING
-
 from aiogram import F, Router
 from aiogram.filters import Command
+from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import OpenMenu
 from bot.handlers.client.lessons.funcs import send_lessons_images
 from bot.keyboards import lessons_keyboard
+from shared.database.repository.repository import Repository
 from shared.utils.consts import TODAY
 from shared.utils.datehelp import date_by_format
-from shared.utils.enums import Menus, SlashCommands, TextCommands
-
-if TYPE_CHECKING:
-    from aiogram.types import CallbackQuery, Message
-
-    from shared.database.repository.repository import Repository
-
+from shared.utils.enums import BotMenu, SlashCommand, TextCommand
 
 router = Router(name=__name__)
 
 
-@router.callback_query(OpenMenu.filter(F.menu == Menus.LESSONS))
+@router.callback_query(OpenMenu.filter(F.menu == BotMenu.LESSONS))
 async def lessons_callback_handler(
     callback: "CallbackQuery",
     callback_data: "OpenMenu",
@@ -44,8 +38,8 @@ async def lessons_callback_handler(
         )
 
 
-@router.message(F.text == TextCommands.LESSONS)
-@router.message(Command(SlashCommands.LESSONS))
+@router.message(F.text == TextCommand.LESSONS)
+@router.message(Command(SlashCommand.LESSONS))
 async def lessons_message_handler(
     message: "Message",
     repo: "Repository",

@@ -1,7 +1,7 @@
-from typing import TYPE_CHECKING
-
 from aiogram import F, Router
 from aiogram.filters import Command, StateFilter
+from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import OpenMenu, SettingsData
 from bot.handlers.client.settings.funcs import (
@@ -15,16 +15,10 @@ from bot.keyboards import (
     settings_keyboard,
 )
 from bot.middlewares.inner.save_user import SaveUpdateUserMiddleware
-from shared.utils.enums import Actions, Menus, SlashCommands, TextCommands, UserCallback
+from shared.database.repository.repository import Repository
+from shared.utils.enums import Action, BotMenu, SlashCommand, TextCommand, UserCallback
 from shared.utils.phrases import NO, SET_TIMER_TEXT, YES
 from shared.utils.states import EditingSettings
-
-if TYPE_CHECKING:
-    from aiogram.fsm.context import FSMContext
-    from aiogram.types import CallbackQuery, Message
-
-    from shared.database.repository.repository import Repository
-
 
 router = Router(name=__name__)
 router.message.middleware(SaveUpdateUserMiddleware())
@@ -42,7 +36,7 @@ YES_NOTIFY = f"{YES} Теперь будут приходить уведомле
 NO_NOTIFY = f"{NO} Теперь не будут приходить уведомления этого типа"
 
 
-@router.callback_query(OpenMenu.filter(F.menu == Menus.SETTINGS))
+@router.callback_query(OpenMenu.filter(F.menu == BotMenu.SETTINGS))
 async def settings_callback_handler(
     callback: "CallbackQuery",
     repo: "Repository",
@@ -56,8 +50,8 @@ async def settings_callback_handler(
     )
 
 
-@router.message(F.text == TextCommands.SETTINGS)
-@router.message(Command(SlashCommands.SETTINGS))
+@router.message(F.text == TextCommand.SETTINGS)
+@router.message(Command(SlashCommand.SETTINGS))
 async def settings_message_handler(
     message: "Message",
     repo: "Repository",
@@ -68,7 +62,7 @@ async def settings_message_handler(
     await message.answer(text=SETTINGS_WELCOME_TEXT, reply_markup=keyboard)
 
 
-@router.callback_query(SettingsData.filter(F.action == Actions.SWITCH))
+@router.callback_query(SettingsData.filter(F.action == Action.SWITCH))
 async def edit_bool_settings_handler(
     callback: "CallbackQuery",
     callback_data: "SettingsData",
@@ -112,7 +106,7 @@ async def edit_grade_settings_handler(
         )
 
 
-@router.callback_query(SettingsData.filter(F.action == Actions.EDIT))
+@router.callback_query(SettingsData.filter(F.action == Action.EDIT))
 async def edit_laundry_start_handler(
     callback: "CallbackQuery",
     callback_data: "SettingsData",

@@ -1,16 +1,12 @@
-from typing import TYPE_CHECKING
+import datetime as dt
 
 from cachetools.func import ttl_cache
 
+from shared.database.repository import MenuRepository
 from shared.utils.consts import BEAUTIFY_MEALS
 from shared.utils.datehelp import format_date, weekday_by_date
 from shared.utils.phrases import NO_DATA
 from shared.utils.translate import CAFE_MENU_TRANSLATE
-
-if TYPE_CHECKING:
-    import datetime as dt
-
-    from shared.database.repository import MenuRepository
 
 
 # @ttl_cache(ttl=60 * 60)  # Час

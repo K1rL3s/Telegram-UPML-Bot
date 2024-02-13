@@ -1,20 +1,10 @@
-from typing import TYPE_CHECKING
-
-from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup
 
 from bot.callbacks import LaundryData
-from bot.keyboards.universal import (
-    main_menu_button,
-    settings_button,
-)
-from shared.utils.enums import Actions, UserCallback
+from bot.keyboards.universal import main_menu_button, settings_button
+from shared.database.models.laundries import Laundry
+from shared.utils.enums import Action, UserCallback
 from shared.utils.phrases import NO
-
-if TYPE_CHECKING:
-    from aiogram.utils.keyboard import InlineKeyboardMarkup
-
-    from shared.database.models.laundries import Laundry
-
 
 START_WASHING = "🏖Запустить стирку"
 START_DRYING = "💨Запустить сушку"
@@ -30,14 +20,14 @@ async def laundry_keyboard(
     keyboard.button(
         text=START_WASHING,
         callback_data=LaundryData(
-            action=Actions.START,
+            action=Action.START,
             attr=UserCallback.WASHING,
         ),
     )
     keyboard.button(
         text=START_DRYING,
         callback_data=LaundryData(
-            action=Actions.START,
+            action=Action.START,
             attr=UserCallback.DRYING,
         ),
     )
@@ -45,7 +35,7 @@ async def laundry_keyboard(
     if add_cancel_button and laundry.is_active:
         keyboard.button(
             text=CANCEL_TIMER,
-            callback_data=LaundryData(action=Actions.CANCEL),
+            callback_data=LaundryData(action=Action.CANCEL),
         )
 
     keyboard.add(main_menu_button, settings_button)

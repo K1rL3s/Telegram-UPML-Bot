@@ -18,7 +18,7 @@ from bot.keyboards import (
     confirm_cancel_keyboard,
 )
 from shared.upml.cafe_menu import process_cafe_menu
-from shared.utils.enums import Actions, Meals, Menus
+from shared.utils.enums import Action, BotMenu, Meal
 from shared.utils.states import EditingMenu
 
 if TYPE_CHECKING:
@@ -34,7 +34,7 @@ router.message.filter(HasCafeMenuRole())
 router.callback_query.filter(HasCafeMenuRole())
 
 
-@router.callback_query(EditMeal.filter(F.meal == Meals.AUTO_ALL))
+@router.callback_query(EditMeal.filter(F.meal == Meal.AUTO_ALL))
 async def auto_update_cafe_menu_handler(
     callback: "CallbackQuery",
     settings: "Settings",
@@ -51,7 +51,7 @@ async def auto_update_cafe_menu_handler(
     )
 
 
-@router.callback_query(AdminEditMenu.filter(F.menu == Menus.CAFE_MENU))
+@router.callback_query(AdminEditMenu.filter(F.menu == BotMenu.CAFE_MENU))
 async def edit_cafe_menu_start_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
@@ -111,7 +111,7 @@ async def edit_cafe_menu_text_handler(
 
 @router.callback_query(
     StateFilter(EditingMenu.writing),
-    InStateData.filter(F.action == Actions.CONFIRM),
+    InStateData.filter(F.action == Action.CONFIRM),
 )
 async def edit_cafe_menu_confirm_handler(
     callback: "CallbackQuery",

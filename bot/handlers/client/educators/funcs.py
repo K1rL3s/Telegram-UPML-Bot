@@ -1,12 +1,8 @@
-from typing import TYPE_CHECKING
+import datetime as dt
 
+from shared.database.repository import EducatorsScheduleRepository
 from shared.utils.datehelp import format_date, weekday_by_date
 from shared.utils.phrases import NO_DATA
-
-if TYPE_CHECKING:
-    import datetime as dt
-
-    from shared.database.repository import EducatorsScheduleRepository
 
 
 async def get_format_educators_by_date(

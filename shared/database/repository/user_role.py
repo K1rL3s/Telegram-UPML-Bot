@@ -5,7 +5,7 @@ import sqlalchemy as sa
 
 from shared.database.models import User
 from shared.database.repository.base_repo import BaseRepository
-from shared.utils.enums import Roles
+from shared.utils.enums import RoleEnum
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -40,7 +40,7 @@ class UserRoleRepository(BaseRepository):
     async def remove_role_from_user(
         self,
         user_id: int,
-        role: "Union[Roles | str]",
+        role: "Union[RoleEnum | str]",
     ) -> None:
         """
         Удаляет роль у юзера.
@@ -48,7 +48,7 @@ class UserRoleRepository(BaseRepository):
         :param user_id: ТГ Айди юзера.
         :param role: Его роль.
         """
-        if isinstance(role, Roles):
+        if isinstance(role, RoleEnum):
             role = role.value
 
         user = await self._user.get(user_id)
@@ -77,7 +77,7 @@ class UserRoleRepository(BaseRepository):
     async def add_role_to_user(
         self,
         user_id: int,
-        role: Roles | str,
+        role: RoleEnum | str,
     ) -> None:
         """
         Добавляет роль юзеру.
@@ -85,7 +85,7 @@ class UserRoleRepository(BaseRepository):
         :param user_id: ТГ Айди юзера.
         :param role: Роль.
         """
-        if isinstance(role, Roles):
+        if isinstance(role, RoleEnum):
             role = role.value
 
         user = await self._user.get(user_id)

@@ -1,27 +1,21 @@
-from typing import TYPE_CHECKING
-
 from aiogram import F, Router
 from aiogram.filters import Command, StateFilter
+from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import InStateData
 from bot.handlers.client.start.handlers import (
     main_menu_callback_handler,
     main_menu_message_handler,
 )
-from shared.utils.enums import Actions, SlashCommands, TextCommands
-
-if TYPE_CHECKING:
-    from aiogram.fsm.context import FSMContext
-    from aiogram.types import CallbackQuery, Message
-
-    from shared.database.repository.repository import Repository
-
+from shared.database.repository.repository import Repository
+from shared.utils.enums import Action, SlashCommand, TextCommand
 
 router = Router(name=__name__)
 
 
 @router.callback_query(
-    InStateData.filter(F.action == Actions.CANCEL),
+    InStateData.filter(F.action == Action.CANCEL),
     StateFilter("*"),
 )
 async def cancel_callback_state(
@@ -38,9 +32,9 @@ async def cancel_callback_state(
     await main_menu_callback_handler(callback, repo)
 
 
-@router.message(F.text == TextCommands.CANCEL, StateFilter("*"))
+@router.message(F.text == TextCommand.CANCEL, StateFilter("*"))
 @router.message(
-    Command(SlashCommands.CANCEL, SlashCommands.STOP),
+    Command(SlashCommand.CANCEL, SlashCommand.STOP),
     StateFilter("*"),
 )
 async def cancel_message_text(

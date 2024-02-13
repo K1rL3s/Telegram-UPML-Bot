@@ -1,5 +1,3 @@
-from typing import TYPE_CHECKING
-
 from aiogram.utils.keyboard import (
     InlineKeyboardBuilder,
     InlineKeyboardMarkup,
@@ -8,18 +6,18 @@ from aiogram.utils.keyboard import (
     ReplyKeyboardMarkup,
 )
 
-from bot.callbacks import OpenMenu
 from bot.keyboards.universal import (
     admin_panel_button,
+    cafe_menu_button,
+    educators_menu_button,
+    electives_menu_button,
+    enrollee_menu_button, laundry_menu_button,
+    lessons_menu_button,
     main_menu_button,
     settings_button,
 )
-from shared.utils.consts import TODAY
-from shared.utils.enums import Menus, Roles, TextCommands
-
-if TYPE_CHECKING:
-    from shared.database.repository import UserRepository
-
+from shared.database.repository import UserRepository
+from shared.utils.enums import RoleEnum
 
 go_to_main_menu_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[[main_menu_button]],
@@ -33,33 +31,20 @@ async def main_menu_keyboard(
     """Клавиатура главного меню."""
     keyboard = InlineKeyboardBuilder()
 
-    for button_text, callback_data in zip(
-        (
-            TextCommands.CAFE,
-            TextCommands.LESSONS,
-            TextCommands.LAUNDRY,
-            TextCommands.ELECTIVES,
-            TextCommands.EDUCATORS,
-        ),
-        (
-            OpenMenu(menu=Menus.CAFE_MENU, date=TODAY),
-            OpenMenu(menu=Menus.LESSONS, date=TODAY),
-            OpenMenu(menu=Menus.LAUNDRY),
-            OpenMenu(menu=Menus.ELECTIVES, date=TODAY),
-            OpenMenu(menu=Menus.EDUCATORS, date=TODAY),
-        ),
-    ):
-        keyboard.button(
-            text=button_text,
-            callback_data=callback_data.pack(),
-        )
-
-    keyboard.add(settings_button)
-
-    if await repo.is_has_any_role(user_id, Roles.all_roles()):
-        keyboard.add(admin_panel_button)
-
+    keyboard.add(
+        cafe_menu_button,
+        lessons_menu_button,
+        laundry_menu_button,
+        electives_menu_button,
+        educators_menu_button,
+        enrollee_menu_button,
+    )
     keyboard.adjust(2, repeat=True)
+
+    keyboard.row(settings_button, width=1)
+
+    if await repo.is_has_any_role(user_id, RoleEnum.all_roles()):
+        keyboard.row(admin_panel_button, width=1)
 
     return keyboard.as_markup()
 

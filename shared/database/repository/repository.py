@@ -6,6 +6,7 @@ from shared.database.repository import (
     FullLessonsRepository,
     LaundryRepository,
     MenuRepository,
+    OlympRepository,
     RoleRepository,
     SettingsRepository,
     UserRepository,
@@ -33,6 +34,7 @@ class Repository:
         self.settings = SettingsRepository(session)
         self.laundry = LaundryRepository(session)
         self.menu = MenuRepository(session)
+        self.olympiads = OlympRepository(session)
 
     async def save_new_user_to_db(
         self,

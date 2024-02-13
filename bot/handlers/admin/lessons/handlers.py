@@ -21,7 +21,7 @@ from bot.keyboards import (
     go_to_main_menu_keyboard,
 )
 from bot.types import Album
-from shared.utils.enums import Actions, Menus
+from shared.utils.enums import Action, BotMenu
 from shared.utils.states import EditingLessons
 
 if TYPE_CHECKING:
@@ -37,7 +37,7 @@ router.message.filter(HasLessonsRole())
 router.callback_query.filter(HasLessonsRole())
 
 
-@router.callback_query(AdminEditMenu.filter(F.menu == Menus.LESSONS))
+@router.callback_query(AdminEditMenu.filter(F.menu == BotMenu.LESSONS))
 async def start_process_lessons_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
@@ -97,7 +97,7 @@ async def process_lessons_album_handler(
 
 @router.callback_query(
     StateFilter(EditingLessons.all_good),
-    InStateData.filter(F.action == Actions.CONFIRM),
+    InStateData.filter(F.action == Action.CONFIRM),
 )
 async def all_good_lessons_handler(
     callback: "CallbackQuery",
@@ -120,11 +120,11 @@ async def all_good_lessons_handler(
 
 @router.callback_query(
     StateFilter(EditingLessons.all_good),
-    InStateData.filter(F.action == Actions.CANCEL),
+    InStateData.filter(F.action == Action.CANCEL),
 )
 @router.callback_query(
     StateFilter(EditingLessons.something_bad),
-    InStateData.filter(F.action == Actions.CONFIRM),
+    InStateData.filter(F.action == Action.CONFIRM),
 )
 async def start_choose_grades_handler(
     callback: "CallbackQuery",
@@ -188,7 +188,7 @@ async def choose_dates_handler(
 
 @router.callback_query(
     StateFilter(EditingLessons.confirm),
-    InStateData.filter(F.action == Actions.CONFIRM),
+    InStateData.filter(F.action == Action.CONFIRM),
 )
 async def confirm_edit_lessons_handler(
     callback: "CallbackQuery",

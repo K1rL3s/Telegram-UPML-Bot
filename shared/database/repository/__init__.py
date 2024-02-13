@@ -3,6 +3,7 @@ from shared.database.repository.educators_schedules import EducatorsScheduleRepo
 from shared.database.repository.full_lessons import FullLessonsRepository
 from shared.database.repository.laundries import LaundryRepository
 from shared.database.repository.menus import MenuRepository
+from shared.database.repository.olymps import OlympRepository
 from shared.database.repository.roles import RoleRepository
 from shared.database.repository.settings import SettingsRepository
 from shared.database.repository.user_role import UserRoleRepository
@@ -14,6 +15,7 @@ __all__ = (
     "FullLessonsRepository",
     "LaundryRepository",
     "MenuRepository",
+    "OlympRepository",
     "RoleRepository",
     "SettingsRepository",
     "UserRepository",

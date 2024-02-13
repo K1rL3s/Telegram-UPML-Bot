@@ -16,7 +16,7 @@ from bot.keyboards import (
     cancel_state_keyboard,
     confirm_cancel_keyboard,
 )
-from shared.utils.enums import Actions, Menus
+from shared.utils.enums import Action, BotMenu
 from shared.utils.states import EditingEducators
 
 if TYPE_CHECKING:
@@ -31,7 +31,7 @@ router.message.filter(HasEducatorsRole())
 router.callback_query.filter(HasEducatorsRole())
 
 
-@router.callback_query(AdminEditMenu.filter(F.menu == Menus.EDUCATORS))
+@router.callback_query(AdminEditMenu.filter(F.menu == BotMenu.EDUCATORS))
 async def edit_educators_start_handler(
     callback: "CallbackQuery",
     state: "FSMContext",
@@ -81,7 +81,7 @@ async def edit_educators_text_handler(
 
 @router.callback_query(
     StateFilter(EditingEducators.writing),
-    InStateData.filter(F.action == Actions.CONFIRM),
+    InStateData.filter(F.action == Action.CONFIRM),
 )
 async def edit_educators_confirm_handler(
     callback: "CallbackQuery",

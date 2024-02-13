@@ -1,26 +1,18 @@
-from typing import TYPE_CHECKING
-
 from aiogram import F, Router
 from aiogram.filters import Command
+from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import LaundryData, OpenMenu
-from bot.handlers.client.laundry.funcs import (
-    laundry_func,
-    laundry_start_timer_func,
-)
+from bot.handlers.client.laundry.funcs import laundry_func, laundry_start_timer_func
 from bot.keyboards import go_to_main_menu_keyboard
+from shared.database.repository.repository import Repository
 from shared.utils.datehelp import format_datetime
-from shared.utils.enums import Actions, Menus, SlashCommands, TextCommands
-
-if TYPE_CHECKING:
-    from aiogram.types import CallbackQuery, Message
-
-    from shared.database.repository.repository import Repository
+from shared.utils.enums import Action, BotMenu, SlashCommand, TextCommand
 
 router = Router(name=__name__)
 
 
-@router.callback_query(OpenMenu.filter(F.menu == Menus.LAUNDRY))
+@router.callback_query(OpenMenu.filter(F.menu == BotMenu.LAUNDRY))
 async def laundry_callback_handler(
     callback: "CallbackQuery",
     repo: "Repository",
@@ -33,8 +25,8 @@ async def laundry_callback_handler(
     )
 
 
-@router.message(F.text == TextCommands.LAUNDRY)
-@router.message(Command(SlashCommands.LAUNDRY))
+@router.message(F.text == TextCommand.LAUNDRY)
+@router.message(Command(SlashCommand.LAUNDRY))
 async def laundry_message_handler(
     message: "Message",
     repo: "Repository",
@@ -44,7 +36,7 @@ async def laundry_message_handler(
     await message.answer(text=text, reply_markup=keyboard)
 
 
-@router.callback_query(LaundryData.filter(F.action == Actions.START))
+@router.callback_query(LaundryData.filter(F.action == Action.START))
 async def laundry_start_timer_handler(
     callback: "CallbackQuery",
     callback_data: "LaundryData",
@@ -68,7 +60,7 @@ async def laundry_start_timer_handler(
     await callback.message.edit_text(text=text, reply_markup=keyboard)
 
 
-@router.callback_query(LaundryData.filter(F.action == Actions.CANCEL))
+@router.callback_query(LaundryData.filter(F.action == Action.CANCEL))
 async def laundry_cancel_timer_handler(
     callback: "CallbackQuery",
     repo: "Repository",

@@ -13,3 +13,10 @@ class SettingsData(CallbackData, prefix="settings"):
 
     action: str
     attr: str | None = None
+
+
+class OlympsData(CallbackData, prefix="olymps"):
+    """Фабрика для открытия олимпиад."""
+
+    subject: str
+    id: int | None = None

@@ -4,7 +4,7 @@ from aiogram import F, Router
 
 from bot.callbacks import OpenMenu
 from bot.keyboards import admin_panel_keyboard
-from shared.utils.enums import Menus, TextCommands
+from shared.utils.enums import BotMenu, TextCommand
 
 if TYPE_CHECKING:
     from aiogram.types import CallbackQuery, Message
@@ -24,7 +24,7 @@ ADMIN_START_TEXT = """
 """.strip()
 
 
-@router.callback_query(OpenMenu.filter(F.menu == Menus.ADMIN_PANEL))
+@router.callback_query(OpenMenu.filter(F.menu == BotMenu.ADMIN_PANEL))
 async def admin_panel_callback_handler(
     callback: "CallbackQuery",
     repo: "Repository",
@@ -34,7 +34,7 @@ async def admin_panel_callback_handler(
     await callback.message.edit_text(text=ADMIN_START_TEXT, reply_markup=keyboard)
 
 
-@router.message(F.text == TextCommands.ADMIN_PANEL)
+@router.message(F.text == TextCommand.ADMIN_PANEL)
 async def admin_panel_message_handler(
     message: "Message",
     repo: "Repository",
