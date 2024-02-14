@@ -1,8 +1,12 @@
 from aiogram.fsm.context import FSMContext
+from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.text_decorations import html_decoration as html
 
+from bot.callbacks import UniverData
+from bot.keyboards import univers_titles_keyboard
 from shared.database.repository import UniverRepository
-from shared.utils.states import AddingUniver
+from shared.utils.phrases import SUCCESS
+from shared.utils.states import AddingUniver, DeletingUniver
 
 
 async def add_univer_func(
@@ -123,3 +127,32 @@ async def add_univer_confirm_func(
 
     text = f"ВУЗ <code>{title}</code> из <code>{city}</code> успешно добавлен!"
     return text, start_id
+
+
+async def delete_univer_func(state: FSMContext, callback_data: UniverData) -> str:
+    await state.set_state(DeletingUniver.confirm)
+    await state.set_data(
+        {
+            "id": callback_data.id,
+            "city": callback_data.city,
+            "page": callback_data.page,
+        }
+    )
+
+    return f"Вы уверены, что хотите удалить этот ВУЗ (#{callback_data.id})?"
+
+
+async def delete_univer_confirm_func(
+    state: FSMContext,
+    univer_repo: UniverRepository,
+) -> tuple[str, InlineKeyboardMarkup]:
+    data = await state.get_data()
+    univer_id: int = data["id"]
+    city: str = data["city"]
+    page: int = data["page"]
+
+    await state.clear()
+
+    await univer_repo.delete(univer_id)
+
+    return SUCCESS, await univers_titles_keyboard(page, city, univer_repo)

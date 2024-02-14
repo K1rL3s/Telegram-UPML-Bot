@@ -10,7 +10,7 @@ from bot.keyboards import (
 from shared.database.repository import UserRepository, UserRoleRepository
 from shared.utils.enums import RoleEnum
 from shared.utils.funcs import name_link
-from shared.utils.phrases import YES
+from shared.utils.phrases import SUCCESS
 from shared.utils.states import EditingRoles
 from shared.utils.translate import ROLES_TRANSLATE
 
@@ -190,4 +190,4 @@ async def edit_role_confirm_sure_func(
     for role in choosed_roles:
         await repo.add_role_to_user(user_id, role)
 
-    return f"{YES} Успешно!"
+    return SUCCESS

@@ -3,13 +3,14 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import OpenMenu, Paginator, UniverData, UniversPaginator
+from bot.filters import HasUniversRole
 from bot.keyboards import (
     one_univer_keyboard,
     univers_cities_keyboard,
     univers_titles_keyboard,
 )
 from shared.database.repository.repository import Repository
-from shared.utils.enums import BotMenu, PageMenu, SlashCommand, TextCommand
+from shared.utils.enums import Action, BotMenu, PageMenu, SlashCommand, TextCommand
 
 from .funcs import univers_open_title_func
 
@@ -90,6 +91,7 @@ async def univers_titles_paginator_handler(
 
 @router.callback_query(
     UniverData.filter(F.city),
+    UniverData.filter(F.action == Action.OPEN),
     UniverData.filter(F.id.is_not(None)),
 )
 async def univers_open_title_handler(
@@ -98,8 +100,10 @@ async def univers_open_title_handler(
     repo: Repository,
 ) -> None:
     keyboard = one_univer_keyboard(
+        univer_id=callback_data.id,
         city=callback_data.city,
         page=callback_data.page,
+        add_edit_buttons=await HasUniversRole()(callback, repo),
     )
     text = await univers_open_title_func(callback_data.id, repo.univers)
     await callback.message.edit_text(text=text, reply_markup=keyboard)

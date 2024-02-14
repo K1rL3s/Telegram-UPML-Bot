@@ -2,7 +2,7 @@ from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
-from bot.callbacks import AdminEditMenu
+from bot.callbacks import AdminEditMenu, InStateData, OlympData
 from bot.filters import HasOlympsRole
 from bot.keyboards import (
     admin_panel_keyboard,
@@ -10,8 +10,8 @@ from bot.keyboards import (
     confirm_cancel_keyboard,
 )
 from shared.database.repository.repository import Repository
-from shared.utils.enums import BotMenu
-from shared.utils.states import AddingOlymp
+from shared.utils.enums import Action, BotMenu
+from shared.utils.states import AddingOlymp, DeletingOlymp
 
 from .funcs import (
     add_olymp_confirm_func,
@@ -19,6 +19,8 @@ from .funcs import (
     add_olymp_func,
     add_olymp_subject_func,
     add_olymp_title_func,
+    delete_olymp_confirm_func,
+    delete_olymp_func,
 )
 
 router = Router()
@@ -85,7 +87,10 @@ async def add_olymp_description_handler(
     await message.delete()
 
 
-@router.callback_query(AddingOlymp.confirm)
+@router.callback_query(
+    AddingOlymp.confirm,
+    InStateData.filter(F.action == Action.CONFIRM),
+)
 async def add_olymp_confirm_handler(
     callback: CallbackQuery,
     bot: Bot,
@@ -93,7 +98,7 @@ async def add_olymp_confirm_handler(
     repo: Repository,
 ) -> None:
     """Обработчик подтверждения сохранения олимпиады."""
-    text, start_id = await add_olymp_confirm_func(state, repo.olympiads)
+    text, start_id = await add_olymp_confirm_func(state, repo.olymps)
     chat_id = callback.message.chat.id
     await bot.edit_message_text(
         text=text,
@@ -101,3 +106,29 @@ async def add_olymp_confirm_handler(
         message_id=start_id,
         reply_markup=await admin_panel_keyboard(repo.user, chat_id),
     )
+
+
+@router.callback_query(
+    OlympData.filter(F.action == Action.DELETE),
+    OlympData.filter(F.id.is_not(None)),
+)
+async def delete_olymp_handler(
+    callback: CallbackQuery,
+    callback_data: OlympData,
+    state: FSMContext,
+) -> None:
+    text = await delete_olymp_func(state, callback_data)
+    await callback.message.edit_text(text=text, reply_markup=confirm_cancel_keyboard)
+
+
+@router.callback_query(
+    DeletingOlymp.confirm,
+    InStateData.filter(F.action == Action.CONFIRM),
+)
+async def delete_olymp_confirm_handler(
+    callback: CallbackQuery,
+    state: FSMContext,
+    repo: Repository,
+) -> None:
+    text, keyboard = await delete_olymp_confirm_func(state, repo.olymps)
+    await callback.message.edit_text(text=text, reply_markup=keyboard)

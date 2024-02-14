@@ -39,7 +39,7 @@ class Repository(BaseRepository):
         self.laundry = LaundryRepository(session)
         self.menu = MenuRepository(session)
         self.univers = UniverRepository(session)
-        self.olympiads = OlympRepository(session)
+        self.olymps = OlympRepository(session)
 
     async def save_new_user_to_db(
         self,

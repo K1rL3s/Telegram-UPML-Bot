@@ -2,7 +2,7 @@ from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
-from bot.callbacks import AdminEditMenu
+from bot.callbacks import AdminEditMenu, InStateData, UniverData
 from bot.filters import HasUniversRole
 from bot.keyboards import (
     admin_panel_keyboard,
@@ -10,8 +10,8 @@ from bot.keyboards import (
     confirm_cancel_keyboard,
 )
 from shared.database.repository.repository import Repository
-from shared.utils.enums import BotMenu
-from shared.utils.states import AddingUniver
+from shared.utils.enums import Action, BotMenu
+from shared.utils.states import AddingUniver, DeletingUniver
 
 from .funcs import (
     add_univer_city_func,
@@ -19,6 +19,8 @@ from .funcs import (
     add_univer_description_func,
     add_univer_func,
     add_univer_title_func,
+    delete_univer_confirm_func,
+    delete_univer_func,
 )
 
 router = Router()
@@ -85,7 +87,10 @@ async def add_univer_description_handler(
     await message.delete()
 
 
-@router.callback_query(AddingUniver.confirm)
+@router.callback_query(
+    AddingUniver.confirm,
+    InStateData.filter(F.action == Action.CONFIRM),
+)
 async def add_univer_confirm_handler(
     callback: CallbackQuery,
     bot: Bot,
@@ -101,3 +106,29 @@ async def add_univer_confirm_handler(
         message_id=start_id,
         reply_markup=await admin_panel_keyboard(repo.user, chat_id),
     )
+
+
+@router.callback_query(
+    UniverData.filter(F.action == Action.DELETE),
+    UniverData.filter(F.id.is_not(None)),
+)
+async def delete_univer_handler(
+    callback: CallbackQuery,
+    callback_data: UniverData,
+    state: FSMContext,
+) -> None:
+    text = await delete_univer_func(state, callback_data)
+    await callback.message.edit_text(text=text, reply_markup=confirm_cancel_keyboard)
+
+
+@router.callback_query(
+    DeletingUniver.confirm,
+    InStateData.filter(F.action == Action.CONFIRM),
+)
+async def delete_univer_confirm_handler(
+    callback: CallbackQuery,
+    state: FSMContext,
+    repo: Repository,
+) -> None:
+    text, keyboard = await delete_univer_confirm_func(state, repo.univers)
+    await callback.message.edit_text(text=text, reply_markup=keyboard)

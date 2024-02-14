@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 from shared.database.models import Univer
 from shared.database.repository.base_repo import BaseRepository
@@ -23,3 +23,7 @@ class UniverRepository(BaseRepository):
         self._session.add(univer)
         await self._session.flush()
         return univer
+
+    async def delete(self, univer_id: int) -> None:
+        await self._session.execute(delete(Univer).where(Univer.id == univer_id))
+        await self._session.flush()

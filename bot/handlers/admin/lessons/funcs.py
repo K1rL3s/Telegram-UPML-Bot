@@ -13,7 +13,7 @@ from shared.database.repository.repository import Repository
 from shared.upml.album_lessons import tesseract_lessons
 from shared.utils.datehelp import date_by_format, format_date, weekday_by_date
 from shared.utils.funcs import multi_bytes_to_ids
-from shared.utils.phrases import DONT_UNDERSTAND_DATE, YES
+from shared.utils.phrases import DONT_UNDERSTAND_DATE, SUCCESS
 from shared.utils.states import EditingLessons
 
 
@@ -80,7 +80,7 @@ async def all_good_lessons_func(
 
     await state.clear()
 
-    return f"{YES} Успешно!"
+    return SUCCESS
 
 
 async def start_choose_grades_func(
@@ -227,7 +227,7 @@ async def confirm_edit_lessons_func(
 
     await state.clear()
 
-    return f"{YES} Успешно!"
+    return SUCCESS
 
 
 async def save_lessons_collection_to_db(

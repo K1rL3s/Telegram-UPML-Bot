@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 from shared.database.models import Olymp
 from shared.database.repository.base_repo import BaseRepository
@@ -23,3 +23,7 @@ class OlympRepository(BaseRepository):
         self._session.add(olymp)
         await self._session.flush()
         return olymp
+
+    async def delete(self, olymp_id: int) -> None:
+        await self._session.execute(delete(Olymp).where(Olymp.id == olymp_id))
+        await self._session.flush()

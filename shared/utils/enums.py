@@ -88,13 +88,13 @@ class PageMenu(str, Enum):
 class Action(str, Enum):
     """Callback'и для действий пользователей."""
 
+    OPEN = "open"
     CONFIRM = "confirm"
     START = "start"
     ADD = "add"
-    CHECK = "check"
     SWITCH = "switch"
     EDIT = "edit"
-    REMOVE = "remove"
+    DELETE = "delete"
     CANCEL = "cancel"
 
 

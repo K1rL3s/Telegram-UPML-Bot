@@ -48,6 +48,15 @@ class DoingNotify(StatesGroup):
     write = State()
 
 
+class AddingUniver(StatesGroup):
+    """Админское состояние для добавление вуза."""
+
+    city = State()
+    title = State()
+    description = State()
+    confirm = State()
+
+
 class AddingOlymp(StatesGroup):
     """Админское состояние для добавление олимпиады."""
 
@@ -57,10 +66,13 @@ class AddingOlymp(StatesGroup):
     confirm = State()
 
 
-class AddingUniver(StatesGroup):
-    """Админское состояние для добавление вуза."""
+class DeletingUniver(StatesGroup):
+    """Админское состояние для удаления вуза."""
 
-    city = State()
-    title = State()
-    description = State()
+    confirm = State()
+
+
+class DeletingOlymp(StatesGroup):
+    """Админское состояние для удаления олимпиады."""
+
     confirm = State()

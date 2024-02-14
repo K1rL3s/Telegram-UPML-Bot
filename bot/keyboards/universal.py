@@ -15,6 +15,8 @@ from shared.utils.phrases import NO, YES
 MAIN_MENU = "🏠Главное меню"
 CANCEL = f"{NO}Отмена"
 CONFIRM = f"{YES}Подтвердить"
+DELETE = "🗑️Удалить"
+EDIT = "✏️Изменить"
 
 
 main_menu_button = InlineKeyboardButton(

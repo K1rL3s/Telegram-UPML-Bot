@@ -1,14 +1,16 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.callbacks import UniverData, UniversPaginator
 from bot.keyboards.paginate import paginate_keyboard
 from bot.keyboards.universal import (
+    DELETE,
     enrollee_menu_button,
     main_menu_button,
     univers_menu_button,
 )
 from shared.database.repository import UniverRepository
-from shared.utils.enums import BotMenu, PageMenu
+from shared.utils.enums import Action, BotMenu, PageMenu
 
 
 async def univers_cities_keyboard(
@@ -58,19 +60,38 @@ async def univers_titles_keyboard(
     )
 
 
-def one_univer_keyboard(city: str, page: int) -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text=f"🏢 {city}",
-                    callback_data=UniversPaginator(
-                        menu=PageMenu.UNIVERS_LIST,
-                        page=page,
-                        city=city,
-                    ).pack(),
-                )
-            ],
-            [main_menu_button],
-        ]
+def one_univer_keyboard(
+    univer_id: int,
+    city: str,
+    page: int,
+    add_edit_buttons: bool,
+) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    builder.row(
+        InlineKeyboardButton(
+            text=f"🏢 {city}",
+            callback_data=UniversPaginator(
+                menu=PageMenu.OLYMPS_LIST, page=page, city=city
+            ).pack(),
+        ),
+        width=1,
     )
+
+    if add_edit_buttons:
+        builder.row(
+            InlineKeyboardButton(
+                text=DELETE,
+                callback_data=UniverData(
+                    action=Action.DELETE,
+                    city=city,
+                    id=univer_id,
+                    page=page,
+                ).pack(),
+            ),
+            width=1,
+        )
+
+    builder.row(main_menu_button, width=1)
+
+    return builder.as_markup()
