@@ -75,7 +75,7 @@ async def add_olymp_description_handler(
     state: FSMContext,
 ) -> None:
     """Обработчик ввода описания олимпиады."""
-    text, start_id = await add_olymp_description_func(message.text, state)
+    text, start_id = await add_olymp_description_func(message.html_text, state)
     await bot.edit_message_text(
         text=text,
         chat_id=message.chat.id,

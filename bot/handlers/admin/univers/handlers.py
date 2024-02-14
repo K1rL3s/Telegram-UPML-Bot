@@ -75,7 +75,7 @@ async def add_univer_description_handler(
     state: FSMContext,
 ) -> None:
     """Обработчик ввода описания вуза."""
-    text, start_id = await add_univer_description_func(message.text, state)
+    text, start_id = await add_univer_description_func(message.html_text, state)
     await bot.edit_message_text(
         text=text,
         chat_id=message.chat.id,

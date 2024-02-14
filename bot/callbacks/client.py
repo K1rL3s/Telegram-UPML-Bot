@@ -19,13 +19,13 @@ class OlympData(CallbackData, prefix="olymp"):
     """Фабрика для открытия олимпиад."""
 
     subject: str
-    id: int | None = None
     page: int = 0
+    id: int | None = None
 
 
 class UniverData(CallbackData, prefix="univer"):
     """Фабрика для открытия ВУЗов."""
 
     city: str
-    id: int | None = None
     page: int = 0
+    id: int | None = None

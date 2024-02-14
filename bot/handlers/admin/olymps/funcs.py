@@ -83,7 +83,7 @@ async def add_olymp_description_func(
     :param state: Состояние пользователя.
     :return: Сообщение пользователю и айди начального сообщения бота.
     """
-    description = html_text.strip()
+    description = html_text
     await state.set_state(AddingOlymp.confirm)
     data = await state.update_data(description=description)
     start_id: int = data["start_id"]

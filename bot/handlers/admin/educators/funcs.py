@@ -74,7 +74,7 @@ async def edit_educators_text_func(
     start_id: int = data["start_id"]
     edit_date: "dt.date" = date_by_format(data["edit_date"])
 
-    new_text = html_text.strip()
+    new_text = html_text
     new_ids: list[int] = data.get("new_ids", []) + [message_id]
     await state.update_data(new_text=new_text, new_ids=new_ids)
 
