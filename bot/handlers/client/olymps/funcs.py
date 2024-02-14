@@ -8,4 +8,4 @@ async def olymps_open_title_func(olymp_id, repo: OlympRepository) -> str:
 
 
 def _format_olympiad(olymp: Olymp) -> str:
-    return olymp.title + "\n\n" + olymp.description
+    return f"<b>{olymp.title}, {olymp.subject}</b>\n\n{olymp.description}"

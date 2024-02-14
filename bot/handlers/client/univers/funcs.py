@@ -8,4 +8,4 @@ async def univers_open_title_func(olymp_id, repo: UniverRepository) -> str:
 
 
 def _format_univer(univer: Univer) -> str:
-    return univer.title + "\n\n" + univer.description
+    return f"<b>{univer.title}, {univer.city}</b>\n\n{univer.description}"
