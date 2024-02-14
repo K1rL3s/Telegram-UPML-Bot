@@ -72,7 +72,7 @@ def one_univer_keyboard(
         InlineKeyboardButton(
             text=f"🏢 {city}",
             callback_data=UniversPaginator(
-                menu=PageMenu.OLYMPS_LIST, page=page, city=city
+                menu=PageMenu.UNIVERS_LIST, page=page, city=city
             ).pack(),
         ),
         width=1,
