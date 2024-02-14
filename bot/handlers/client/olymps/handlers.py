@@ -3,7 +3,6 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import OlympData, OlympsPaginator, OpenMenu, Paginator
-from bot.handlers.client.olymps.funcs import olymps_open_title_func
 from bot.keyboards import (
     olymps_subjects_keyboard,
     olymps_titles_keyboard,
@@ -11,6 +10,8 @@ from bot.keyboards import (
 )
 from shared.database.repository.repository import Repository
 from shared.utils.enums import BotMenu, PageMenu, SlashCommand, TextCommand
+
+from .funcs import olymps_open_title_func
 
 router = Router(name=__name__)
 

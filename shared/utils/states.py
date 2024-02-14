@@ -4,7 +4,7 @@ from aiogram.fsm.state import State, StatesGroup
 class EditingSettings(StatesGroup):
     """Пользовательское состояние для редактирования настроек, требующих ввода."""
 
-    writing = State()
+    write = State()
 
 
 class EditingMenu(StatesGroup):
@@ -12,14 +12,14 @@ class EditingMenu(StatesGroup):
 
     choose_date = State()
     choose_meal = State()
-    writing = State()
+    write = State()
 
 
 class EditingEducators(StatesGroup):
     """Админские состояния для редактирования расписания воспитателей."""
 
     choose_date = State()
-    writing = State()
+    write = State()
 
 
 class EditingLessons(StatesGroup):
@@ -45,4 +45,22 @@ class EditingRoles(StatesGroup):
 class DoingNotify(StatesGroup):
     """Админское состояние для отправки уведомления."""
 
-    writing = State()
+    write = State()
+
+
+class AddingOlymp(StatesGroup):
+    """Админское состояние для добавление олимпиады."""
+
+    subject = State()
+    title = State()
+    description = State()
+    confirm = State()
+
+
+class AddingUniver(StatesGroup):
+    """Админское состояние для добавление вуза."""
+
+    city = State()
+    title = State()
+    description = State()
+    confirm = State()

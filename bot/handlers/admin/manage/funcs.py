@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING
+from aiogram.fsm.context import FSMContext
+from aiogram.types import InlineKeyboardMarkup
 
 from bot.keyboards import (
     admins_list_keyboard,
@@ -6,17 +7,12 @@ from bot.keyboards import (
     check_admin_roles_keyboard,
     edit_roles_keyboard,
 )
+from shared.database.repository import UserRepository, UserRoleRepository
 from shared.utils.enums import RoleEnum
 from shared.utils.funcs import name_link
 from shared.utils.phrases import YES
 from shared.utils.states import EditingRoles
 from shared.utils.translate import ROLES_TRANSLATE
-
-if TYPE_CHECKING:
-    from aiogram.fsm.context import FSMContext
-    from aiogram.types import InlineKeyboardMarkup
-
-    from shared.database.repository import UserRepository, UserRoleRepository
 
 
 async def admins_list_func(

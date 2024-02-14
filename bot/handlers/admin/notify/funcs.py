@@ -1,5 +1,8 @@
-from typing import TYPE_CHECKING, Any, Union
+from typing import Any, Union
 
+from aiogram import Bot
+from aiogram.fsm.context import FSMContext
+from aiogram.types import InlineKeyboardMarkup
 from sqlalchemy.orm import Mapped, MappedColumn
 
 from bot.keyboards import (
@@ -8,17 +11,11 @@ from bot.keyboards import (
     notify_for_grade_keyboard,
 )
 from shared.database.models import Settings, User
+from shared.database.repository import UserRepository
 from shared.utils.enums import NotifyType
 from shared.utils.notify import do_admin_notify
 from shared.utils.states import DoingNotify
 from shared.utils.translate import NOTIFIES_TYPES_TRANSLATE
-
-if TYPE_CHECKING:
-    from aiogram import Bot
-    from aiogram.fsm.context import FSMContext
-    from aiogram.types import InlineKeyboardMarkup
-
-    from shared.database.repository import UserRepository
 
 
 async def notify_for_who_func(
@@ -43,7 +40,7 @@ async def notify_for_who_func(
         text = "Выберите, какому классу сделать уведомление"
         keyboard = notify_for_class_keyboard
     else:
-        await state.set_state(DoingNotify.writing)
+        await state.set_state(DoingNotify.write)
         await state.set_data(
             {
                 "start_id": message_id,

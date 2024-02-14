@@ -56,15 +56,12 @@ async def start_reply_keyboard(
 ) -> "ReplyKeyboardMarkup":
     """Клавиатура с текстовыми кнопками после команды /start."""
     inline_keyboard = await main_menu_keyboard(repo, user_id)
-    reply_keyboard = ReplyKeyboardBuilder()
+    builder = ReplyKeyboardBuilder()
 
     for row in inline_keyboard.inline_keyboard:
-        for button in row:
-            reply_keyboard.add(KeyboardButton(text=button.text))
+        builder.row(*(KeyboardButton(text=button.text) for button in row))
 
-    reply_keyboard.adjust(2, repeat=True)
-
-    return reply_keyboard.as_markup(
+    return builder.as_markup(
         resize_keyboard=True,
         one_time_keyboard=False,
     )

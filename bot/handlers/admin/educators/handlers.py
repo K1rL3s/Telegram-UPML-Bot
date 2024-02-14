@@ -1,30 +1,25 @@
-from typing import TYPE_CHECKING
-
 from aiogram import F, Router
 from aiogram.filters import StateFilter
+from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import AdminEditMenu, InStateData
 from bot.filters import HasEducatorsRole
-from bot.handlers.admin.educators.funcs import (
-    edit_educators_confirm_func,
-    edit_educators_date_func,
-    edit_educators_start_func,
-    edit_educators_text_func,
-)
 from bot.keyboards import (
     admin_panel_keyboard,
     cancel_state_keyboard,
     confirm_cancel_keyboard,
 )
+from shared.database.repository.repository import Repository
 from shared.utils.enums import Action, BotMenu
 from shared.utils.states import EditingEducators
 
-if TYPE_CHECKING:
-    from aiogram.fsm.context import FSMContext
-    from aiogram.types import CallbackQuery, Message
-
-    from shared.database.repository.repository import Repository
-
+from .funcs import (
+    edit_educators_confirm_func,
+    edit_educators_date_func,
+    edit_educators_start_func,
+    edit_educators_text_func,
+)
 
 router = Router(name=__name__)
 router.message.filter(HasEducatorsRole())
@@ -59,7 +54,7 @@ async def edit_educators_date_handler(
     )
 
 
-@router.message(StateFilter(EditingEducators.writing))
+@router.message(StateFilter(EditingEducators.write))
 async def edit_educators_text_handler(
     message: "Message",
     state: "FSMContext",
@@ -80,7 +75,7 @@ async def edit_educators_text_handler(
 
 
 @router.callback_query(
-    StateFilter(EditingEducators.writing),
+    StateFilter(EditingEducators.write),
     InStateData.filter(F.action == Action.CONFIRM),
 )
 async def edit_educators_confirm_handler(

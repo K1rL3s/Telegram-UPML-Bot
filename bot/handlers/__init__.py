@@ -1,14 +1,10 @@
 """View-часть, передающая события в logic-часть."""
 
-from typing import TYPE_CHECKING
+from aiogram import Dispatcher
 
-from bot.handlers import errors
-from bot.handlers.admin import admin_router
-from bot.handlers.client import cancel_state_router, client_router
-
-if TYPE_CHECKING:
-    from aiogram import Dispatcher
-
+from ..handlers import errors
+from .admin import admin_router
+from .client import cancel_state_router, client_router
 
 __all__ = ("include_routers",)
 

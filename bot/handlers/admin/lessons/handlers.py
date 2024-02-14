@@ -1,19 +1,10 @@
-from typing import TYPE_CHECKING
-
 from aiogram import F, Router
 from aiogram.filters import StateFilter
-from aiogram.types import InputMediaPhoto
+from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, InputMediaPhoto, Message
 
 from bot.callbacks import AdminEditMenu, EditLessons, InStateData
 from bot.filters import HasLessonsRole
-from bot.handlers.admin.lessons.funcs import (
-    all_good_lessons_func,
-    choose_dates_func,
-    choose_grades_func,
-    confirm_edit_lessons_func,
-    process_lessons_album_func,
-    start_choose_grades_func,
-)
 from bot.keyboards import (
     cancel_state_keyboard,
     choose_parallel_keyboard,
@@ -21,16 +12,19 @@ from bot.keyboards import (
     go_to_main_menu_keyboard,
 )
 from bot.types import Album
+from shared.core.settings import Settings
+from shared.database.repository.repository import Repository
 from shared.utils.enums import Action, BotMenu
 from shared.utils.states import EditingLessons
 
-if TYPE_CHECKING:
-    from aiogram.fsm.context import FSMContext
-    from aiogram.types import CallbackQuery, Message
-
-    from shared.core.settings import Settings
-    from shared.database.repository.repository import Repository
-
+from .funcs import (
+    all_good_lessons_func,
+    choose_dates_func,
+    choose_grades_func,
+    confirm_edit_lessons_func,
+    process_lessons_album_func,
+    start_choose_grades_func,
+)
 
 router = Router(name=__name__)
 router.message.filter(HasLessonsRole())

@@ -1,33 +1,28 @@
-from typing import TYPE_CHECKING
-
 from aiogram import F, Router
 from aiogram.filters import StateFilter
+from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import AdminEditMenu, EditMeal, InStateData
 from bot.filters import HasCafeMenuRole
-from bot.handlers.admin.cafe_menu.funcs import (
+from bot.keyboards import (
+    admin_panel_keyboard,
+    cancel_state_keyboard,
+    confirm_cancel_keyboard,
+)
+from shared.core.settings import Settings
+from shared.database.repository.repository import Repository
+from shared.upml.cafe_menu import process_cafe_menu
+from shared.utils.enums import Action, BotMenu, Meal
+from shared.utils.states import EditingMenu
+
+from .funcs import (
     edit_cafe_menu_confirm_func,
     edit_cafe_menu_date_func,
     edit_cafe_menu_meal_func,
     edit_cafe_menu_start_func,
     edit_cafe_menu_text_func,
 )
-from bot.keyboards import (
-    admin_panel_keyboard,
-    cancel_state_keyboard,
-    confirm_cancel_keyboard,
-)
-from shared.upml.cafe_menu import process_cafe_menu
-from shared.utils.enums import Action, BotMenu, Meal
-from shared.utils.states import EditingMenu
-
-if TYPE_CHECKING:
-    from aiogram.fsm.context import FSMContext
-    from aiogram.types import CallbackQuery, Message
-
-    from shared.core.settings import Settings
-    from shared.database.repository.repository import Repository
-
 
 router = Router(name=__name__)
 router.message.filter(HasCafeMenuRole())
@@ -90,7 +85,7 @@ async def edit_cafe_menu_meal_handler(
     await callback.message.edit_text(text=text, reply_markup=cancel_state_keyboard)
 
 
-@router.message(StateFilter(EditingMenu.writing))
+@router.message(StateFilter(EditingMenu.write))
 async def edit_cafe_menu_text_handler(
     message: "Message",
     state: "FSMContext",
@@ -110,7 +105,7 @@ async def edit_cafe_menu_text_handler(
 
 
 @router.callback_query(
-    StateFilter(EditingMenu.writing),
+    StateFilter(EditingMenu.write),
     InStateData.filter(F.action == Action.CONFIRM),
 )
 async def edit_cafe_menu_confirm_handler(

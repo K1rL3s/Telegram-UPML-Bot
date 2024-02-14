@@ -3,11 +3,12 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import LaundryData, OpenMenu
-from bot.handlers.client.laundry.funcs import laundry_func, laundry_start_timer_func
 from bot.keyboards import go_to_main_menu_keyboard
 from shared.database.repository.repository import Repository
 from shared.utils.datehelp import format_datetime
 from shared.utils.enums import Action, BotMenu, SlashCommand, TextCommand
+
+from .funcs import laundry_func, laundry_start_timer_func
 
 router = Router(name=__name__)
 

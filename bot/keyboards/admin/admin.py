@@ -11,6 +11,8 @@ EDIT_CAFE_MENU = "🍴Изменить меню"
 EDIT_LESSONS = "📓Загрузить уроки"
 DO_NOTIFY = "🔔Уведомление"
 EDIT_EDUCATORS_SCHEDULE = "👩‍✈️Изменить расписание воспитателей"
+ADD_UNIVER = "🏢Добавить ВУЗ"
+ADD_OLYMP = "🏆Добавить олимпиаду"
 
 
 async def admin_panel_keyboard(
@@ -28,6 +30,8 @@ async def admin_panel_keyboard(
             EDIT_CAFE_MENU,
             EDIT_LESSONS,
             DO_NOTIFY,
+            ADD_UNIVER,
+            ADD_OLYMP,
             EDIT_EDUCATORS_SCHEDULE,
         ),
         (
@@ -35,6 +39,8 @@ async def admin_panel_keyboard(
             AdminEditMenu(menu=BotMenu.CAFE_MENU),
             AdminEditMenu(menu=BotMenu.LESSONS),
             OpenMenu(menu=BotMenu.NOTIFY),
+            AdminEditMenu(menu=BotMenu.UNIVERS),
+            AdminEditMenu(menu=BotMenu.OLYMPS),
             AdminEditMenu(menu=BotMenu.EDUCATORS),
         ),
         (
@@ -42,17 +48,19 @@ async def admin_panel_keyboard(
             RoleEnum.CAFE_MENU in roles,
             RoleEnum.LESSONS in roles,
             RoleEnum.NOTIFY in roles,
+            RoleEnum.UNIVERS in roles,
+            RoleEnum.OLYMPS in roles,
             RoleEnum.EDUCATORS in roles,
         ),
     ):
         if condition or is_admin:
             keyboard.button(text=text, callback_data=callback_data)
 
+    keyboard.adjust(2, repeat=True)
+
     if RoleEnum.SUPERADMIN in roles:
-        keyboard.add(admins_list_button)
+        keyboard.row(admins_list_button, width=1)
 
-    keyboard.add(main_menu_button)
-
-    keyboard.adjust(2, 2, 1, 1, repeat=True)
+    keyboard.row(main_menu_button, width=1)
 
     return keyboard.as_markup()

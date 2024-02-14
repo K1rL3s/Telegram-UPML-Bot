@@ -3,7 +3,6 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import OpenMenu, Paginator, UniverData, UniversPaginator
-from bot.handlers.client.univers.funcs import univers_open_title_func
 from bot.keyboards import (
     one_univer_keyboard,
     univers_cities_keyboard,
@@ -11,6 +10,8 @@ from bot.keyboards import (
 )
 from shared.database.repository.repository import Repository
 from shared.utils.enums import BotMenu, PageMenu, SlashCommand, TextCommand
+
+from .funcs import univers_open_title_func
 
 router = Router(name=__name__)
 

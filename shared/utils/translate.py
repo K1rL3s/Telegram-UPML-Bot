@@ -25,4 +25,6 @@ ROLES_TRANSLATE: Final[dict[str, str]] = {
     RoleEnum.LESSONS: "уроки",
     RoleEnum.CAFE_MENU: "столовая",
     RoleEnum.EDUCATORS: "воспитатели",
+    RoleEnum.UNIVERS: "университеты",
+    RoleEnum.OLYMPS: "олимпиады",
 }

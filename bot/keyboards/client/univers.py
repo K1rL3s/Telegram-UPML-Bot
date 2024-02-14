@@ -43,7 +43,7 @@ async def univers_titles_keyboard(
             text=univer.title,
             callback_data=UniverData(city=city, id=univer.id, page=page).pack(),
         )
-        for univer in await univer_repo.get_univers_by_city(city)
+        for univer in await univer_repo.get_by_city(city)
     ]
 
     return paginate_keyboard(

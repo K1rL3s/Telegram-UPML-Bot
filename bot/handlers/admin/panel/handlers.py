@@ -1,16 +1,10 @@
-from typing import TYPE_CHECKING
-
 from aiogram import F, Router
+from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import OpenMenu
 from bot.keyboards import admin_panel_keyboard
+from shared.database.repository.repository import Repository
 from shared.utils.enums import BotMenu, TextCommand
-
-if TYPE_CHECKING:
-    from aiogram.types import CallbackQuery, Message
-
-    from shared.database.repository.repository import Repository
-
 
 router = Router(name=__name__)
 

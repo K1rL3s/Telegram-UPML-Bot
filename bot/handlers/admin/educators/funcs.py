@@ -1,15 +1,11 @@
-from typing import TYPE_CHECKING
+import datetime as dt
 
+from aiogram.fsm.context import FSMContext
+
+from shared.database.repository import EducatorsScheduleRepository
 from shared.utils.datehelp import date_by_format, date_today, format_date
 from shared.utils.phrases import DONT_UNDERSTAND_DATE, NO_DATA
 from shared.utils.states import EditingEducators
-
-if TYPE_CHECKING:
-    import datetime as dt
-
-    from aiogram.fsm.context import FSMContext
-
-    from shared.database.repository import EducatorsScheduleRepository
 
 
 async def edit_educators_start_func(
@@ -17,7 +13,7 @@ async def edit_educators_start_func(
     state: "FSMContext",
 ) -> str:
     """
-    Обработчик кнопки "Изменить меню".
+    Обработчик кнопки "Изменить расписание воспитателей".
 
     :param message_id: Начальное сообщение бота.
     :param state: Состояние пользователя.
@@ -53,7 +49,7 @@ async def edit_educators_date_func(
             "Чтобы изменить, отправьте <b>одним сообщением</b> "
             "изменённую версию."
         )
-        await state.set_state(EditingEducators.writing)
+        await state.set_state(EditingEducators.write)
         await state.update_data(edit_date=format_date(edit_date))
     else:
         text = DONT_UNDERSTAND_DATE

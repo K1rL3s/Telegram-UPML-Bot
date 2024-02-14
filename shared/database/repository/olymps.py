@@ -10,15 +10,15 @@ class OlympRepository(BaseRepository):
             select(Olymp.subject).distinct().order_by(Olymp.subject)
         )
 
-    async def get_olymps_by_subject(self, subject: str) -> list[Olymp]:
+    async def get_by_subject(self, subject: str) -> list[Olymp]:
         return await self.select_query_to_list(
             select(Olymp).where(Olymp.subject == subject).order_by(Olymp.title)
         )
 
-    async def get_olymp_by_id(self, olymp_id: int) -> Olymp:
+    async def get_by_id(self, olymp_id: int) -> Olymp:
         return await self._session.scalar(select(Olymp).where(Olymp.id == olymp_id))
 
-    async def add_olymp(self, title: str, subject: str, description: str) -> Olymp:
+    async def add(self, title: str, subject: str, description: str) -> Olymp:
         olymp = Olymp(title=title, subject=subject, description=description)
         self._session.add(olymp)
         await self._session.flush()

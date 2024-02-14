@@ -3,12 +3,13 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import OpenMenu
-from bot.handlers.client.lessons.funcs import send_lessons_images
 from bot.keyboards import lessons_keyboard
 from shared.database.repository.repository import Repository
 from shared.utils.consts import TODAY
 from shared.utils.datehelp import date_by_format
 from shared.utils.enums import BotMenu, SlashCommand, TextCommand
+
+from .funcs import send_lessons_images
 
 router = Router(name=__name__)
 

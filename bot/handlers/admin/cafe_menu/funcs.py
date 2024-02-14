@@ -1,6 +1,10 @@
-from typing import TYPE_CHECKING
+import datetime as dt
+
+from aiogram.fsm.context import FSMContext
+from aiogram.types import InlineKeyboardMarkup
 
 from bot.keyboards import cancel_state_keyboard, choose_meal_keyboard
+from shared.database.repository import MenuRepository
 from shared.utils.datehelp import (
     date_by_format,
     date_today,
@@ -10,14 +14,6 @@ from shared.utils.datehelp import (
 from shared.utils.phrases import NO, NO_DATA
 from shared.utils.states import EditingMenu
 from shared.utils.translate import CAFE_MENU_TRANSLATE
-
-if TYPE_CHECKING:
-    import datetime as dt
-
-    from aiogram.fsm.context import FSMContext
-    from aiogram.types import InlineKeyboardMarkup
-
-    from shared.database.repository import MenuRepository
 
 
 async def edit_cafe_menu_start_func(
@@ -80,7 +76,7 @@ async def edit_cafe_menu_meal_func(
     :param repo: Репозиторий расписаний столовой.
     :return: Сообщение пользователю.
     """
-    await state.set_state(EditingMenu.writing)
+    await state.set_state(EditingMenu.write)
     data = await state.update_data(edit_meal=edit_meal)
 
     edit_date: "dt.date" = date_by_format(data["edit_date"])

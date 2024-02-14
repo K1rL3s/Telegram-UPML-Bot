@@ -10,23 +10,22 @@ https://docs.aiogram.dev/en/dev-3.x/api/session/middleware.html
 """
 
 import asyncio
-from typing import TYPE_CHECKING
 
-from aiogram.client.session.middlewares.base import BaseRequestMiddleware
+from aiogram import Bot
+from aiogram.client.session.middlewares.base import (
+    BaseRequestMiddleware,
+    NextRequestMiddlewareType,
+)
 from aiogram.dispatcher.dispatcher import DEFAULT_BACKOFF_CONFIG
 from aiogram.exceptions import (
     TelegramNetworkError,
     TelegramRetryAfter,
     TelegramServerError,
 )
+from aiogram.methods import Response, TelegramMethod
+from aiogram.methods.base import TelegramType
 from aiogram.utils.backoff import Backoff, BackoffConfig
 from loguru import logger
-
-if TYPE_CHECKING:
-    from aiogram import Bot
-    from aiogram.client.session.middlewares.base import NextRequestMiddlewareType
-    from aiogram.methods import Response, TelegramMethod
-    from aiogram.methods.base import TelegramType
 
 
 class RetryRequestMiddleware(BaseRequestMiddleware):

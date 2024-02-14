@@ -1,14 +1,11 @@
-from typing import TYPE_CHECKING, Any
+from collections.abc import Awaitable, Callable
+from typing import Any
+
+from aiogram.types import Message
 
 from bot.middlewares.base import BaseInfoMiddleware
+from shared.database.repository.repository import Repository
 from shared.utils.funcs import extract_username
-
-if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable
-
-    from aiogram.types import Message
-
-    from shared.database.repository.repository import Repository
 
 
 class SaveUpdateUserMiddleware(BaseInfoMiddleware):

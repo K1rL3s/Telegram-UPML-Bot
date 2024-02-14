@@ -1,13 +1,8 @@
-from typing import TYPE_CHECKING
-
 from aiogram import F, Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import ExceptionTypeFilter
+from aiogram.types import ErrorEvent
 from loguru import logger
-
-if TYPE_CHECKING:
-    from aiogram.types import ErrorEvent
-
 
 router = Router(name=__name__)
 

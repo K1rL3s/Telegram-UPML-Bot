@@ -130,6 +130,8 @@ class RoleEnum(str, Enum):
     LESSONS = "lessons"
     CAFE_MENU = "cafe_menu"
     EDUCATORS = "educators"
+    UNIVERS = "univers"
+    OLYMPS = "olymps"
 
     @staticmethod
     def all_roles() -> list[str]:

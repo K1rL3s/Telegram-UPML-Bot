@@ -1,14 +1,11 @@
 import contextlib
-from typing import TYPE_CHECKING, Any
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 from aiogram.exceptions import TelegramAPIError
+from aiogram.types import CallbackQuery
 
 from bot.middlewares.base import BaseInfoMiddleware
-
-if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable
-
-    from aiogram.types import CallbackQuery
 
 
 class CallbackAnswerMiddleware(BaseInfoMiddleware):

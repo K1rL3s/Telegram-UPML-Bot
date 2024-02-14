@@ -1,5 +1,5 @@
-from typing import TYPE_CHECKING
-
+from aiogram import Bot
+from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InputMediaPhoto
 
 from bot.keyboards import (
@@ -9,17 +9,12 @@ from bot.keyboards import (
 )
 from bot.types import Album, LessonsCollection
 from shared.database.repository import ClassLessonsRepository, FullLessonsRepository
+from shared.database.repository.repository import Repository
 from shared.upml.album_lessons import tesseract_lessons
 from shared.utils.datehelp import date_by_format, format_date, weekday_by_date
 from shared.utils.funcs import multi_bytes_to_ids
 from shared.utils.phrases import DONT_UNDERSTAND_DATE, YES
 from shared.utils.states import EditingLessons
-
-if TYPE_CHECKING:
-    from aiogram import Bot
-    from aiogram.fsm.context import FSMContext
-
-    from shared.database.repository.repository import Repository
 
 
 async def process_lessons_album_func(

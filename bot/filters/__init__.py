@@ -3,6 +3,8 @@ from bot.filters.roles import (
     HasEducatorsRole,
     HasLessonsRole,
     HasNotifyRole,
+    HasOlympsRole,
+    HasUniversRole,
     IsAdmin,
     IsSuperAdmin,
     RoleAccess,
@@ -16,4 +18,6 @@ __all__ = (
     "IsAdmin",
     "IsSuperAdmin",
     "RoleAccess",
+    "HasUniversRole",
+    "HasOlympsRole",
 )

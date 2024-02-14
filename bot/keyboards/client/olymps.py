@@ -43,7 +43,7 @@ async def olymps_titles_keyboard(
             text=olymp.title,
             callback_data=OlympData(subject=subject, id=olymp.id, page=page).pack(),
         )
-        for olymp in await olymp_repo.get_olymps_by_subject(subject)
+        for olymp in await olymp_repo.get_by_subject(subject)
     ]
 
     return paginate_keyboard(

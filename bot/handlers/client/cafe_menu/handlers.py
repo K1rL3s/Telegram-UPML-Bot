@@ -3,12 +3,13 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import OpenMenu
-from bot.handlers.client.cafe_menu.funcs import get_format_menu_by_date
 from bot.keyboards import cafe_menu_keyboard
 from shared.database.repository.repository import Repository
 from shared.utils.consts import TODAY
 from shared.utils.datehelp import date_by_format
 from shared.utils.enums import BotMenu, SlashCommand, TextCommand
+
+from .funcs import get_format_menu_by_date
 
 router = Router(name=__name__)
 

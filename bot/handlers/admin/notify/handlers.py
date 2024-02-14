@@ -1,29 +1,20 @@
-from typing import TYPE_CHECKING
-
 from aiogram import F, Router
 from aiogram.filters import StateFilter
+from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import DoNotify, InStateData, OpenMenu
 from bot.filters import HasNotifyRole
-from bot.handlers.admin.notify.funcs import (
-    notify_confirm_func,
-    notify_for_who_func,
-    notify_message_func,
-)
 from bot.keyboards import (
     admin_panel_keyboard,
     confirm_cancel_keyboard,
     notify_menu_keyboard,
 )
+from shared.database.repository.repository import Repository
 from shared.utils.enums import Action, BotMenu
 from shared.utils.states import DoingNotify
 
-if TYPE_CHECKING:
-    from aiogram.fsm.context import FSMContext
-    from aiogram.types import CallbackQuery, Message
-
-    from shared.database.repository.repository import Repository
-
+from .funcs import notify_confirm_func, notify_for_who_func, notify_message_func
 
 router = Router(name=__name__)
 router.message.filter(HasNotifyRole())
@@ -59,7 +50,7 @@ async def notify_for_who_handler(
     await callback.message.edit_text(text=text, reply_markup=keyboard)
 
 
-@router.message(StateFilter(DoingNotify.writing))
+@router.message(StateFilter(DoingNotify.write))
 async def notify_message_handler(
     message: "Message",
     state: "FSMContext",
@@ -80,7 +71,7 @@ async def notify_message_handler(
 
 @router.callback_query(
     InStateData.filter(F.action == Action.CONFIRM),
-    StateFilter(DoingNotify.writing),
+    StateFilter(DoingNotify.write),
 )
 async def notify_confirm_handler(
     callback: "CallbackQuery",

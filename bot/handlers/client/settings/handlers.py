@@ -4,11 +4,6 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import OpenMenu, SettingsData
-from bot.handlers.client.settings.funcs import (
-    edit_bool_settings_func,
-    edit_grade_setting_func,
-    edit_laundry_time_func,
-)
 from bot.keyboards import (
     cancel_state_keyboard,
     choose_grade_keyboard,
@@ -19,6 +14,12 @@ from shared.database.repository.repository import Repository
 from shared.utils.enums import Action, BotMenu, SlashCommand, TextCommand, UserCallback
 from shared.utils.phrases import NO, SET_TIMER_TEXT, YES
 from shared.utils.states import EditingSettings
+
+from .funcs import (
+    edit_bool_settings_func,
+    edit_grade_setting_func,
+    edit_laundry_time_func,
+)
 
 router = Router(name=__name__)
 router.message.middleware(SaveUpdateUserMiddleware())
@@ -113,7 +114,7 @@ async def edit_laundry_start_handler(
     state: "FSMContext",
 ) -> None:
     """Обработчик кнопок изменения времени таймера прачечной."""
-    await state.set_state(EditingSettings.writing)
+    await state.set_state(EditingSettings.write)
     await state.update_data(
         start_id=callback.message.message_id,
         attr=callback_data.attr,
@@ -124,7 +125,7 @@ async def edit_laundry_start_handler(
     )
 
 
-@router.message(StateFilter(EditingSettings.writing))
+@router.message(StateFilter(EditingSettings.write))
 async def edit_laundry_time_handler(
     message: "Message",
     state: "FSMContext",

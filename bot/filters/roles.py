@@ -68,3 +68,17 @@ class HasEducatorsRole(RoleAccess):
 
     def __init__(self) -> None:
         super().__init__([RoleEnum.SUPERADMIN, RoleEnum.ADMIN, RoleEnum.EDUCATORS])
+
+
+class HasUniversRole(RoleAccess):
+    """Фильтр доступа к редактированию информации о вузах."""
+
+    def __init__(self) -> None:
+        super().__init__([RoleEnum.SUPERADMIN, RoleEnum.ADMIN, RoleEnum.UNIVERS])
+
+
+class HasOlympsRole(RoleAccess):
+    """Фильтр доступа к редактированию информации об олимпиадах."""
+
+    def __init__(self) -> None:
+        super().__init__([RoleEnum.SUPERADMIN, RoleEnum.ADMIN, RoleEnum.OLYMPS])

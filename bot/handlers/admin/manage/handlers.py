@@ -1,11 +1,20 @@
-from typing import TYPE_CHECKING
-
 from aiogram import F, Router
 from aiogram.filters import StateFilter
+from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks import AdminCheck, AdminEditRole, InStateData, Paginator
 from bot.filters import IsSuperAdmin
-from bot.handlers.admin.manage.funcs import (
+from bot.keyboards import (
+    admin_panel_keyboard,
+    cancel_state_keyboard,
+    confirm_cancel_keyboard,
+)
+from shared.database.repository.repository import Repository
+from shared.utils.enums import Action, BotMenu
+from shared.utils.states import EditingRoles
+
+from .funcs import (
     admins_list_func,
     check_admin_roles_func,
     edit_role_choose_role_func,
@@ -14,20 +23,6 @@ from bot.handlers.admin.manage.funcs import (
     edit_role_directly_func,
     edit_role_username_func,
 )
-from bot.keyboards import (
-    admin_panel_keyboard,
-    cancel_state_keyboard,
-    confirm_cancel_keyboard,
-)
-from shared.utils.enums import Action, BotMenu
-from shared.utils.states import EditingRoles
-
-if TYPE_CHECKING:
-    from aiogram.fsm.context import FSMContext
-    from aiogram.types import CallbackQuery, Message
-
-    from shared.database.repository.repository import Repository
-
 
 router = Router(name=__name__)
 router.message.filter(IsSuperAdmin())
