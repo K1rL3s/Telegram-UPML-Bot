@@ -47,7 +47,7 @@ class RetryRequestMiddleware(BaseRequestMiddleware):
     ) -> "Response[TelegramType]":
         backoff = Backoff(config=self.backoff_config)
 
-        for i in range(self.attempts):
+        for i in range(1, self.attempts + 1):
             try:
                 return await make_request(bot, method)
             except TelegramRetryAfter as e:

@@ -129,14 +129,19 @@ def __parse_page_to_meals(text_menu: str) -> list[str]:
 
     meals = []
     for start_sub, end_sub in food_times:
-        meal, _, end = __get_meal(text_menu, start_sub, end_sub)
-        meals.append(__normalize_meal(meal))
-        text_menu = text_menu[end:]
+        meal, _, end_index = __get_meal(text_menu, start_sub, end_sub)
+        meals.append(__normalize_meal(meal) if meal else None)
+        if end_index is not None:
+            text_menu = text_menu[end_index:]
 
     return meals
 
 
-def __get_meal(menu: str, start_sub: str, end_sub: str) -> tuple[str, int, int]:
+def __get_meal(
+    menu: str,
+    start_sub: str,
+    end_sub: str,
+) -> tuple[Optional[str], Optional[int], Optional[int]]:
     """
     Возвращает строку с едой для конкретного приёма пищи.
 
@@ -148,8 +153,19 @@ def __get_meal(menu: str, start_sub: str, end_sub: str) -> tuple[str, int, int]:
     :return: Строка формата "{блюдо} {числа} {блюдо} {числа} ...",
              начальный и конечный индексы по строке меню.
     """
-    start_index = menu.lower().index(start_sub) + len(start_sub)
-    end_index = menu.lower().rindex(end_sub)
+    try:
+        start_index = menu.lower().index(start_sub) + len(start_sub)
+    except ValueError:
+        start_index = None
+
+    try:
+        end_index = menu.lower().rindex(end_sub)
+    except ValueError:
+        end_index = None
+
+    if start_index is None or end_index is None:
+        return None, start_index, end_index
+
     return menu[start_index:end_index].strip(), start_index, end_index
 
 
