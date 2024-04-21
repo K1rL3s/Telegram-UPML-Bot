@@ -4,13 +4,7 @@ from aiogram.filters.callback_data import CallbackData
 class AdminEditMenu(CallbackData, prefix="admin_edit"):
     """Фабрика для изменения информации в каком-то из меню бота."""
 
-    menu: str  # Menus
-
-
-class AdminList(CallbackData, prefix="admin_list"):
-    """Фабрика для просмотра списка админов."""
-
-    page: int = 0
+    menu: str  # BotMenu
 
 
 class AdminCheck(CallbackData, prefix="admin_check"):
@@ -31,7 +25,7 @@ class AdminEditRole(CallbackData, prefix="admin_role"):
 class EditMeal(CallbackData, prefix="edit_meal"):
     """Фабрика для выбора приёма пищи при изменении расписания еды."""
 
-    meal: str  # Meals
+    meal: str  # Meal
 
 
 class EditLessons(CallbackData, prefix="edit_lessons"):

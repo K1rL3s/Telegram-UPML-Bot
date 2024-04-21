@@ -1,14 +1,12 @@
 """Source: https://github.com/wakaree/simple_echo_bot."""
-from typing import TYPE_CHECKING, Any, Union
 
+from collections.abc import Awaitable, Callable
+from typing import Any, Union
+
+from aiogram.types import CallbackQuery, Message
 from cachetools import TTLCache
 
 from bot.middlewares.base import BaseInfoMiddleware
-
-if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable
-
-    from aiogram.types import CallbackQuery, Message
 
 
 class ThrottlingMiddleware(BaseInfoMiddleware):

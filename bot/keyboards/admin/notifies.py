@@ -3,8 +3,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 
 from bot.callbacks import DoNotify
 from bot.keyboards.universal import admin_panel_button
-from bot.utils.consts import GRADES
-from bot.utils.enums import NotifyTypes
+from shared.utils.consts import GRADES
+from shared.utils.enums import NotifyType
 
 notify_menu_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
@@ -13,9 +13,9 @@ notify_menu_keyboard = InlineKeyboardMarkup(
             for for_who, callback_data in zip(
                 ("Всем", "Поток", "Класс"),
                 (
-                    DoNotify(for_who=NotifyTypes.ALL),
-                    DoNotify(notify_type=NotifyTypes.GRADE),
-                    DoNotify(notify_type=NotifyTypes.CLASS),
+                    DoNotify(for_who=NotifyType.ALL),
+                    DoNotify(notify_type=NotifyType.GRADE),
+                    DoNotify(notify_type=NotifyType.CLASS),
                 ),
             )
         ],
@@ -28,11 +28,11 @@ notify_for_grade_keyboard = InlineKeyboardMarkup(
         [
             InlineKeyboardButton(
                 text="10 классы",
-                callback_data=DoNotify(for_who=NotifyTypes.GRADE_10).pack(),
+                callback_data=DoNotify(for_who=NotifyType.GRADE_10).pack(),
             ),
             InlineKeyboardButton(
                 text="11 классы",
-                callback_data=DoNotify(for_who=NotifyTypes.GRADE_11).pack(),
+                callback_data=DoNotify(for_who=NotifyType.GRADE_11).pack(),
             ),
         ],
         [admin_panel_button],  # сделать переход в панель уведомлений?

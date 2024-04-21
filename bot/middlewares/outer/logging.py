@@ -1,14 +1,11 @@
-from typing import TYPE_CHECKING, Any
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 from aiogram.dispatcher.event.bases import REJECTED, UNHANDLED
+from aiogram.types import CallbackQuery, Message, TelegramObject
 from loguru import logger
 
 from bot.middlewares.base import BaseInfoMiddleware
-
-if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable
-
-    from aiogram.types import CallbackQuery, Message, TelegramObject
 
 
 class LoggingMiddleware(BaseInfoMiddleware):

@@ -1,14 +1,16 @@
 import asyncio
 import contextlib
 
+from aiogram import Bot
+from aiogram.enums import ParseMode
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from loguru import logger
 from sqlalchemy.orm import close_all_sessions
 
-from bot.database import database_init
-from bot.settings import get_settings
-from bot.setup import configure_logs, make_bot
 from scheduler.tasks import add_schedule_jobs
+from shared.core.log import configure_logs
+from shared.core.settings import get_settings
+from shared.database import database_init
 
 
 async def main() -> None:
@@ -18,7 +20,11 @@ async def main() -> None:
     session_maker = await database_init(settings.db)
     scheduler = AsyncIOScheduler()
 
-    bot = await make_bot(settings.bot.token)
+    bot = Bot(
+        token=settings.bot.token,
+        parse_mode=ParseMode.HTML,
+        disable_web_page_preview=True,
+    )
     async with bot.context():
         add_schedule_jobs(scheduler, bot, session_maker, settings.other.timeout)
         scheduler.start()

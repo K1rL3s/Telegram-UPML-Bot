@@ -1,17 +1,14 @@
 """Source: https://github.com/wakaree/simple_echo_bot."""
 
 from asyncio import sleep
-from typing import TYPE_CHECKING, Any, Final
+from collections.abc import Awaitable, Callable, MutableMapping
+from typing import Any, Final
 
 from aiogram.types import Message, TelegramObject
 from cachetools import TTLCache
 
 from bot.middlewares.base import BaseInfoMiddleware
 from bot.types import Album, Media
-
-if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable, MutableMapping
-
 
 ALBUM_KEY: Final[str] = "album"
 

@@ -23,7 +23,7 @@ COPY --from=builder /app/wheels /wheels
 RUN pip install --no-cache-dir /wheels/*
 
 COPY ./scheduler ./scheduler
-COPY ./resources ./resources
+COPY ./shared ./shared
 COPY ./bot ./bot
 
 CMD ["python", "-m", "scheduler"]

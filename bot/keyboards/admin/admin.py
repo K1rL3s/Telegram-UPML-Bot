@@ -1,21 +1,18 @@
-from typing import TYPE_CHECKING
-
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup
 
 from bot.callbacks import AdminEditMenu, EditMeal, OpenMenu
 from bot.keyboards.admin.manage import admins_list_button
 from bot.keyboards.universal import main_menu_button
-from bot.utils.enums import Meals, Menus, Roles
-
-if TYPE_CHECKING:
-    from bot.database.repository import UserRepository
-
+from shared.database.repository import UserRepository
+from shared.utils.enums import BotMenu, Meal, RoleEnum
 
 AUTO_UPDATE_CAFE_MENU = "🍴Загрузить меню"
 EDIT_CAFE_MENU = "🍴Изменить меню"
 EDIT_LESSONS = "📓Загрузить уроки"
 DO_NOTIFY = "🔔Уведомление"
 EDIT_EDUCATORS_SCHEDULE = "👩‍✈️Изменить расписание воспитателей"
+ADD_UNIVER = "🏢Добавить ВУЗ"
+ADD_OLYMP = "🏆Добавить олимпиаду"
 
 
 async def admin_panel_keyboard(
@@ -24,7 +21,7 @@ async def admin_panel_keyboard(
 ) -> "InlineKeyboardMarkup":
     """Клавиатура в админ меню."""
     roles: list[str] = [role.role for role in (await repo.get(user_id)).roles]
-    is_admin = Roles.SUPERADMIN in roles or Roles.ADMIN in roles
+    is_admin = RoleEnum.SUPERADMIN in roles or RoleEnum.ADMIN in roles
 
     keyboard = InlineKeyboardBuilder()
     for text, callback_data, condition in zip(
@@ -33,31 +30,37 @@ async def admin_panel_keyboard(
             EDIT_CAFE_MENU,
             EDIT_LESSONS,
             DO_NOTIFY,
+            ADD_UNIVER,
+            ADD_OLYMP,
             EDIT_EDUCATORS_SCHEDULE,
         ),
         (
-            EditMeal(meal=Meals.AUTO_ALL),
-            AdminEditMenu(menu=Menus.CAFE_MENU),
-            AdminEditMenu(menu=Menus.LESSONS),
-            OpenMenu(menu=Menus.NOTIFY),
-            AdminEditMenu(menu=Menus.EDUCATORS),
+            EditMeal(meal=Meal.AUTO_ALL),
+            AdminEditMenu(menu=BotMenu.CAFE_MENU),
+            AdminEditMenu(menu=BotMenu.LESSONS),
+            OpenMenu(menu=BotMenu.NOTIFY),
+            AdminEditMenu(menu=BotMenu.UNIVERS),
+            AdminEditMenu(menu=BotMenu.OLYMPS),
+            AdminEditMenu(menu=BotMenu.EDUCATORS),
         ),
         (
-            Roles.CAFE_MENU in roles,
-            Roles.CAFE_MENU in roles,
-            Roles.LESSONS in roles,
-            Roles.NOTIFY in roles,
-            Roles.EDUCATORS in roles,
+            RoleEnum.CAFE_MENU in roles,
+            RoleEnum.CAFE_MENU in roles,
+            RoleEnum.LESSONS in roles,
+            RoleEnum.NOTIFY in roles,
+            RoleEnum.UNIVERS in roles,
+            RoleEnum.OLYMPS in roles,
+            RoleEnum.EDUCATORS in roles,
         ),
     ):
         if condition or is_admin:
             keyboard.button(text=text, callback_data=callback_data)
 
-    if Roles.SUPERADMIN in roles:
-        keyboard.add(admins_list_button)
+    keyboard.adjust(2, repeat=True)
 
-    keyboard.add(main_menu_button)
+    if RoleEnum.SUPERADMIN in roles:
+        keyboard.row(admins_list_button, width=1)
 
-    keyboard.adjust(2, 2, 1, 1, repeat=True)
+    keyboard.row(main_menu_button, width=1)
 
     return keyboard.as_markup()

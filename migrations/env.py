@@ -8,10 +8,11 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from shared.core.settings import get_settings
+
 # noinspection PyUnresolvedReferences
-from bot.database import AlchemyBaseModel
-from bot.database.models import *  # noqa: F403
-from bot.settings import get_settings
+from shared.database import AlchemyBaseModel
+from shared.database.models import *  # noqa: F403
 
 config = context.config
 db_settings = get_settings(dotenv_path=Path.cwd() / ".env").db

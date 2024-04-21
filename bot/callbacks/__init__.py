@@ -2,19 +2,18 @@ from bot.callbacks.admin import (
     AdminCheck,
     AdminEditMenu,
     AdminEditRole,
-    AdminList,
     DoNotify,
     EditLessons,
     EditMeal,
 )
-from bot.callbacks.client import LaundryData, SettingsData
+from bot.callbacks.client import LaundryData, OlympData, SettingsData, UniverData
+from bot.callbacks.paginate import OlympsPaginator, Paginator, UniversPaginator
 from bot.callbacks.universal import InStateData, OpenMenu
 
 __all__ = (
     "AdminCheck",
     "AdminEditMenu",
     "AdminEditRole",
-    "AdminList",
     "DoNotify",
     "EditLessons",
     "EditMeal",
@@ -22,4 +21,9 @@ __all__ = (
     "LaundryData",
     "OpenMenu",
     "SettingsData",
+    "Paginator",
+    "OlympData",
+    "OlympsPaginator",
+    "UniverData",
+    "UniversPaginator",
 )

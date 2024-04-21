@@ -15,13 +15,24 @@ from bot.keyboards.admin.notifies import (
 )
 from bot.keyboards.client.cafe_menu import cafe_menu_keyboard
 from bot.keyboards.client.educators import educators_keyboard
+from bot.keyboards.client.enrollee import enrollee_keyboard
 from bot.keyboards.client.laundry import laundry_keyboard
 from bot.keyboards.client.lessons import lessons_keyboard
+from bot.keyboards.client.olymps import (
+    olymps_subjects_keyboard,
+    olymps_titles_keyboard,
+    one_olymp_keyboard,
+)
 from bot.keyboards.client.settings import choose_grade_keyboard, settings_keyboard
 from bot.keyboards.client.start import (
     go_to_main_menu_keyboard,
     main_menu_keyboard,
     start_reply_keyboard,
+)
+from bot.keyboards.client.univers import (
+    one_univer_keyboard,
+    univers_cities_keyboard,
+    univers_titles_keyboard,
 )
 from bot.keyboards.universal import cancel_state_keyboard, confirm_cancel_keyboard
 
@@ -46,4 +57,11 @@ __all__ = (
     "notify_menu_keyboard",
     "settings_keyboard",
     "start_reply_keyboard",
+    "enrollee_keyboard",
+    "olymps_subjects_keyboard",
+    "olymps_titles_keyboard",
+    "one_olymp_keyboard",
+    "univers_cities_keyboard",
+    "univers_titles_keyboard",
+    "one_univer_keyboard",
 )

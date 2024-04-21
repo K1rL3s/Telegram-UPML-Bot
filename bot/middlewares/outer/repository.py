@@ -1,14 +1,11 @@
-from typing import TYPE_CHECKING, Any, Final
+from collections.abc import Awaitable, Callable
+from typing import Any, Final
 
 from aiogram import BaseMiddleware
+from aiogram.types import TelegramObject
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from bot.database.repository.repository import Repository
-
-if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable
-
-    from aiogram.types import TelegramObject
-    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from shared.database.repository.repository import Repository
 
 
 class RepositoryMiddleware(BaseMiddleware):

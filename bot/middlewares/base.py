@@ -4,7 +4,7 @@ from typing import Union
 from aiogram import BaseMiddleware
 from aiogram.types import CallbackQuery, Message
 
-from bot.utils.funcs import extract_username
+from shared.utils.funcs import extract_username
 
 
 class BaseInfoMiddleware(BaseMiddleware, ABC):

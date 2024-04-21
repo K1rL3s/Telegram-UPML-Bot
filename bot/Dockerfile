@@ -27,6 +27,7 @@ RUN apt-get update && \
     pip install --no-cache-dir /wheels/*
 
 COPY ./bot ./bot
+COPY ./shared ./shared
 COPY ./migrations ./migrations
 COPY ./alembic.ini ./alembic.ini
 

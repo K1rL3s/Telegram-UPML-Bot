@@ -1,5 +1,3 @@
-from typing import TYPE_CHECKING
-
 from aiogram.utils.keyboard import (
     InlineKeyboardBuilder,
     InlineKeyboardButton,
@@ -8,14 +6,11 @@ from aiogram.utils.keyboard import (
 
 from bot.callbacks import OpenMenu, SettingsData
 from bot.keyboards.universal import main_menu_button
-from bot.utils.consts import GRADES
-from bot.utils.datehelp import format_time
-from bot.utils.enums import Actions, Menus, UserCallback
-from bot.utils.phrases import NO, QUESTION, YES
-
-if TYPE_CHECKING:
-    from bot.database.repository import SettingsRepository
-
+from shared.database.repository import SettingsRepository
+from shared.utils.consts import GRADES
+from shared.utils.datehelp import format_time
+from shared.utils.enums import Action, BotMenu, UserCallback
+from shared.utils.phrases import NO, QUESTION, YES
 
 USER_CLASS = "Класс {0}".format
 LESSONS_NOTIFY = "Уроки {0}".format
@@ -44,14 +39,14 @@ async def settings_keyboard(
                 InlineKeyboardButton(
                     text=LESSONS_NOTIFY(YES if settings.lessons_notify else NO),
                     callback_data=SettingsData(
-                        action=Actions.SWITCH,
+                        action=Action.SWITCH,
                         attr=UserCallback.LESSONS_NOTIFY,
                     ).pack(),
                 ),
                 InlineKeyboardButton(
                     text=NEWS_NOTIFY(YES if settings.news_notify else NO),
                     callback_data=SettingsData(
-                        action=Actions.SWITCH,
+                        action=Action.SWITCH,
                         attr=UserCallback.NEWS_NOTIFY,
                     ).pack(),
                 ),
@@ -59,23 +54,27 @@ async def settings_keyboard(
             [
                 InlineKeyboardButton(
                     text=WASHING(
-                        f"{settings.washing_minutes} мин."
-                        if settings.washing_time is None
-                        else format_time(settings.washing_time),
+                        (
+                            f"{settings.washing_minutes} мин."
+                            if settings.washing_time is None
+                            else format_time(settings.washing_time)
+                        ),
                     ),
                     callback_data=SettingsData(
-                        action=Actions.EDIT,
+                        action=Action.EDIT,
                         attr=UserCallback.WASHING,
                     ).pack(),
                 ),
                 InlineKeyboardButton(
                     text=DRYING(
-                        f"{settings.drying_minutes} мин."
-                        if settings.drying_time is None
-                        else format_time(settings.drying_time),
+                        (
+                            f"{settings.drying_minutes} мин."
+                            if settings.drying_time is None
+                            else format_time(settings.drying_time)
+                        ),
                     ),
                     callback_data=SettingsData(
-                        action=Actions.EDIT,
+                        action=Action.EDIT,
                         attr=UserCallback.DRYING,
                     ).pack(),
                 ),
@@ -100,7 +99,7 @@ choose_grade_keyboard: "InlineKeyboardMarkup" = (
         ),
         InlineKeyboardButton(
             text=BACK_TO_SETTINGS,
-            callback_data=OpenMenu(menu=Menus.SETTINGS).pack(),
+            callback_data=OpenMenu(menu=BotMenu.SETTINGS).pack(),
         ),
         InlineKeyboardButton(
             text=RESET_CLASS,
